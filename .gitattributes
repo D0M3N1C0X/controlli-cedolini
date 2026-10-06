@@ -1,0 +1,5 @@
+# Generated outputs: out of the language bar and out of review diffs.
+report/** linguist-generated
+data/cedolini.csv linguist-generated
+data/dipendenti.csv linguist-generated
+*.xlsx binary
