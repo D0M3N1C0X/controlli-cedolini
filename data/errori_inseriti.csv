@@ -1,0 +1,28 @@
+matricola,cliente,tipo,nota
+B031,B,minimo,tabellare fermo alla tranche di marzo 2025
+B064,B,minimo,tabellare fermo alla tranche di marzo 2025
+B052,B,minimo,tabellare fermo alla tranche di marzo 2025
+B036,B,minimo,tabellare fermo alla tranche di marzo 2025
+B044,B,minimo,tabellare fermo alla tranche di marzo 2025
+B082,B,minimo,tabellare fermo alla tranche di marzo 2025
+A007,A,scatto,"triennio compiuto ad agosto 2026, scatto non applicato da settembre"
+A016,A,scatto,"triennio compiuto ad agosto 2026, scatto non applicato da settembre"
+B025,B,scatto,"triennio compiuto ad agosto 2026, scatto non applicato da settembre"
+B047,B,scatto,"triennio compiuto ad agosto 2026, scatto non applicato da settembre"
+A012,A,inps,"aliquota 9,49% invece di 9,19%"
+B087,B,inps,"aliquota 9,49% invece di 9,19%"
+C098,C,inps,"aliquota 9,49% invece di 9,19%"
+A003,A,inps,"aliquota 9,49% invece di 9,19%"
+B033,B,tfr,quota TFR calcolata sul solo tabellare
+C101,C,tfr,quota TFR calcolata sul solo tabellare
+B059,B,tfr,quota TFR calcolata sul solo tabellare
+B084,B,ferie,maturazione del mese non sommata al residuo
+B055,B,ferie,maturazione del mese non sommata al residuo
+A009,A,ferie,maturazione del mese non sommata al residuo
+C093,C,netto,netto diverso da imponibile - IRPEF - altre trattenute
+A001,A,netto,netto diverso da imponibile - IRPEF - altre trattenute
+B090,B,variazione,straordinari inseriti senza evento: netto oltre il 20% sopra agosto
+C099,C,variazione,straordinari inseriti senza evento: netto oltre il 20% sopra agosto
+B058,B,codice_fiscale,carattere di controllo errato
+C107,C,codice_fiscale,carattere di controllo errato
+,C,f24,"F24 con 212,40 € di ritenute in meno dei cedolini"
