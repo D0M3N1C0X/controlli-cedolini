@@ -60,12 +60,21 @@ serve sapere come l'ha calcolato il software paghe.
 
 | File | Per chi | Cosa contiene |
 |---|---|---|
-| [`foglio_controllo_cedolini.xlsx`](deliverables/foglio_controllo_cedolini.xlsx) | chi elabora le paghe | Si incollano i cedolini del mese e del mese prima, e gli F24: esiti OK/ERRORE riga per riga, riepilogo per cliente, tranche di novembre, parametri modificabili, riconciliazione con Python. |
+| [`foglio_controllo_cedolini.xlsx`](deliverables/foglio_controllo_cedolini.xlsx) | chi elabora le paghe | Si incollano i cedolini del mese e del mese prima (fino a 250 righe, formule già pronte) e gli F24: esiti OK/ERRORE riga per riga, riepilogo per cliente, tranche di novembre, parametri modificabili, riconciliazione con Python. |
 | [Rapporto](report/rapporto.md) | il responsabile del team | Le segnalazioni con cosa fare, l'F24, la tranche di novembre, quanto ci si può fidare dei controlli. |
 | [`anomalie.csv`](report/anomalie.csv) | un altro strumento | Le segnalazioni in formato tabellare, da caricare in un ticket o in un CRM. |
 | [`docs/fonti.md`](docs/fonti.md) | chi verifica | Fonte e stato di ogni regola, e cosa ricontrollare prima di usarlo su dati veri. |
 
-## Come si usa
+## Usare il foglio, senza Python
+
+1. Apri [`foglio_controllo_cedolini.xlsx`](deliverables/foglio_controllo_cedolini.xlsx) in Excel o LibreOffice, oppure importalo in Google Sheets.
+2. Nel foglio **Parametri** imposta il mese e l'aliquota INPS del cliente.
+3. Incolla i cedolini del mese nel foglio **Mese** (colonne A-W, fino a 250 righe) e quelli del mese prima in **Mese precedente**; gli importi delle deleghe vanno nel foglio **F24**.
+4. Leggi il **Riepilogo**, poi filtra il foglio Mese sulla colonna *Errori*. Il foglio **Novembre 2026** si aggiorna da solo.
+
+I dati di esempio già presenti si possono cancellare: le formule restano.
+
+## Usare lo script
 
 ```bash
 python3 -m venv .venv && . .venv/bin/activate

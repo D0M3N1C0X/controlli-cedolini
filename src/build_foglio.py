@@ -1,7 +1,7 @@
 """
 Scrive deliverables/foglio_controllo_cedolini.xlsx: i controlli come formule, per chi non usa
 Python. Si apre in Excel, in LibreOffice e in Google Sheets (File > Importa): si incollano i
-cedolini del mese nei fogli Settembre e Agosto e gli esiti si aggiornano da soli.
+cedolini del mese nei fogli Mese e Mese precedente e gli esiti si aggiornano da soli.
 
 Convenzioni: testo blu = dato da incollare o parametro, nero = formula, verde = collegamento a un
 altro foglio, giallo = parametro che cambia i risultati. Nessuna formula a matrice dinamica.
@@ -25,6 +25,7 @@ import regole as R
 from deterministic import normalise
 
 OUTPUT = C.DELIVERABLES / "foglio_controllo_cedolini.xlsx"
+RIGHE = 250          # righe con le formule già pronte nei fogli Mese, Mese precedente e Novembre 2026
 REPO = "https://github.com/D0M3N1C0X/controlli-cedolini"
 
 FONT = "Arial"
@@ -98,7 +99,7 @@ class Foglio:
         self.checks.append((area, item, plain(value), ref))
 
     def build(self, path: Path):
-        names = ["Leggimi", "Riepilogo", "Settembre", "Agosto", "F24", "Novembre 2026", "CCNL", "Parametri",
+        names = ["Leggimi", "Riepilogo", "Mese", "Mese precedente", "F24", "Novembre 2026", "CCNL", "Parametri",
                  "Codice fiscale", "Riconciliazione"]
         self.wb.active.title = names[0]
         for n in names[1:]:
@@ -106,8 +107,8 @@ class Foglio:
         self.parametri(self.wb["Parametri"])
         self.ccnl(self.wb["CCNL"])
         self.tabelle_cf(self.wb["Codice fiscale"])
-        self.agosto(self.wb["Agosto"])
-        self.settembre(self.wb["Settembre"])
+        self.agosto(self.wb["Mese precedente"])
+        self.settembre(self.wb["Mese"])
         self.f24(self.wb["F24"])
         self.novembre(self.wb["Novembre 2026"])
         self.riepilogo(self.wb["Riepilogo"])
@@ -133,7 +134,7 @@ class Foglio:
         widths(ws, {"A": 3, "B": 44, "C": 14, "D": 90})
         rows = [
             ("mese", "Mese controllato (primo giorno)", date.fromisoformat(C.MESE + "-01"), "DD/MM/YYYY", None,
-             "Il mese dei cedolini incollati nel foglio Settembre."),
+             "Il mese dei cedolini incollati nel foglio Mese: conta per gli scatti."),
             ("aliquota", "Contributo IVS a carico del dipendente", C.ALIQUOTA_DIPENDENTE, PCT, YELLOW,
              "9,19% generale. Va preso dalla posizione INPS del cliente: FIS, CIGS e l'1% sopra la prima fascia pensionabile non sono modellati."),
             ("divisore_tfr", "Divisore TFR", C.DIVISORE_TFR, "0.0", None, "Art. 2120 c.c.: quota annua = retribuzione annua / 13,5."),
@@ -184,7 +185,7 @@ class Foglio:
 
     def agosto(self, ws):
         p = self.o["precedente"]
-        title(ws, "Agosto 2026: i cedolini del mese prima", "Servono il netto e il residuo ferie, per i controlli C05 e C07.")
+        title(ws, "Mese precedente: i cedolini del mese prima", "Servono il netto e il residuo ferie, per i controlli C05 e C07. Nei dati di esempio: agosto 2026.")
         widths(ws, {"A": 12, "B": 9, "C": 14, "D": 14})
         header(ws, 4, ["Matricola", "Cliente", "Netto", "Residuo ferie"], height=20)
         first = 5
@@ -193,32 +194,32 @@ class Foglio:
             put(ws, f"B{i}", t.cliente, color=BLUE)
             put(ws, f"C{i}", float(t.netto), color=BLUE, fmt=NUM2)
             put(ws, f"D{i}", float(t.ferie_residuo), color=BLUE, fmt=NUM4)
-        last = first + len(p) - 1 + 50          # spazio per incollare più righe
-        self.R.update({"ag_m": f"Agosto!$A${first}:$A${last}", "ag_n": f"Agosto!$C${first}:$C${last}",
-                       "ag_f": f"Agosto!$D${first}:$D${last}"})
+        last = first + RIGHE - 1                 # spazio per incollare più righe
+        self.R.update({"ag_m": f"'Mese precedente'!$A${first}:$A${last}", "ag_n": f"'Mese precedente'!$C${first}:$C${last}",
+                       "ag_f": f"'Mese precedente'!$D${first}:$D${last}"})
         ws.freeze_panes = "A5"
 
     # ---- The checks ------------------------------------------------------------------------------
     def settembre(self, ws):
         R_, m, a = self.R, self.o["mese"], self.o["attesi"]
-        title(ws, "Settembre 2026: cedolini e controlli",
-              "Colonne A-W: i dati del software paghe (blu). Colonne X-AQ: valori attesi ed esiti, in formula.")
+        title(ws, "Mese: cedolini e controlli (nei dati di esempio, settembre 2026)",
+              f"Colonne A-W: i dati del software paghe (blu), fino a {RIGHE} righe. Colonne X-AS: valori attesi ed esiti, in formula.")
         inputs = ["matricola", "cliente", "codice_fiscale", "livello", "data_assunzione", "part_time", "evento",
                   "superminimo_assorbibile", "tabellare", "scatti_n", "scatti", "superminimo", "straordinari", "lordo",
                   "contributi_inps", "imponibile_irpef", "irpef", "altre_trattenute", "netto", "quota_tfr",
                   "ferie_maturate", "ferie_godute", "ferie_residuo"]
         heads = [s.replace("_", " ").capitalize() for s in inputs] + [
             "Tabellare atteso", "Mesi di servizio", "Scatti attesi", "Importo scatti atteso", "Contributi attesi",
-            "TFR atteso", "Residuo agosto", "Residuo atteso", "Lordo atteso", "Netto atteso", "Netto agosto",
+            "TFR atteso", "Residuo mese prima", "Residuo atteso", "Lordo atteso", "Netto atteso", "Netto mese prima",
             "Variazione", "Controllo CF",
             "C01 Minimo", "C02 Scatti", "C03 INPS", "C04 TFR", "C05 Ferie", "C06 Quadratura", "C07 Variazione",
             "C09 Cod. fiscale", "Errori"]
         header(ws, 4, heads, height=44)
         widths(ws, {**{col(k): 11 for k in range(1, len(heads) + 1)}, "C": 19, "G": 14})
         first = 5
-        last = first + len(m) - 1
+        assert len(m) <= RIGHE, "più cedolini delle righe preparate nel foglio"
+        last = first + RIGHE - 1
         self.rows = (first, last)
-        V = lambda c, i: f"{c}{i}"
         for i, t in enumerate(m.itertuples(index=False), start=first):
             for j, name in enumerate(inputs):
                 v = getattr(t, name)
@@ -233,40 +234,45 @@ class Foglio:
                 put(ws, f"{col(1 + j)}{i}", plain(v), color=BLUE,
                     fmt="DD/MM/YYYY" if name == "data_assunzione" else (NUM4 if "ferie" in name else
                                                                          (NUM2 if isinstance(v, float) else None)))
+        # le formule coprono RIGHE righe, così si possono incollare i cedolini di un cliente più grande;
+        # le righe vuote restano vuote
+        for i in range(first, last + 1):
+            g = lambda expr: f'=IF($A{i}="","",{expr})'
             lookup = lambda rng: f"INDEX({rng},MATCH(D{i},{R_['lv']},0))"
-            put(ws, f"X{i}", f"=ROUND({lookup(R_['min'])}*F{i},2)", fmt=NUM2)
-            put(ws, f"Y{i}", f"=(YEAR({R_['mese']})*12+MONTH({R_['mese']}))-(YEAR(E{i})*12+MONTH(E{i}))")
-            put(ws, f"Z{i}", f"=MIN({R_['scatti_max']},MAX(0,INT((Y{i}-1)/36)))")
-            put(ws, f"AA{i}", f"=ROUND({lookup(R_['scatto'])}*Z{i}*F{i},2)", fmt=NUM2)
-            put(ws, f"AB{i}", f"=ROUND(N{i}*{R_['aliquota']},2)", fmt=NUM2)
-            put(ws, f"AC{i}", f"=ROUND((I{i}+K{i}+L{i})*{R_['mensilita']}/{R_['divisore_tfr']}/12,2)", fmt=NUM2)
-            put(ws, f"AD{i}", f'=IFERROR(INDEX({R_["ag_f"]},MATCH(A{i},{R_["ag_m"]},0)),0)', color=GREEN, fmt=NUM4)
-            put(ws, f"AE{i}", f"=ROUND(AD{i}+ROUND({R_['ferie']}/12,4)-V{i},4)", fmt=NUM4)
-            put(ws, f"AF{i}", f"=ROUND(I{i}+K{i}+L{i}+M{i},2)", fmt=NUM2)
-            put(ws, f"AG{i}", f"=ROUND(N{i}-O{i}-Q{i}-R{i},2)", fmt=NUM2)
-            put(ws, f"AH{i}", f'=IFERROR(INDEX({R_["ag_n"]},MATCH(A{i},{R_["ag_m"]},0)),"")', color=GREEN, fmt=NUM2)
-            put(ws, f"AI{i}", f'=IF(AH{i}="","",S{i}/AH{i}-1)', fmt=PCT)
+            put(ws, f"X{i}", g(f"ROUND({lookup(R_['min'])}*F{i},2)"), fmt=NUM2)
+            put(ws, f"Y{i}", g(f"(YEAR({R_['mese']})*12+MONTH({R_['mese']}))-(YEAR(E{i})*12+MONTH(E{i}))"))
+            put(ws, f"Z{i}", g(f"MIN({R_['scatti_max']},MAX(0,INT((Y{i}-1)/36)))"))
+            put(ws, f"AA{i}", g(f"ROUND({lookup(R_['scatto'])}*Z{i}*F{i},2)"), fmt=NUM2)
+            put(ws, f"AB{i}", g(f"ROUND(N{i}*{R_['aliquota']},2)"), fmt=NUM2)
+            put(ws, f"AC{i}", g(f"ROUND((I{i}+K{i}+L{i})*{R_['mensilita']}/{R_['divisore_tfr']}/12,2)"), fmt=NUM2)
+            put(ws, f"AD{i}", g(f'IFERROR(INDEX({R_["ag_f"]},MATCH(A{i},{R_["ag_m"]},0)),0)'), color=GREEN, fmt=NUM4)
+            put(ws, f"AE{i}", g(f"ROUND(AD{i}+ROUND({R_['ferie']}/12,4)-V{i},4)"), fmt=NUM4)
+            put(ws, f"AF{i}", g(f"ROUND(I{i}+K{i}+L{i}+M{i},2)"), fmt=NUM2)
+            put(ws, f"AG{i}", g(f"ROUND(N{i}-O{i}-Q{i}-R{i},2)"), fmt=NUM2)
+            put(ws, f"AH{i}", g(f'IFERROR(INDEX({R_["ag_n"]},MATCH(A{i},{R_["ag_m"]},0)),"")'), color=GREEN, fmt=NUM2)
+            put(ws, f"AI{i}", g(f'IF(AH{i}="","",S{i}/AH{i}-1)'), fmt=PCT)
             odd = "{1,3,5,7,9,11,13,15}"
             even = "{2,4,6,8,10,12,14}"
-            put(ws, f"AJ{i}", (f"=CHAR(65+MOD(SUMPRODUCT(SUMIF({R_['cf_c']},MID(C{i},{odd},1),{R_['cf_d']}))"
-                               f"+SUMPRODUCT(SUMIF({R_['cf_c']},MID(C{i},{even},1),{R_['cf_p']})),26))"))
+            put(ws, f"AJ{i}", g(f"CHAR(65+MOD(SUMPRODUCT(SUMIF({R_['cf_c']},MID(C{i},{odd},1),{R_['cf_d']}))"
+                                f"+SUMPRODUCT(SUMIF({R_['cf_c']},MID(C{i},{even},1),{R_['cf_p']})),26))"))
             tol, tolf = R_["tolleranza"], R_["tolleranza_ferie"]
-            put(ws, f"AK{i}", f'=IF(ABS(I{i}-X{i})>{tol},"ERRORE","OK")')
-            put(ws, f"AL{i}", f'=IF(ABS(K{i}-AA{i})>{tol},"ERRORE","OK")')
-            put(ws, f"AM{i}", f'=IF(ABS(O{i}-AB{i})>{tol},"ERRORE","OK")')
-            put(ws, f"AN{i}", f'=IF(ABS(T{i}-AC{i})>{tol},"ERRORE","OK")')
-            put(ws, f"AO{i}", f'=IF(ABS(W{i}-AE{i})>{tolf},"ERRORE","OK")')
-            put(ws, f"AP{i}", f'=IF(OR(ABS(N{i}-AF{i})>{tol},ABS(S{i}-AG{i})>{tol}),"ERRORE","OK")')
-            put(ws, f"AQ{i}", f'=IF(AI{i}="","OK",IF(AND(ABS(AI{i})>{R_["soglia"]},G{i}=""),"ERRORE","OK"))')
-            put(ws, f"AR{i}", f'=IF(AND(LEN(C{i})=16,RIGHT(C{i},1)=AJ{i}),"OK","ERRORE")')
-            put(ws, f"AS{i}", f'=COUNTIF(AK{i}:AR{i},"ERRORE")', bold=True)
+            put(ws, f"AK{i}", g(f'IF(ABS(I{i}-X{i})>{tol},"ERRORE","OK")'))
+            put(ws, f"AL{i}", g(f'IF(ABS(K{i}-AA{i})>{tol},"ERRORE","OK")'))
+            put(ws, f"AM{i}", g(f'IF(ABS(O{i}-AB{i})>{tol},"ERRORE","OK")'))
+            put(ws, f"AN{i}", g(f'IF(ABS(T{i}-AC{i})>{tol},"ERRORE","OK")'))
+            put(ws, f"AO{i}", g(f'IF(ABS(W{i}-AE{i})>{tolf},"ERRORE","OK")'))
+            put(ws, f"AP{i}", g(f'IF(OR(ABS(N{i}-AF{i})>{tol},ABS(S{i}-AG{i})>{tol}),"ERRORE","OK")'))
+            put(ws, f"AQ{i}", g(f'IF(AI{i}="","OK",IF(AND(ABS(AI{i})>{R_["soglia"]},G{i}=""),"ERRORE","OK"))'))
+            put(ws, f"AR{i}", g(f'IF(AND(LEN(C{i})=16,RIGHT(C{i},1)=AJ{i}),"OK","ERRORE")'))
+            put(ws, f"AS{i}", g(f'COUNTIF(AK{i}:AR{i},"ERRORE")'), bold=True)
+        for i, t in enumerate(m.itertuples(index=False), start=first):
             k = i - first
             if k % 6 == 0:
                 for letter, name in (("X", "tabellare"), ("Z", "scatti_n"), ("AA", "scatti"), ("AB", "contributi_inps"),
                                      ("AC", "quota_tfr"), ("AE", "ferie_residuo"), ("AG", "netto")):
-                    self.check("Settembre", f"{t.matricola} {name} atteso", a.loc[k, name], f"Settembre!{letter}{i}")
+                    self.check("Mese", f"{t.matricola} {name} atteso", a.loc[k, name], f"Mese!{letter}{i}")
         esito_rule(ws, f"AK{first}:AR{last}")
-        E = lambda letter: f"Settembre!${letter}${first}:${letter}${last}"
+        E = lambda letter: f"Mese!${letter}${first}:${letter}${last}"
         self.R.update({"s_cli": E("B"), "s_m": E("A"), "s_irpef": E("Q"), "s_inps": E("O"), "s_err": E("AS"),
                        **{f"s_{c}": E(letter) for c, letter in zip(
                            ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C09"],
@@ -279,13 +285,13 @@ class Foglio:
             for codice, letter in colonna.items():
                 if (codice, t.matricola) in trovate or k % 10 == 0:
                     esito = "ERRORE" if (codice, t.matricola) in trovate else "OK"
-                    self.check("Settembre", f"{t.matricola} {codice}", esito, f"Settembre!{letter}{first + k}")
+                    self.check("Mese", f"{t.matricola} {codice}", esito, f"Mese!{letter}{first + k}")
         ws.freeze_panes = "D5"
         ws.auto_filter.ref = f"A4:AS{last}"
 
     def f24(self, ws):
         R_, rec = self.R, self.o["riconciliazione_f24"]
-        title(ws, "F24 di settembre: deleghe contro cedolini",
+        title(ws, "F24 del mese: deleghe contro cedolini",
               "Ritenute IRPEF (codice tributo 1001) e contributi a carico dei dipendenti, per cliente.")
         widths(ws, {"A": 10, **{col(k): 16 for k in range(2, 10)}})
         header(ws, 4, ["Cliente", "Ritenute in F24", "Ritenute nei cedolini", "Differenza", "Contributi in F24",
@@ -308,35 +314,34 @@ class Foglio:
     def novembre(self, ws):
         R_, n = self.R, self.o["novembre"]
         title(ws, "Novembre 2026: la nuova tranche del CCNL Terziario",
-              "Dal 1° novembre 2026 i minimi salgono. Superminimo assorbibile: verificare la lettera di assunzione di ciascuno.")
+              "Si aggiorna dal foglio Mese. Superminimo assorbibile: verificare la lettera di assunzione di ciascuno.")
         widths(ws, {"A": 12, "B": 9, "C": 9, "D": 10, "E": 12, "F": 12, "G": 12, "H": 12, "I": 12, "J": 14, "K": 14})
         header(ws, 4, ["Matricola", "Cliente", "Livello", "Part-time", "Superminimo", "Assorbibile",
                        "Aumento mensile", "Assorbito", "Da pagare", "Nuovo tabellare", "Nuovo superminimo"])
         first = 5
-        for i, t in enumerate(n.itertuples(index=False), start=first):
-            put(ws, f"A{i}", t.matricola, color=BLUE)
-            put(ws, f"B{i}", t.cliente, color=BLUE)
-            put(ws, f"C{i}", t.livello, color=BLUE)
-            put(ws, f"D{i}", float(t.part_time), color=BLUE)
-            put(ws, f"E{i}", float(t.superminimo), color=BLUE, fmt=NUM2)
-            put(ws, f"F{i}", bool(t.superminimo_assorbibile), color=BLUE)
+        for i in range(first, first + RIGHE):
+            g = lambda expr: f'=IF($A{i}="","",{expr})'
+            for letter, src in (("A", "A"), ("B", "B"), ("C", "D"), ("D", "F"), ("E", "L"), ("F", "H")):
+                fmt = NUM2 if letter == "E" else None
+                put(ws, f"{letter}{i}", f'=IF(Mese!$A{i}="","",Mese!{src}{i})', color=GREEN, fmt=fmt)
             lk = lambda rng: f"INDEX({rng},MATCH(C{i},{R_['lv']},0))"
-            put(ws, f"G{i}", f"=ROUND(({lk(R_['min_next'])}-{lk(R_['min'])})*D{i},2)", fmt=NUM2)
-            put(ws, f"H{i}", f"=IF(F{i},MIN(E{i},G{i}),0)", fmt=NUM2)
-            put(ws, f"I{i}", f"=ROUND(G{i}-H{i},2)", fmt=NUM2)
-            put(ws, f"J{i}", f"=ROUND({lk(R_['min_next'])}*D{i},2)", fmt=NUM2)
-            put(ws, f"K{i}", f"=ROUND(E{i}-H{i},2)", fmt=NUM2)
+            put(ws, f"G{i}", g(f"ROUND(({lk(R_['min_next'])}-{lk(R_['min'])})*D{i},2)"), fmt=NUM2)
+            put(ws, f"H{i}", g(f"IF(F{i},MIN(E{i},G{i}),0)"), fmt=NUM2)
+            put(ws, f"I{i}", g(f"ROUND(G{i}-H{i},2)"), fmt=NUM2)
+            put(ws, f"J{i}", g(f"ROUND({lk(R_['min_next'])}*D{i},2)"), fmt=NUM2)
+            put(ws, f"K{i}", g(f"ROUND(E{i}-H{i},2)"), fmt=NUM2)
+        for i, t in enumerate(n.itertuples(index=False), start=first):
             if (i - first) % 5 == 0:
                 for letter, name in (("G", "aumento"), ("H", "assorbito"), ("I", "da_pagare"), ("J", "nuovo_tabellare")):
                     self.check("Novembre 2026", f"{t.matricola} {name}", float(getattr(t, name)), f"'Novembre 2026'!{letter}{i}")
-        last = first + len(n) - 1
+        last = first + RIGHE - 1
         N = lambda letter: f"'Novembre 2026'!${letter}${first}:${letter}${last}"
         self.R.update({"n_cli": N("B"), "n_aum": N("G"), "n_ass": N("H"), "n_pag": N("I")})
         ws.freeze_panes = "B5"
 
     def riepilogo(self, ws):
         R_, o = self.R, self.o
-        title(ws, "Riepilogo: settembre 2026", "Errori per controllo e cliente, e il costo della tranche di novembre.")
+        title(ws, "Riepilogo del mese", "Errori per controllo e cliente, e il costo della tranche di novembre.")
         clienti = list(C.CLIENTI)
         widths(ws, {"A": 8, "B": 40, **{col(k): 13 for k in range(3, 4 + len(clienti))}})
         header(ws, 4, ["Codice", "Controllo", *[f"Cliente {c}" for c in clienti], "Totale"])
@@ -415,10 +420,10 @@ class Foglio:
             color=MUTED, size=12)
         put(ws, "B5", "Come si usa", bold=True, size=11)
         for i, text in enumerate([
-            "1. Incolla i cedolini del mese nel foglio Settembre (colonne A-W) e quelli del mese prima nel foglio Agosto.",
+            f"1. Imposta il mese nei Parametri. Incolla i cedolini del mese nel foglio Mese (colonne A-W, fino a {RIGHE} righe) e quelli del mese prima nel foglio Mese precedente.",
             "2. Incolla gli importi delle deleghe F24 nel foglio F24 (colonne B ed E).",
             "3. Controlla i parametri gialli nel foglio Parametri: l'aliquota INPS va presa dal cliente.",
-            "4. Leggi il Riepilogo e filtra il foglio Settembre sulla colonna Errori maggiore di zero.",
+            "4. Leggi il Riepilogo e filtra il foglio Mese sulla colonna Errori maggiore di zero.",
         ], start=6):
             put(ws, f"C{i}", text)
         put(ws, "B11", "I controlli", bold=True, size=11)
@@ -429,8 +434,8 @@ class Foglio:
         put(ws, f"B{r}", "Fogli", bold=True, size=11)
         purpose = {
             "Riepilogo": "Errori per controllo e cliente; costo della tranche di novembre.",
-            "Settembre": "I cedolini del mese con valori attesi ed esiti, riga per riga.",
-            "Agosto": "Netto e residuo ferie del mese prima.",
+            "Mese": "I cedolini del mese con valori attesi ed esiti, riga per riga.",
+            "Mese precedente": "Netto e residuo ferie del mese prima.",
             "F24": "Deleghe contro somma dei cedolini, per cliente.",
             "Novembre 2026": "Aumento dei minimi dal 1° novembre per dipendente, con l'assorbimento del superminimo.",
             "CCNL": "Minimi e scatti del CCNL Terziario.",
