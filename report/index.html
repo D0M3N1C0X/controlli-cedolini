@@ -1,0 +1,152 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Controlli cedolini</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root{
+  --paper:#fbfcfd; --surface:#ffffff; --ink:#131a24; --ink-soft:#39434f; --muted:#5f6b7a;
+  --line:#e2e7ef; --line-strong:#c9d2df; --accent:#1d4ed8; --accent-wash:#eef3ff;
+  --flag:#b5352c; --flag-wash:#fdeceb; --ok:#0c6b59; --ok-wash:#e8f5f1;
+  --warn:#8a5a00; --warn-wash:#fdf3dc;
+  --plate:#fcfcfb; --plate-edge:#dde4ee; --shadow:0 1px 2px rgba(19,26,36,.06),0 8px 24px rgba(19,26,36,.06);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0f141b; --surface:#161d26; --ink:#e7ecf3; --ink-soft:#c3cbd6; --muted:#8b97a6;
+    --line:#232c38; --line-strong:#33404f; --accent:#7ba4ff; --accent-wash:#17233a;
+    --flag:#f08a80; --flag-wash:#2e1b1a; --ok:#5fc6ae; --ok-wash:#12291f;
+    --warn:#f0c060; --warn-wash:#2e2512;
+    --plate:#1a1a19; --plate-edge:#2b3542; --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0f141b; --surface:#161d26; --ink:#e7ecf3; --ink-soft:#c3cbd6; --muted:#8b97a6;
+  --line:#232c38; --line-strong:#33404f; --accent:#7ba4ff; --accent-wash:#17233a;
+  --flag:#f08a80; --flag-wash:#2e1b1a; --ok:#5fc6ae; --ok-wash:#12291f;
+  --warn:#f0c060; --warn-wash:#2e2512;
+  --plate:#1a1a19; --plate-edge:#2b3542; --shadow:0 1px 2px rgba(0,0,0,.4),0 10px 30px rgba(0,0,0,.35);
+}
+
+*{box-sizing:border-box}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:17px; line-height:1.68; -webkit-font-smoothing:antialiased;
+}
+.page{padding:clamp(1.25rem,4vw,3.5rem) clamp(1rem,4vw,2rem) 5rem}
+.doc{display:grid; gap:1.5rem; justify-items:center}
+.doc > *{width:100%; max-width:42rem; margin:0}
+.doc > figure, .doc > .table-wrap{max-width:57rem}
+
+h1,h2,h3{font-family:"Source Serif 4",Georgia,"Times New Roman",serif; text-wrap:balance; margin:0}
+h1{font-size:clamp(2.1rem,5.5vw,3.1rem); font-weight:600; letter-spacing:-.015em; line-height:1.12}
+h2{font-size:clamp(1.5rem,3.4vw,2rem); font-weight:600; letter-spacing:-.01em;
+   display:flex; align-items:baseline; gap:.75rem; padding-top:2.5rem;
+   border-top:1px solid var(--line); margin-top:1.5rem}
+h2 .num{
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.8rem;
+  font-weight:500; color:var(--accent); letter-spacing:.08em; transform:translateY(-.15em);
+}
+h3{font-size:1.22rem; font-weight:600; padding-top:1.25rem}
+p{margin:0; color:var(--ink-soft)}
+strong{color:var(--ink); font-weight:600}
+a{color:var(--accent); text-decoration:underline; text-underline-offset:2px; text-decoration-thickness:1px}
+a:focus-visible{outline:2px solid var(--accent); outline-offset:3px; border-radius:2px}
+
+.masthead{border-bottom:2px solid var(--ink); padding-bottom:1.5rem}
+.eyebrow{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.72rem; letter-spacing:.16em;
+  text-transform:uppercase; color:var(--muted); margin-bottom:1rem
+}
+dl.meta{display:grid; grid-template-columns:auto 1fr; gap:.4rem 1.25rem; margin:1.4rem 0 0; font-size:.94rem}
+dl.meta dt{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.72rem; letter-spacing:.1em;
+  text-transform:uppercase; color:var(--muted); padding-top:.28em
+}
+dl.meta dd{margin:0; color:var(--ink-soft)}
+
+.notice{
+  background:var(--accent-wash); border-left:3px solid var(--accent); border-radius:0 4px 4px 0;
+  padding:1rem 1.25rem; font-size:.95rem; color:var(--ink-soft)
+}
+p.note{font-size:.9rem; color:var(--muted)}
+
+figure{display:flex; flex-direction:column; gap:.6rem}
+figure .plate{
+  background:var(--plate); border:1px solid var(--plate-edge); border-radius:6px;
+  box-shadow:var(--shadow); padding:.5rem; overflow-x:auto
+}
+figure svg{display:block; width:100%; height:auto; min-width:32rem}
+figcaption{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.72rem; letter-spacing:.06em;
+  color:var(--muted); text-transform:uppercase
+}
+
+.table-wrap{overflow-x:auto; border:1px solid var(--line); border-radius:6px; background:var(--surface)}
+table{border-collapse:collapse; width:100%; font-size:.92rem; font-variant-numeric:tabular-nums}
+th,td{padding:.62rem .9rem; text-align:left; border-bottom:1px solid var(--line)}
+thead th{
+  font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.68rem; font-weight:500;
+  letter-spacing:.09em; text-transform:uppercase; color:var(--muted);
+  border-bottom:1px solid var(--line-strong); white-space:nowrap
+}
+tbody tr:last-child td{border-bottom:none}
+td.r,th.r{text-align:right}
+td.r{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.86rem; white-space:nowrap}
+
+.pill{
+  display:inline-block; padding:.14em .6em; border-radius:999px; font-size:.72rem;
+  font-weight:600; letter-spacing:.02em; white-space:nowrap
+}
+.pill.flag{background:var(--flag-wash); color:var(--flag)}
+.pill.ok{background:var(--ok-wash); color:var(--ok)}
+.pill.warn{background:var(--warn-wash); color:var(--warn)}
+ul{margin:0; padding-left:1.2rem; display:grid; gap:.5rem; color:var(--ink-soft)}
+ul li::marker{color:var(--accent)}
+
+code{
+  font-family:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace; font-size:.86em;
+  background:var(--accent-wash); color:var(--ink); padding:.1em .35em; border-radius:3px
+}
+ol{margin:0; padding-left:1.3rem; display:grid; gap:.75rem; color:var(--ink-soft)}
+ol li::marker{color:var(--accent); font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:.85em}
+hr{border:none; height:1px; background:var(--line); margin:1rem 0}
+
+footer.colophon{
+  max-width:42rem; margin:3rem auto 0; padding-top:1.25rem; border-top:1px solid var(--line);
+  font-size:.85rem; color:var(--muted)
+}
+@media (max-width:640px){
+  body{font-size:16px}
+  dl.meta{grid-template-columns:1fr; gap:.15rem}
+  dl.meta dd{margin-bottom:.5rem}
+}
+</style>
+</head><body><div class="page"><article class="doc"><header class="masthead"><p class="eyebrow">Rapporto di controllo &middot; CCNL Terziario Confcommercio</p><h1>Controlli sui cedolini di settembre 2026</h1>
+<dl class="meta"><dt>Perimetro</dt><dd>3 clienti con il CCNL Terziario Confcommercio, 122 cedolini di settembre confrontati con quelli di agosto e con gli F24</dd><dt>Dati</dt><dd>Clienti e dipendenti inventati, con errori inseriti apposta; minimi e scatti del CCNL reali, con le fonti in <a href="https://github.com/D0M3N1C0X/controlli-cedolini/blob/main/docs/fonti.md">docs/fonti.md</a></dd><dt>Strumenti</dt><dd>Uno script Python e lo stesso controllo in un <a href="foglio_controllo_cedolini.xlsx">foglio di calcolo</a> che si apre anche in Google Sheets</dd></dl></header>
+<div class="notice">Nove controlli da passare prima di mandare i cedolini al cliente. Ognuno ricalcola un valore dalle regole del contratto e lo confronta con il cedolino: non serve sapere come l'ha calcolato il software paghe. Non è consulenza del lavoro.</div>
+<h2><span>In sintesi</span></h2>
+<ul><li><strong>27 segnalazioni: 26 cedolini e 1 F24</strong>, 19 ad alta priorità; cliente A 6, cliente B 15, cliente C 6.</li><li><strong>6 dipendenti sono pagati sotto il minimo:</strong> il tabellare è fermo alla tranche di marzo 2025. Mancano 175,44 € al mese in tutto, più gli arretrati da novembre 2025.</li><li><strong>L'F24 del cliente C ha 212,40 € di ritenute in meno</strong> della somma dei cedolini: va integrato prima della scadenza del versamento.</li><li><strong>Dal 1° novembre 2026 i minimi salgono:</strong> 3.930,05 € al mese per 122 dipendenti. Il superminimo assorbibile ne copre 1.505,54 € in 46 casi; restano 2.424,51 € al mese, 33.943 € l'anno su 14 mensilità.</li><li><strong>I controlli trovano ogni alterazione sopra il centesimo</strong> in 878 prove casuali (sezione 4). Non trovano un errore coerente, come un livello sbagliato in anagrafica.</li></ul>
+<h2><span class="num">01</span><span>Le segnalazioni, cedolino per cedolino</span></h2>
+<div class="table-wrap"><table><thead><tr><th>Matricola</th><th>Cliente</th><th>Controllo</th><th class="r">Priorità</th><th class="r">Atteso</th><th class="r">Trovato</th><th class="r">Differenza</th></tr></thead><tbody><tr><td>B031</td><td>B</td><td>C01</td><td class="r"><span class="pill flag">alta</span></td><td class="r">890,84 €</td><td class="r">873,34 €</td><td class="r">−17,50 €</td></tr><tr><td>B036</td><td>B</td><td>C01</td><td class="r"><span class="pill flag">alta</span></td><td class="r">1.486,38 €</td><td class="r">1.456,03 €</td><td class="r">−30,35 €</td></tr><tr><td>B044</td><td>B</td><td>C01</td><td class="r"><span class="pill flag">alta</span></td><td class="r">2.233,60 €</td><td class="r">2.186,25 €</td><td class="r">−47,35 €</td></tr><tr><td>B052</td><td>B</td><td>C01</td><td class="r"><span class="pill flag">alta</span></td><td class="r">1.658,01 €</td><td class="r">1.626,39 €</td><td class="r">−31,62 €</td></tr><tr><td>B064</td><td>B</td><td>C01</td><td class="r"><span class="pill flag">alta</span></td><td class="r">1.395,89 €</td><td class="r">1.371,58 €</td><td class="r">−24,31 €</td></tr><tr><td>B082</td><td>B</td><td>C01</td><td class="r"><span class="pill flag">alta</span></td><td class="r">1.395,89 €</td><td class="r">1.371,58 €</td><td class="r">−24,31 €</td></tr><tr><td>A007</td><td>A</td><td>C02</td><td class="r"><span class="pill flag">alta</span></td><td class="r">49,68 €</td><td class="r">24,84 €</td><td class="r">−24,84 €</td></tr><tr><td>A016</td><td>A</td><td>C02</td><td class="r"><span class="pill flag">alta</span></td><td class="r">61,98 €</td><td class="r">41,32 €</td><td class="r">−20,66 €</td></tr><tr><td>B025</td><td>B</td><td>C02</td><td class="r"><span class="pill flag">alta</span></td><td class="r">38,94 €</td><td class="r">19,47 €</td><td class="r">−19,47 €</td></tr><tr><td>B047</td><td>B</td><td>C02</td><td class="r"><span class="pill flag">alta</span></td><td class="r">24,84 €</td><td class="r">0,00 €</td><td class="r">−24,84 €</td></tr><tr><td>A003</td><td>A</td><td>C03</td><td class="r"><span class="pill flag">alta</span></td><td class="r">182,12 €</td><td class="r">188,06 €</td><td class="r">5,94 €</td></tr><tr><td>A012</td><td>A</td><td>C03</td><td class="r"><span class="pill flag">alta</span></td><td class="r">139,02 €</td><td class="r">143,56 €</td><td class="r">4,54 €</td></tr><tr><td>B087</td><td>B</td><td>C03</td><td class="r"><span class="pill flag">alta</span></td><td class="r">125,65 €</td><td class="r">129,75 €</td><td class="r">4,10 €</td></tr><tr><td>C098</td><td>C</td><td>C03</td><td class="r"><span class="pill flag">alta</span></td><td class="r">198,83 €</td><td class="r">205,32 €</td><td class="r">6,49 €</td></tr><tr><td>B033</td><td>B</td><td>C04</td><td class="r"><span class="pill warn">media</span></td><td class="r">194,92 €</td><td class="r">171,27 €</td><td class="r">−23,65 €</td></tr><tr><td>B059</td><td>B</td><td>C04</td><td class="r"><span class="pill warn">media</span></td><td class="r">179,38 €</td><td class="r">171,27 €</td><td class="r">−8,11 €</td></tr><tr><td>C101</td><td>C</td><td>C04</td><td class="r"><span class="pill warn">media</span></td><td class="r">157,22 €</td><td class="r">143,28 €</td><td class="r">−13,94 €</td></tr><tr><td>A009</td><td>A</td><td>C05</td><td class="r"><span class="pill warn">media</span></td><td class="r">22,96 gg</td><td class="r">20,79 gg</td><td class="r">-2,17 gg</td></tr><tr><td>B055</td><td>B</td><td>C05</td><td class="r"><span class="pill warn">media</span></td><td class="r">13,40 gg</td><td class="r">11,23 gg</td><td class="r">-2,17 gg</td></tr><tr><td>B084</td><td>B</td><td>C05</td><td class="r"><span class="pill warn">media</span></td><td class="r">17,97 gg</td><td class="r">15,80 gg</td><td class="r">-2,17 gg</td></tr><tr><td>A001</td><td>A</td><td>C06</td><td class="r"><span class="pill flag">alta</span></td><td class="r">1.310,02 €</td><td class="r">1.347,52 €</td><td class="r">37,50 €</td></tr><tr><td>C093</td><td>C</td><td>C06</td><td class="r"><span class="pill flag">alta</span></td><td class="r">1.528,21 €</td><td class="r">1.628,21 €</td><td class="r">100,00 €</td></tr><tr><td>B090</td><td>B</td><td>C07</td><td class="r"><span class="pill warn">media</span></td><td class="r">1.752,11 €</td><td class="r">2.374,82 €</td><td class="r">622,71 €</td></tr><tr><td>C099</td><td>C</td><td>C07</td><td class="r"><span class="pill warn">media</span></td><td class="r">1.467,14 €</td><td class="r">2.045,04 €</td><td class="r">577,90 €</td></tr><tr><td>F24</td><td>C</td><td>C08</td><td class="r"><span class="pill flag">alta</span></td><td class="r">6.280,99 €</td><td class="r">6.068,59 €</td><td class="r">−212,40 €</td></tr><tr><td>B058</td><td>B</td><td>C09</td><td class="r"><span class="pill flag">alta</span></td><td class="r">valido</td><td class="r"><code>GFZPLG92P01Z321A</code></td><td class="r">-</td></tr><tr><td>C107</td><td>C</td><td>C09</td><td class="r"><span class="pill flag">alta</span></td><td class="r">valido</td><td class="r"><code>ZCCGMF94M55Z282A</code></td><td class="r">-</td></tr></tbody></table></div>
+<p><strong>Cosa fare, per controllo</strong></p>
+<div class="table-wrap"><table><thead><tr><th>Controllo</th><th>Cosa fare</th></tr></thead><tbody><tr><td>C01 Minimo tabellare</td><td>Aggiornare il tabellare al minimo in vigore e pagare la differenza dei mesi arretrati</td></tr><tr><td>C02 Scatti di anzianità</td><td>Inserire lo scatto maturato e verificare la data di decorrenza</td></tr><tr><td>C03 Contributi INPS</td><td>Correggere l'aliquota nella posizione del dipendente</td></tr><tr><td>C04 Quota TFR</td><td>Ricalcolare il rateo includendo scatti e superminimo</td></tr><tr><td>C05 Residuo ferie</td><td>Riallineare il residuo: maturazione del mese non registrata</td></tr><tr><td>C06 Quadratura</td><td>Ricontrollare le voci: il cedolino non quadra</td></tr><tr><td>C07 Variazione del netto</td><td>Chiedere al cliente l'evento che giustifica la variazione</td></tr><tr><td>C08 Riconciliazione F24</td><td>Integrare la delega prima della scadenza del versamento</td></tr><tr><td>C09 Codice fiscale</td><td>Correggere il codice fiscale in anagrafica</td></tr></tbody></table></div>
+<p class="note">C07 non dice che il cedolino è sbagliato: dice che il netto è cambiato di oltre il 20% senza un evento registrato. Le assunzioni del mese, gli straordinari dichiarati e il passaggio a part-time non sono segnalati.</p>
+<h2><span class="num">02</span><span>F24 contro cedolini</span></h2>
+<div class="table-wrap"><table><thead><tr><th>Cliente</th><th class="r">Ritenute in F24 (1001)</th><th class="r">Ritenute nei cedolini</th><th class="r">Differenza</th><th class="r">Contributi in F24</th><th class="r">Contributi nei cedolini</th><th class="r">Differenza</th></tr></thead><tbody><tr><td>A</td><td class="r">4.315,37 €</td><td class="r">4.315,37 €</td><td class="r">0,00 €</td><td class="r">3.049,18 €</td><td class="r">3.049,18 €</td><td class="r">0,00 €</td></tr><tr><td>B</td><td class="r">18.013,87 €</td><td class="r">18.013,87 €</td><td class="r">0,00 €</td><td class="r">12.777,48 €</td><td class="r">12.777,48 €</td><td class="r">0,00 €</td></tr><tr><td>C</td><td class="r">6.068,59 €</td><td class="r">6.280,99 €</td><td class="r">−212,40 €</td><td class="r">4.470,73 €</td><td class="r">4.470,73 €</td><td class="r">0,00 €</td></tr></tbody></table></div>
+<p class="note">Le ritenute IRPEF dei dati sintetici non sono calcolate con le regole fiscali: servono solo a mostrare la riconciliazione.</p>
+<h2><span class="num">03</span><span>La tranche del 1° novembre 2026</span></h2>
+<p>Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e di nuovo a febbraio 2027. Per ogni dipendente: l'aumento del livello, riproporzionato al part-time; quanto ne assorbe il superminimo, se la lettera di assunzione lo dice assorbibile; quanto resta da pagare.</p>
+<div class="table-wrap"><table><thead><tr><th>Cliente</th><th class="r">Dipendenti</th><th class="r">Aumento al mese</th><th class="r">Assorbito</th><th class="r">Da pagare al mese</th><th class="r">Costo annuo (14 mensilità)</th></tr></thead><tbody><tr><td>Cliente A</td><td class="r">18</td><td class="r">565,41 €</td><td class="r">277,65 €</td><td class="r">287,76 €</td><td class="r">4.029 €</td></tr><tr><td>Cliente B</td><td class="r">77</td><td class="r">2.492,17 €</td><td class="r">921,74 €</td><td class="r">1.570,43 €</td><td class="r">21.986 €</td></tr><tr><td>Cliente C</td><td class="r">27</td><td class="r">872,47 €</td><td class="r">306,15 €</td><td class="r">566,32 €</td><td class="r">7.928 €</td></tr></tbody></table></div>
+<p class="note">Lordo dipendente, senza i contributi a carico dell'azienda. L'assorbibilità del superminimo dipende dalla lettera di assunzione e dagli accordi aziendali: va verificata dipendente per dipendente prima di comunicarla.</p>
+<h2><span class="num">04</span><span>Quanto ci si può fidare dei controlli</span></h2>
+<p><strong>Sugli errori inseriti.</strong> 27 su 27, nessun falso allarme. Dimostra che i controlli fanno quello che dicono, non che troverebbero errori reali: gli errori li ho scelti io.</p>
+<div class="table-wrap"><table><thead><tr><th>Controllo</th><th class="r">Errori inseriti</th><th class="r">Trovati</th><th class="r">Mancati</th><th class="r">Falsi allarmi</th></tr></thead><tbody><tr><td>C01 Minimo tabellare</td><td class="r">6</td><td class="r">6</td><td class="r">0</td><td class="r">0</td></tr><tr><td>C02 Scatti di anzianità</td><td class="r">4</td><td class="r">4</td><td class="r">0</td><td class="r">0</td></tr><tr><td>C03 Contributi INPS</td><td class="r">4</td><td class="r">4</td><td class="r">0</td><td class="r">0</td></tr><tr><td>C04 Quota TFR</td><td class="r">3</td><td class="r">3</td><td class="r">0</td><td class="r">0</td></tr><tr><td>C05 Residuo ferie</td><td class="r">3</td><td class="r">3</td><td class="r">0</td><td class="r">0</td></tr><tr><td>C06 Quadratura</td><td class="r">2</td><td class="r">2</td><td class="r">0</td><td class="r">0</td></tr><tr><td>C07 Variazione del netto</td><td class="r">2</td><td class="r">2</td><td class="r">0</td><td class="r">0</td></tr><tr><td>C08 Riconciliazione F24</td><td class="r">1</td><td class="r">1</td><td class="r">0</td><td class="r">0</td></tr><tr><td>C09 Codice fiscale</td><td class="r">2</td><td class="r">2</td><td class="r">0</td><td class="r">0</td></tr></tbody></table></div>
+<p><strong>Su alterazioni casuali.</strong> 1.100 prove: una voce a caso di un cedolino corretto, cambiata di un importo a caso. La tabella dice quante volte almeno un controllo se ne accorge.</p>
+<div class="table-wrap"><table><thead><tr><th>Voce alterata</th><th class="r">± 0,005 €</th><th class="r">± 0,02 €</th><th class="r">± 1,00 €</th><th class="r">± 10,00 €</th><th class="r">± 100,00 €</th></tr></thead><tbody><tr><td>tabellare</td><td class="r">9%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td></tr><tr><td>scatti</td><td class="r">13%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td></tr><tr><td>superminimo</td><td class="r">0%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td></tr><tr><td>straordinari</td><td class="r">15%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td></tr><tr><td>lordo</td><td class="r">0%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td></tr><tr><td>contributi inps</td><td class="r">52%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td></tr><tr><td>irpef</td><td class="r">42%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td></tr><tr><td>altre trattenute</td><td class="r">0%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td></tr><tr><td>netto</td><td class="r">0%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td></tr><tr><td>quota tfr</td><td class="r">0%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td></tr><tr><td>ferie residuo</td><td class="r">0%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td><td class="r">100%</td></tr></tbody></table></div>
+<p class="note">Sotto la tolleranza di un centesimo l'alterazione si confonde con un arrotondamento, ed è giusto che passi. Sopra, la trovano tutte: 100%. Per le ferie l'importo è in giorni.</p>
+<p><strong>Il limite.</strong> Un errore coerente passa. Il dipendente A010 è assunto al 4° livello: inserito al 5° e ricalcolato da capo, il cedolino torna in ogni voce e prende 61,27 € netti in meno al mese, senza che nessun controllo lo segnali. Per questi errori serve un confronto con i documenti del cliente: lettera di assunzione, mansioni, accordi.</p>
+<h2><span class="num">05</span><span>Come lo userei in un team payroll</span></h2>
+<ol><li><strong>Prima dell'invio, ogni mese:</strong> l'export del software paghe entra nello script o nel foglio; si guardano solo le righe segnalate, a partire dalla priorità alta.</li><li><strong>C07 diventa una domanda al cliente,</strong> non un errore: se lo straordinario c'è, si registra l'evento e il mese dopo non torna.</li><li><strong>Prima di ogni tranche contrattuale:</strong> la tabella di novembre dice al cliente quanto costa l'aumento e chi assorbe, prima del cedolino e non dopo.</li><li><strong>Il passo successivo</strong> è collegarlo all'export reale e misurare quante segnalazioni sono giuste nei primi due mesi, per tarare la soglia di C07.</li></ol>
+<h2><span class="num">06</span><span>Metodo e limiti</span></h2>
+<ul><li><strong>Due motori, una risposta.</strong> Gli stessi controlli sono in Python e in formule nel foglio; il foglio Riconciliazione confronta ogni formula con Python, e la CI ricalcola il foglio con LibreOffice.</li><li><strong>Contributi semplificati.</strong> Un'aliquota a carico del dipendente (9,19%) per tutti, senza FIS, CIGS e contributo aggiuntivo dell'1%: in uso reale l'aliquota viene dalla posizione INPS del cliente.</li><li><strong>Scatti al livello attuale.</strong> Il CCNL non rivaluta gli scatti già maturati con il passaggio di livello: chi ha cambiato livello va controllato a mano.</li><li><strong>Un CCNL, un mese.</strong> Tredicesima, quattordicesima, malattia, cessazioni e conguagli non sono controllati.</li></ul></article><footer class="colophon">Generato da <code>report/rapporto.md</code> con <code>python3 src/run_all.py</code>. Clienti e dipendenti inventati, minimi del CCNL reali. Non è consulenza del lavoro. Codice: <a href="https://github.com/D0M3N1C0X/controlli-cedolini">controlli-cedolini</a>.</footer></div></body></html>
