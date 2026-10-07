@@ -6,7 +6,12 @@ export const CONTROLLI = {
   C01: ["Minimo tabellare", "alta"], C02: ["Scatti di anzianità", "alta"], C03: ["Contributi INPS", "alta"],
   C04: ["Quota TFR", "media"], C05: ["Residuo ferie", "media"], C06: ["Quadratura", "alta"],
   C07: ["Variazione del netto", "media"], C08: ["Riconciliazione F24", "alta"], C09: ["Codice fiscale", "alta"],
+  C10: ["Anagrafica", "alta"],
 };
+
+const ANAGRAFICA = ["livello", "part_time", "superminimo", "data_assunzione"];
+// come _fmt in Python: i numeri nel formato più corto ("%g"), il resto come testo
+const fmtValore = (v) => (typeof v === "number" ? String(Number(v.toPrecision(6))) : String(v));
 
 // ---- Arrotondamenti -------------------------------------------------------------------------
 // ROUND di Excel: 15 cifre significative, poi metà per eccesso (come regole.centesimi in Python).
@@ -94,6 +99,12 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
       if (Math.abs(v) > cfg.soglia && !r.evento) segnala(r, "C07", p.netto, r.netto);
     }
     if (!cfValido(r.codice_fiscale)) segnala(r, "C09", "valido", r.codice_fiscale);
+    if (p && !r.evento) {
+      const cambi = ANAGRAFICA.filter((c) => (typeof p[c] === "number" && typeof r[c] === "number"
+        ? Math.abs(p[c] - r[c]) > cfg.tolleranza : String(p[c]) !== String(r[c])));
+      if (cambi.length) segnala(r, "C10", cambi.map((c) => `${c} ${fmtValore(p[c])}`).join("; "),
+        cambi.map((c) => `${c} ${fmtValore(r[c])}`).join("; "));
+    }
   }
   const somme = {};
   for (const r of mese) {

@@ -4,15 +4,15 @@
 **Dati:** Clienti e dipendenti inventati, con errori inseriti apposta; minimi e scatti del CCNL reali, con le fonti in [docs/fonti.md](../docs/fonti.md)
 **Strumenti:** Uno script Python, lo stesso controllo in un [foglio di calcolo](../deliverables/foglio_controllo_cedolini.xlsx) e uno [strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) dove i file restano sul computer
 
-> Nove controlli da passare prima di mandare i cedolini al cliente. Ognuno ricalcola un valore dalle regole del contratto e lo confronta con il cedolino: non serve sapere come l'ha calcolato il software paghe. Non è consulenza del lavoro.
+> Dieci controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano ogni voce dalle regole del contratto, o la confrontano con il mese prima e con l'F24: non serve sapere come l'ha calcolata il software paghe. Non è consulenza del lavoro.
 
 ## In sintesi
 
-- **27 segnalazioni: 26 cedolini e 1 F24**, 19 ad alta priorità; cliente A 6, cliente B 15, cliente C 6.
+- **29 segnalazioni: 28 cedolini e 1 F24**, 21 ad alta priorità; cliente A 6, cliente B 16, cliente C 7.
 - **6 dipendenti sono pagati sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Mancano 175,44 € al mese in tutto, più gli arretrati da novembre 2025.
 - **L'F24 del cliente C ha 212,40 € di ritenute in meno** della somma dei cedolini: va integrato prima della scadenza del versamento.
-- **Dal 1° novembre 2026 i minimi salgono:** 3.930,05 € al mese per 122 dipendenti. Il superminimo assorbibile ne copre 1.505,54 € in 46 casi; restano 2.424,51 € al mese, 33.943 € l'anno su 14 mensilità.
-- **I controlli trovano ogni alterazione sopra il centesimo** in 878 prove casuali (sezione 4). Non trovano un errore coerente, come un livello sbagliato in anagrafica.
+- **Dal 1° novembre 2026 i minimi salgono:** 3.927,52 € al mese per 122 dipendenti. Il superminimo assorbibile ne copre 1.478,70 € in 45 casi; restano 2.448,82 € al mese, 34.283 € l'anno su 14 mensilità.
+- **I controlli trovano ogni alterazione sopra il centesimo** in 878 prove casuali (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).
 
 ## 1. Le segnalazioni, cedolino per cedolino
 
@@ -42,9 +42,11 @@
 | C093 | C | C06 | alta | 1.528,21 € | 1.628,21 € | 100,00 € |
 | B090 | B | C07 | media | 1.752,11 € | 2.374,82 € | 622,71 € |
 | C099 | C | C07 | media | 1.467,14 € | 2.045,04 € | 577,90 € |
-| F24 | C | C08 | alta | 6.280,99 € | 6.068,59 € | −212,40 € |
+| F24 | C | C08 | alta | 6.258,18 € | 6.045,78 € | −212,40 € |
 | B058 | B | C09 | alta | valido | `GFZPLG92P01Z321A` | - |
 | C107 | C | C09 | alta | valido | `ZCCGMF94M55Z282A` | - |
+| B070 | B | C10 | alta | superminimo 150 | superminimo 0 | - |
+| C100 | C | C10 | alta | livello 4 | livello 5 | - |
 
 **Cosa fare, per controllo**
 
@@ -59,6 +61,7 @@
 | C07 Variazione del netto | Chiedere al cliente l'evento che giustifica la variazione |
 | C08 Riconciliazione F24 | Integrare la delega prima della scadenza del versamento |
 | C09 Codice fiscale | Correggere il codice fiscale in anagrafica |
+| C10 Anagrafica | Verificare il cambio con il cliente e con i documenti: se non c'è stato, correggere l'anagrafica |
 
 *C07 non dice che il cedolino è sbagliato: dice che il netto è cambiato di oltre il 20% senza un evento registrato. Le assunzioni del mese, gli straordinari dichiarati e il passaggio a part-time non sono segnalati.*
 
@@ -67,8 +70,8 @@
 | Cliente | Ritenute in F24 (1001) | Ritenute nei cedolini | Differenza | Contributi in F24 | Contributi nei cedolini | Differenza |
 |---|---:|---:|---:|---:|---:|---:|
 | A | 4.315,37 € | 4.315,37 € | 0,00 € | 3.049,18 € | 3.049,18 € | 0,00 € |
-| B | 18.013,87 € | 18.013,87 € | 0,00 € | 12.777,48 € | 12.777,48 € | 0,00 € |
-| C | 6.068,59 € | 6.280,99 € | −212,40 € | 4.470,73 € | 4.470,73 € | 0,00 € |
+| B | 17.977,09 € | 17.977,09 € | 0,00 € | 12.763,70 € | 12.763,70 € | 0,00 € |
+| C | 6.045,78 € | 6.258,18 € | −212,40 € | 4.462,18 € | 4.462,18 € | 0,00 € |
 
 *Le ritenute IRPEF dei dati sintetici non sono calcolate con le regole fiscali: servono solo a mostrare la riconciliazione.*
 
@@ -79,14 +82,14 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 | Cliente | Dipendenti | Aumento al mese | Assorbito | Da pagare al mese | Costo annuo (14 mensilità) |
 |---|---:|---:|---:|---:|---:|
 | Cliente A | 18 | 565,41 € | 277,65 € | 287,76 € | 4.029 € |
-| Cliente B | 77 | 2.492,17 € | 921,74 € | 1.570,43 € | 21.986 € |
-| Cliente C | 27 | 872,47 € | 306,15 € | 566,32 € | 7.928 € |
+| Cliente B | 77 | 2.492,17 € | 897,43 € | 1.594,74 € | 22.326 € |
+| Cliente C | 27 | 869,94 € | 303,62 € | 566,32 € | 7.928 € |
 
 *Lordo dipendente, senza i contributi a carico dell'azienda. L'assorbibilità del superminimo dipende dalla lettera di assunzione e dagli accordi aziendali: va verificata dipendente per dipendente prima di comunicarla.*
 
 ## 4. Quanto ci si può fidare dei controlli
 
-**Sugli errori inseriti.** 27 su 27, nessun falso allarme. Dimostra che i controlli fanno quello che dicono, non che troverebbero errori reali: gli errori li ho scelti io.
+**Sugli errori inseriti.** 29 su 29, nessun falso allarme. Dimostra che i controlli fanno quello che dicono, non che troverebbero errori reali: gli errori li ho scelti io.
 
 | Controllo | Errori inseriti | Trovati | Mancati | Falsi allarmi |
 |---|---:|---:|---:|---:|
@@ -99,18 +102,19 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 | C07 Variazione del netto | 2 | 2 | 0 | 0 |
 | C08 Riconciliazione F24 | 1 | 1 | 0 | 0 |
 | C09 Codice fiscale | 2 | 2 | 0 | 0 |
+| C10 Anagrafica | 2 | 2 | 0 | 0 |
 
 **Su alterazioni casuali.** 1.100 prove: una voce a caso di un cedolino corretto, cambiata di un importo a caso. La tabella dice quante volte almeno un controllo se ne accorge.
 
 | Voce alterata | ± 0,005 € | ± 0,02 € | ± 1,00 € | ± 10,00 € | ± 100,00 € |
 |---|---:|---:|---:|---:|---:|
-| tabellare | 9% | 100% | 100% | 100% | 100% |
-| scatti | 13% | 100% | 100% | 100% | 100% |
+| tabellare | 14% | 100% | 100% | 100% | 100% |
+| scatti | 12% | 100% | 100% | 100% | 100% |
 | superminimo | 0% | 100% | 100% | 100% | 100% |
-| straordinari | 15% | 100% | 100% | 100% | 100% |
+| straordinari | 14% | 100% | 100% | 100% | 100% |
 | lordo | 0% | 100% | 100% | 100% | 100% |
-| contributi inps | 52% | 100% | 100% | 100% | 100% |
-| irpef | 42% | 100% | 100% | 100% | 100% |
+| contributi inps | 0% | 100% | 100% | 100% | 100% |
+| irpef | 16% | 100% | 100% | 100% | 100% |
 | altre trattenute | 0% | 100% | 100% | 100% | 100% |
 | netto | 0% | 100% | 100% | 100% | 100% |
 | quota tfr | 0% | 100% | 100% | 100% | 100% |
@@ -118,7 +122,7 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 
 *Sotto la tolleranza di un centesimo l'alterazione si confonde con un arrotondamento, ed è giusto che passi. Sopra, la trovano tutte: 100%. Per le ferie l'importo è in giorni.*
 
-**Il limite.** Un errore coerente passa. Il dipendente A010 è assunto al 4° livello: inserito al 5° e ricalcolato da capo, il cedolino torna in ogni voce e prende 61,27 € netti in meno al mese, senza che nessun controllo lo segnali. Per questi errori serve un confronto con i documenti del cliente: lettera di assunzione, mansioni, accordi.
+**Il limite, e come C10 lo restringe.** Un errore coerente passa i controlli aritmetici: il dipendente A010 è assunto al 4° livello; inserito al 5° e ricalcolato da capo, il cedolino torna in ogni voce e prende 61,27 € netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima, senza un evento che lo spieghi, lo trova C10: i due errori di anagrafica inseriti (un livello, un superminimo azzerato) sono segnalati. Resta invisibile solo se è sbagliato fin dall'assunzione: lì serve il confronto con i documenti del cliente, lettera di assunzione e mansioni.
 
 ## 5. Come lo userei in un team payroll
 

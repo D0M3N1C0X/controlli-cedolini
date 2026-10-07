@@ -18,6 +18,7 @@ COSA_FARE = {
     "C07": "Chiedere al cliente l'evento che giustifica la variazione",
     "C08": "Integrare la delega prima della scadenza del versamento",
     "C09": "Correggere il codice fiscale in anagrafica",
+    "C10": "Verificare il cambio con il cliente e con i documenti: se non c'è stato, correggere l'anagrafica",
 }
 
 
@@ -75,8 +76,9 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add("**Strumenti:** Uno script Python, lo stesso controllo in un [foglio di calcolo](../deliverables/foglio_controllo_cedolini.xlsx) "
         "e uno [strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) dove i file restano sul computer")
     add("")
-    add("> Nove controlli da passare prima di mandare i cedolini al cliente. Ognuno ricalcola un valore dalle regole "
-        "del contratto e lo confronta con il cedolino: non serve sapere come l'ha calcolato il software paghe. "
+    add("> Dieci controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano "
+        "ogni voce dalle regole del contratto, o la confrontano con il mese prima e con l'F24: non serve sapere come "
+        "l'ha calcolata il software paghe. "
         "Non è consulenza del lavoro.")
     add("")
     add("## In sintesi")
@@ -91,7 +93,7 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
         f"dipendenti. Il superminimo assorbibile ne copre {euro(f['nov_assorbito'])} in {f['nov_assorbimenti']} casi; "
         f"restano {euro(f['nov_da_pagare'])} al mese, {euro(f['nov_annuo'], 0)} l'anno su 14 mensilità.")
     add(f"- **I controlli trovano ogni alterazione sopra il centesimo** in {num(f['prove_sopra'], 0)} prove casuali "
-        f"(sezione 4). Non trovano un errore coerente, come un livello sbagliato in anagrafica.")
+        f"(sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).")
     add("")
 
     add("## 1. Le segnalazioni, cedolino per cedolino")
@@ -100,6 +102,8 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     for t in an.itertuples(index=False):
         if t.controllo == "C09":
             atteso, trovato, diff = "valido", f"`{t.trovato}`", "-"
+        elif t.controllo == "C10":
+            atteso, trovato, diff = t.atteso, t.trovato, "-"
         elif t.controllo == "C05":
             atteso, trovato, diff = f"{num(t.atteso, 2)} gg", f"{num(t.trovato, 2)} gg", f"{num(t.differenza, 2)} gg"
         else:
@@ -164,10 +168,12 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
         f"Sopra, la trovano tutte: {pct(f['trovate_sopra'])}. Per le ferie l'importo è in giorni.*")
     add("")
     c = f["coerente"]
-    add(f"**Il limite.** Un errore coerente passa. Il dipendente {c['matricola']} è assunto al 4° livello: inserito al "
-        f"5° e ricalcolato da capo, il cedolino torna in ogni voce e prende {euro(c['netto_giusto'] - c['netto_pagato'])} "
-        f"netti in meno al mese, senza che nessun controllo lo segnali. Per questi errori serve un confronto con i "
-        f"documenti del cliente: lettera di assunzione, mansioni, accordi.")
+    add(f"**Il limite, e come C10 lo restringe.** Un errore coerente passa i controlli aritmetici: il dipendente "
+        f"{c['matricola']} è assunto al 4° livello; inserito al 5° e ricalcolato da capo, il cedolino torna in ogni voce e "
+        f"prende {euro(c['netto_giusto'] - c['netto_pagato'])} netti in meno al mese. Se l'errore nasce da un cambio "
+        f"rispetto al mese prima, senza un evento che lo spieghi, lo trova C10: i due errori di anagrafica inseriti "
+        f"(un livello, un superminimo azzerato) sono segnalati. Resta invisibile solo se è sbagliato fin "
+        f"dall'assunzione: lì serve il confronto con i documenti del cliente, lettera di assunzione e mansioni.")
     add("")
 
     add("## 5. Come lo userei in un team payroll")

@@ -25,9 +25,11 @@ CONTROLLI = {
     "C07": ("Variazione del netto", "Netto oltre il 20% sopra o sotto il mese prima, senza un evento che lo spieghi", "media"),
     "C08": ("Riconciliazione F24", "Ritenute o contributi in F24 diversi dalla somma dei cedolini del cliente", "alta"),
     "C09": ("Codice fiscale", "Carattere di controllo non valido", "alta"),
+    "C10": ("Anagrafica", "Livello, part-time, superminimo o data di assunzione diversi dal mese prima, senza un evento", "alta"),
 }
 TIPO_CONTROLLO = {"minimo": "C01", "scatto": "C02", "inps": "C03", "tfr": "C04", "ferie": "C05", "netto": "C06",
-                  "variazione": "C07", "f24": "C08", "codice_fiscale": "C09"}
+                  "variazione": "C07", "f24": "C08", "codice_fiscale": "C09",
+                  "anagrafica": "C10"}
 
 
 def carica() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -55,8 +57,22 @@ def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
     return a
 
 
+ANAGRAFICA = ["livello", "part_time", "superminimo", "data_assunzione"]
+
+
+def _diverso(a, b) -> bool:
+    if isinstance(a, (int, float)) and isinstance(b, (int, float)):
+        return abs(a - b) > C.TOLLERANZA
+    return str(a) != str(b)
+
+
+def _fmt(v) -> str:
+    return f"{v:g}" if isinstance(v, float) else str(v)
+
+
 def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
     a = attesi(m, prec)
+    prev_by = {r["matricola"]: r for r in prec.to_dict("records")}
     out = []
 
     def segnala(i, codice, atteso, trovato):
@@ -80,6 +96,12 @@ def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.D
             segnala(i, "C07", float(a.loc[i, "netto_prec"]), float(m.loc[i, "netto"]))
         if not codice_fiscale.valido(m.loc[i, "codice_fiscale"]):
             segnala(i, "C09", "valido", m.loc[i, "codice_fiscale"])
+        p = prev_by.get(m.loc[i, "matricola"])
+        if p is not None and m.loc[i, "evento"] == "":
+            cambi = [(c, p[c], m.loc[i, c]) for c in ANAGRAFICA if _diverso(p[c], m.loc[i, c])]
+            if cambi:
+                segnala(i, "C10", "; ".join(f"{c} {_fmt(a)}" for c, a, _ in cambi),
+                        "; ".join(f"{c} {_fmt(b)}" for c, _, b in cambi))
 
     somme = m.groupby("cliente")[["irpef", "contributi_inps"]].sum().round(2)
     rec = f24.set_index("cliente").join(somme)

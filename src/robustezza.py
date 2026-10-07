@@ -62,8 +62,8 @@ if __name__ == "__main__":
 
 
 def errore_coerente() -> dict:
-    """Il limite dichiarato: un livello sbagliato in anagrafica, con il cedolino ricalcolato in modo
-    coerente, passa tutti i controlli aritmetici. Restituisce cosa vedono i controlli."""
+    """Il limite dichiarato: un livello sbagliato in anagrafica fin dall'assunzione, con il cedolino
+    ricalcolato in modo coerente, passa tutti i controlli; se cambia da un mese all'altro lo vede C10."""
     import genera
     m, prec, f24 = controlli.carica()
     err = pd.read_csv(C.ERRORI, keep_default_na=False)
@@ -76,6 +76,9 @@ def errore_coerente() -> dict:
     x = m.copy()
     for k, v in r.items():
         x.loc[i, k] = v
-    riga, _ = controlli.esegui(x.loc[[i]].reset_index(drop=True), prec, f24.iloc[0:0])
+    # errato fin dall'assunzione: anche il mese prima riporta il livello sbagliato
+    p = prec.copy()
+    p.loc[p["matricola"] == m.loc[i, "matricola"], "livello"] = "5"
+    riga, _ = controlli.esegui(x.loc[[i]].reset_index(drop=True), p, f24.iloc[0:0])
     return {"matricola": m.loc[i, "matricola"], "netto_giusto": float(m.loc[i, "netto"]),
             "netto_pagato": float(x.loc[i, "netto"]), "segnalazioni": list(riga["controllo"])}

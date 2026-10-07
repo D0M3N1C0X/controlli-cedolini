@@ -187,6 +187,21 @@ def main() -> None:
         S.loc[i, "codice_fiscale"] = cf[:15] + ("A" if cf[15] != "A" else "B")
         registra(i, "codice_fiscale", "carattere di controllo errato")
 
+    # anagrafica cambiata senza evento, cedolino ricalcolato in modo coerente: solo il confronto con il mese
+    # prima lo vede
+    i = prendi(lambda r: libero(r) and r["livello"] == "4")
+    d = a.set_index("matricola").loc[S.loc[i, "matricola"]].copy()
+    d["matricola"], d["livello"] = S.loc[i, "matricola"], "5"
+    r = cedolino(d, C.MESE, rng, ago[i]["ferie_residuo"], ferie_godute=S.loc[i, "ferie_godute"])
+    for k in ("livello", "tabellare", "scatti", "lordo", "contributi_inps", "imponibile_irpef", "irpef",
+              "altre_trattenute", "netto", "quota_tfr"):
+        S.loc[i, k] = r[k]
+    registra(i, "anagrafica", "livello passato da 4 a 5 senza evento: il cedolino torna, ma è più basso")
+    i = prendi(lambda r: libero(r) and r["superminimo"] > 0)
+    S.loc[i, "superminimo"] = 0.0
+    S.loc[i] = pd.Series(ricalcola(S.loc[i].to_dict()))
+    registra(i, "anagrafica", "superminimo azzerato senza evento: il cedolino torna, ma è più basso")
+
     S = pd.concat([S, pd.DataFrame(nuovi)], ignore_index=True)
     ced = pd.concat([pd.DataFrame(ago), S], ignore_index=True)
     for col in ("scatti_n",):

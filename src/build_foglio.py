@@ -185,25 +185,32 @@ class Foglio:
 
     def agosto(self, ws):
         p = self.o["precedente"]
-        title(ws, "Mese precedente: i cedolini del mese prima", "Servono il netto e il residuo ferie, per i controlli C05 e C07. Nei dati di esempio: agosto 2026.")
-        widths(ws, {"A": 12, "B": 9, "C": 14, "D": 14})
-        header(ws, 4, ["Matricola", "Cliente", "Netto", "Residuo ferie"], height=20)
+        title(ws, "Mese precedente: i cedolini del mese prima", "Netto, residuo ferie e anagrafica, per i controlli C05, C07 e C10. Nei dati di esempio: agosto 2026.")
+        widths(ws, {"A": 12, "B": 9, "C": 14, "D": 14, "E": 9, "F": 10, "G": 12, "H": 14})
+        header(ws, 4, ["Matricola", "Cliente", "Netto", "Residuo ferie", "Livello", "Part-time", "Superminimo",
+                       "Data assunzione"], height=20)
         first = 5
         for i, t in enumerate(p.itertuples(index=False), start=first):
             put(ws, f"A{i}", t.matricola, color=BLUE)
             put(ws, f"B{i}", t.cliente, color=BLUE)
             put(ws, f"C{i}", float(t.netto), color=BLUE, fmt=NUM2)
             put(ws, f"D{i}", float(t.ferie_residuo), color=BLUE, fmt=NUM4)
+            put(ws, f"E{i}", str(t.livello), color=BLUE)
+            put(ws, f"F{i}", float(t.part_time), color=BLUE)
+            put(ws, f"G{i}", float(t.superminimo), color=BLUE, fmt=NUM2)
+            put(ws, f"H{i}", date.fromisoformat(t.data_assunzione), color=BLUE, fmt="DD/MM/YYYY")
         last = first + RIGHE - 1                 # spazio per incollare più righe
         self.R.update({"ag_m": f"'Mese precedente'!$A${first}:$A${last}", "ag_n": f"'Mese precedente'!$C${first}:$C${last}",
-                       "ag_f": f"'Mese precedente'!$D${first}:$D${last}"})
+                       "ag_f": f"'Mese precedente'!$D${first}:$D${last}",
+                       **{k: f"'Mese precedente'!${c}${first}:${c}${last}" for k, c in
+                          (("ag_liv", "E"), ("ag_pt", "F"), ("ag_sup", "G"), ("ag_dat", "H"))}})
         ws.freeze_panes = "A5"
 
     # ---- The checks ------------------------------------------------------------------------------
     def settembre(self, ws):
         R_, m, a = self.R, self.o["mese"], self.o["attesi"]
         title(ws, "Mese: cedolini e controlli (nei dati di esempio, settembre 2026)",
-              f"Colonne A-W: i dati del software paghe (blu), fino a {RIGHE} righe. Colonne X-AS: valori attesi ed esiti, in formula.")
+              f"Colonne A-W: i dati del software paghe (blu), fino a {RIGHE} righe. Colonne X-AT: valori attesi ed esiti, in formula.")
         inputs = ["matricola", "cliente", "codice_fiscale", "livello", "data_assunzione", "part_time", "evento",
                   "superminimo_assorbibile", "tabellare", "scatti_n", "scatti", "superminimo", "straordinari", "lordo",
                   "contributi_inps", "imponibile_irpef", "irpef", "altre_trattenute", "netto", "quota_tfr",
@@ -213,7 +220,7 @@ class Foglio:
             "TFR atteso", "Residuo mese prima", "Residuo atteso", "Lordo atteso", "Netto atteso", "Netto mese prima",
             "Variazione", "Controllo CF",
             "C01 Minimo", "C02 Scatti", "C03 INPS", "C04 TFR", "C05 Ferie", "C06 Quadratura", "C07 Variazione",
-            "C09 Cod. fiscale", "Errori"]
+            "C09 Cod. fiscale", "C10 Anagrafica", "Errori"]
         header(ws, 4, heads, height=44)
         widths(ws, {**{col(k): 11 for k in range(1, len(heads) + 1)}, "C": 19, "G": 14})
         first = 5
@@ -264,22 +271,27 @@ class Foglio:
             put(ws, f"AP{i}", g(f'IF(OR(ABS(N{i}-AF{i})>{tol},ABS(S{i}-AG{i})>{tol}),"ERRORE","OK")'))
             put(ws, f"AQ{i}", g(f'IF(AI{i}="","OK",IF(AND(ABS(AI{i})>{R_["soglia"]},G{i}=""),"ERRORE","OK"))'))
             put(ws, f"AR{i}", g(f'IF(AND(LEN(C{i})=16,RIGHT(C{i},1)=AJ{i}),"OK","ERRORE")'))
-            put(ws, f"AS{i}", g(f'COUNTIF(AK{i}:AR{i},"ERRORE")'), bold=True)
+            ag = lambda rng: f"INDEX({R_[rng]},MATCH(A{i},{R_['ag_m']},0))"
+            cambio = (f"OR({ag('ag_liv')}&\"\"<>D{i}&\"\",ABS({ag('ag_pt')}-F{i})>{tol},"
+                      f"ABS({ag('ag_sup')}-L{i})>{tol},{ag('ag_dat')}<>E{i})")
+            put(ws, f"AS{i}", g(f'IF(ISNA(MATCH(A{i},{R_["ag_m"]},0)),"OK",IF(AND(G{i}="",{cambio}),"ERRORE","OK"))'))
+            put(ws, f"AT{i}", g(f'COUNTIF(AK{i}:AS{i},"ERRORE")'), bold=True)
         for i, t in enumerate(m.itertuples(index=False), start=first):
             k = i - first
             if k % 6 == 0:
                 for letter, name in (("X", "tabellare"), ("Z", "scatti_n"), ("AA", "scatti"), ("AB", "contributi_inps"),
                                      ("AC", "quota_tfr"), ("AE", "ferie_residuo"), ("AG", "netto")):
                     self.check("Mese", f"{t.matricola} {name} atteso", a.loc[k, name], f"Mese!{letter}{i}")
-        esito_rule(ws, f"AK{first}:AR{last}")
+        esito_rule(ws, f"AK{first}:AS{last}")
         E = lambda letter: f"Mese!${letter}${first}:${letter}${last}"
-        self.R.update({"s_cli": E("B"), "s_m": E("A"), "s_irpef": E("Q"), "s_inps": E("O"), "s_err": E("AS"),
+        self.R.update({"s_cli": E("B"), "s_m": E("A"), "s_irpef": E("Q"), "s_inps": E("O"), "s_err": E("AT"),
                        **{f"s_{c}": E(letter) for c, letter in zip(
-                           ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C09"],
-                           ["AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR"])}})
+                           ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C09", "C10"],
+                           ["AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS"])}})
         # each Python finding must be an ERRORE in the sheet, and every other row OK
         an = self.o["anomalie"]
-        colonna = {"C01": "AK", "C02": "AL", "C03": "AM", "C04": "AN", "C05": "AO", "C06": "AP", "C07": "AQ", "C09": "AR"}
+        colonna = {"C01": "AK", "C02": "AL", "C03": "AM", "C04": "AN", "C05": "AO", "C06": "AP", "C07": "AQ", "C09": "AR",
+                   "C10": "AS"}
         trovate = set(zip(an["controllo"], an["matricola"]))
         for k, t in enumerate(m.itertuples(index=False)):
             for codice, letter in colonna.items():
@@ -287,7 +299,7 @@ class Foglio:
                     esito = "ERRORE" if (codice, t.matricola) in trovate else "OK"
                     self.check("Mese", f"{t.matricola} {codice}", esito, f"Mese!{letter}{first + k}")
         ws.freeze_panes = "D5"
-        ws.auto_filter.ref = f"A4:AS{last}"
+        ws.auto_filter.ref = f"A4:AT{last}"
 
     def f24(self, ws):
         R_, rec = self.R, self.o["riconciliazione_f24"]
@@ -416,7 +428,7 @@ class Foglio:
     def leggimi(self, ws, names):
         widths(ws, {"A": 3, "B": 22, "C": 100})
         put(ws, "B2", "Controlli cedolini", bold=True, size=18)
-        put(ws, "B3", "Nove controlli sui cedolini del mese, prima dell'invio al cliente: CCNL Terziario Confcommercio",
+        put(ws, "B3", "Dieci controlli sui cedolini del mese, prima dell'invio al cliente: CCNL Terziario Confcommercio",
             color=MUTED, size=12)
         put(ws, "B5", "Come si usa", bold=True, size=11)
         for i, text in enumerate([

@@ -39,3 +39,4 @@ Ogni regola che i controlli applicano, da dove viene e quanto è stata verificat
 | S03 | Rateo TFR mensile = retribuzione ordinaria × 14 / 13,5 / 12 | Accantonamento mensile che include tredicesima e quattordicesima |
 | S04 | Scatti valorizzati al livello attuale | Il CCNL non rivaluta gli scatti già maturati con il passaggio di livello: chi ha cambiato livello va controllato a mano |
 | S05 | Arrotondamento al centesimo come ROUND di Excel, metà per eccesso | Python e foglio di calcolo devono dare lo stesso risultato |
+| S06 | C10 confronta livello, part-time, superminimo e data di assunzione con il mese prima; un cambio senza evento è una segnalazione | Un errore coerente spesso nasce da un cambio di anagrafica: il cedolino torna, ma il dato è cambiato senza motivo |

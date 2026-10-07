@@ -63,8 +63,8 @@ def test_un_cedolino_incollato_viene_controllato(foglio, valori, tmp_path):
     v = check_workbook.values_from_formulas(nuovo)
     S = lambda ref: v[("MESE", ref)]
     assert S(f"AK{r}") == "ERRORE"                       # C01: tabellare fermo a marzo 2025
-    assert S(f"AS{r}") == 1
+    assert S(f"AT{r}") == 1
     assert v[("NOVEMBRE 2026", f"A{r}")] == "Z999" and v[("NOVEMBRE 2026", f"G{r}")] == 35.0
     assert v[("RIEPILOGO", "D5")] == valori[("RIEPILOGO", "D5")] + 1    # C01, cliente B
     vuota = r + 1
-    assert S(f"AK{vuota}") in ("", None) and S(f"AS{vuota}") in ("", None)
+    assert S(f"AK{vuota}") in ("", None) and S(f"AT{vuota}") in ("", None)

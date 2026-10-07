@@ -23,6 +23,8 @@ A001,A,C06,Quadratura,1310.02,1347.52,37.50,alta
 C093,C,C06,Quadratura,1528.21,1628.21,100.00,alta
 B090,B,C07,Variazione del netto,1752.11,2374.82,622.71,media
 C099,C,C07,Variazione del netto,1467.14,2045.04,577.90,media
-,C,C08,Riconciliazione F24,6280.99,6068.59,-212.40,alta
+,C,C08,Riconciliazione F24,6258.18,6045.78,-212.40,alta
 B058,B,C09,Codice fiscale,valido,GFZPLG92P01Z321A,,alta
 C107,C,C09,Codice fiscale,valido,ZCCGMF94M55Z282A,,alta
+B070,B,C10,Anagrafica,superminimo 150,superminimo 0,,alta
+C100,C,C10,Anagrafica,livello 4,livello 5,,alta

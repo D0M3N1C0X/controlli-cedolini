@@ -1,6 +1,6 @@
 # Controlli cedolini
 
-Nove controlli da passare sui cedolini del mese **prima di mandarli al cliente**: minimi e scatti del
+Dieci controlli da passare sui cedolini del mese **prima di mandarli al cliente**: minimi e scatti del
 CCNL Terziario, contributi, TFR, ferie, quadratura, variazioni anomale, F24 e codice fiscale. In più,
 quanto costa a ogni cliente la **tranche CCNL del 1° novembre 2026** e quanto ne assorbono i
 superminimi. Gli stessi controlli esistono in Python e in un **foglio di calcolo con formule vive**,
@@ -23,8 +23,8 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 
 | | |
 |---|---|
-| **27 segnalazioni su 122 cedolini e 3 F24**, 19 ad alta priorità. Ognuna con valore atteso, valore trovato e cosa fare. | **6 dipendenti sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Sono 175,44 € al mese, più gli arretrati da novembre 2025. |
-| **Un F24 con 212,40 € di ritenute in meno** della somma dei cedolini del cliente. | **Novembre 2026:** 3.930,05 € al mese di aumenti dei minimi; i superminimi assorbibili ne coprono 1.505,54 €, restano **2.424,51 € al mese**. |
+| **29 segnalazioni su 122 cedolini e 3 F24**, 21 ad alta priorità. Ognuna con valore atteso, valore trovato e cosa fare. | **6 dipendenti sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Sono 175,44 € al mese, più gli arretrati da novembre 2025. |
+| **Un F24 con 212,40 € di ritenute in meno** della somma dei cedolini del cliente. | **Novembre 2026:** 3.927,52 € al mese di aumenti dei minimi; i superminimi assorbibili ne coprono 1.478,70 €, restano **2.448,82 € al mese**. |
 
 ## I controlli
 
@@ -39,22 +39,25 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 | C07 | Variazione del netto | Oltre il 20% sul mese prima senza un evento registrato (assunzione, straordinari, part-time) |
 | C08 | Riconciliazione F24 | Ritenute (1001) e contributi in delega = somma dei cedolini del cliente |
 | C09 | Codice fiscale | Carattere di controllo |
+| C10 | Anagrafica | Livello, part-time, superminimo o data di assunzione diversi dal mese prima senza un evento: l'errore coerente che nasce da un cambio |
 
-Ogni controllo **ricalcola il valore dalle regole del contratto** e lo confronta con il cedolino: non
-serve sapere come l'ha calcolato il software paghe.
+I controlli **ricalcolano ogni voce dalle regole del contratto**, o la confrontano con il mese prima e con
+l'F24: non serve sapere come l'ha calcolata il software paghe.
 
 ## Quanto ci si può fidare
 
-- **Sugli errori inseriti:** 27 trovati su 27, nessun falso allarme, e nessuna segnalazione sui casi
+- **Sugli errori inseriti:** 29 trovati su 29, nessun falso allarme, e nessuna segnalazione sui casi
   legittimi (assunzioni del mese, straordinari dichiarati, passaggio a part-time). Dimostra che i
   controlli fanno quello che dicono, non che troverebbero errori reali: gli errori li ho scelti io.
 - **Su 1.100 alterazioni casuali:** una voce qualsiasi di un cedolino corretto, cambiata di un importo
   a caso. Sopra il centesimo di tolleranza le trovano tutte.
-- **Il limite:** un errore *coerente* passa. Un dipendente di 4° livello inserito al 5°, con il cedolino
-  ricalcolato da capo, torna in ogni voce e prende 61,27 € netti in meno al mese. Per questo serve il
-  confronto con i documenti del cliente; il test `test_limite_dichiarato_errore_coerente` lo tiene vero.
-- **Tre motori, una risposta:** il foglio di calcolo è confrontato con Python su 417 valori e ricalcolato
-  con LibreOffice nella CI; lo strumento nel browser è confrontato con Python su 1.690 valori.
+- **Il limite, ristretto da C10:** un errore *coerente* passa i controlli aritmetici. Un dipendente di
+  4° livello inserito al 5°, con il cedolino ricalcolato da capo, torna in ogni voce e prende 61,27 €
+  netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima lo trova C10; resta
+  invisibile solo se è sbagliato fin dall'assunzione, e lì serve il confronto con i documenti del
+  cliente. Il test `test_limite_dichiarato_errore_coerente` tiene vero il limite.
+- **Tre motori, una risposta:** il foglio di calcolo è confrontato con Python su 435 valori e ricalcolato
+  con LibreOffice nella CI; lo strumento nel browser è confrontato con Python su 1.807 valori.
 
 ## Cosa c'è
 
@@ -72,7 +75,7 @@ controllare e mese prima) e, se vuoi, quello degli F24. I controlli girano nella
 computer**. Accetta l'esportazione di Excel in italiano (punto e virgola, virgola decimale, date gg/mm/aaaa); i
 modelli delle colonne sono nella pagina. Con "Usa i dati di esempio" si vede subito il risultato.
 
-Il JavaScript dello strumento è verificato contro Python a ogni modifica: 1.690 confronti su nove casi, comprese le
+Il JavaScript dello strumento è verificato contro Python a ogni modifica: 1.807 confronti su nove casi, comprese le
 alterazioni di mezzo centesimo e il formato italiano.
 
 ## Usare il foglio, senza Python
@@ -110,7 +113,7 @@ pytest
 ├── src/
 │   ├── config.py            parametri e soglie
 │   ├── regole.py            le regole del contratto, scritte una volta
-│   ├── controlli.py         i nove controlli, la tranche di novembre, la valutazione
+│   ├── controlli.py         i dieci controlli, la tranche di novembre, la valutazione
 │   ├── robustezza.py        alterazioni casuali e l'errore coerente
 │   ├── build_foglio.py      il foglio di calcolo con le formule
 │   ├── build_rapporto.py    il rapporto
@@ -132,11 +135,12 @@ pytest
 
 ## In English
 
-Nine pre-release checks on Italian payslips under the retail and services collective agreement
+Ten pre-release checks on Italian payslips under the retail and services collective agreement
 (CCNL Terziario): contractual minimums, seniority steps, social security, severance accrual, holiday
-balances, payslip arithmetic, unexplained swings, tax-payment reconciliation and tax-code validity, plus
-the cost of the November 2026 pay increase per client. Built twice, in Python and as a live-formula
-spreadsheet that opens in Google Sheets, reconciled on 417 values.
+balances, payslip arithmetic, unexplained swings, tax-payment reconciliation, tax-code validity and
+undeclared master-data changes, plus the cost of the November 2026 pay increase per client. Built three
+times, all giving the same results: in Python, as a live-formula spreadsheet (reconciled on 435 values)
+and as a browser tool where payslip files never leave the computer (checked on 1,807 values).
 
 ## Autore
 
