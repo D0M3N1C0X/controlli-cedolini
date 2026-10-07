@@ -60,7 +60,8 @@ l'F24: non serve sapere come l'ha calcolata il software paghe.
   invisibile solo se è sbagliato fin dall'assunzione, e lì serve il confronto con i documenti del
   cliente. Il test `test_limite_dichiarato_errore_coerente` tiene vero il limite.
 - **Tre motori, una risposta:** il foglio di calcolo è confrontato con Python su 435 valori e ricalcolato
-  con LibreOffice nella CI; lo strumento nel browser è confrontato con Python su 1.807 valori.
+  con LibreOffice nella CI; lo strumento nel browser è confrontato con Python su 1.807 valori. La verifica del
+  foglio usa [excel-twin](https://github.com/D0M3N1C0X/excel-twin), una piccola libreria condivisa dal portfolio.
 
 ## Cosa c'è
 
