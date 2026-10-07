@@ -7,6 +7,7 @@ import pandas as pd
 import config as C
 import controlli
 import robustezza
+import statistica
 
 COSA_FARE = {
     "C01": "Aggiornare il tabellare al minimo in vigore e pagare la differenza dei mesi arretrati",
@@ -166,6 +167,25 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add("")
     add(f"*Sotto la tolleranza di un centesimo l'alterazione si confonde con un arrotondamento, ed è giusto che passi. "
         f"Sopra, la trovano tutte: {pct(f['trovate_sopra'])}. Per le ferie l'importo è in giorni.*")
+    add("")
+    sv = statistica.valutazione()
+    st = sv[sv["metodo"].str.startswith("Statistico")]
+    rg = sv[sv["metodo"].str.startswith("Regole")].iloc[0]
+    add("**Perché regole e non un modello statistico.** Un rilevatore che non sa nulla del contratto confronta ogni "
+        "cedolino con gli altri su quattro rapporti (contributi su lordo, TFR su retribuzione ordinaria, netto su lordo, "
+        "netto sul mese prima) e segnala chi si allontana dalla mediana. Sugli stessi errori:")
+    add("")
+    add(table(["Metodo", "Cedolini sbagliati", "Trovati", "Falsi allarmi", "Precisione"],
+              [[r.metodo, r.errori, r.trovati, r.falsi_allarmi, pct(r.precisione)] for r in sv.itertuples(index=False)],
+              "lrrrr"))
+    add("")
+    pt = statistica.per_tipo()
+    nomi = {"minimo": "minimi", "scatto": "scatti", "inps": "contributi", "tfr": "TFR", "ferie": "ferie", "netto": "netto",
+            "variazione": "variazioni del netto", "codice_fiscale": "codice fiscale", "anagrafica": "anagrafica"}
+    visti = ", ".join(nomi[t] for t in pt.loc[pt["trovati_statistico"] > 0, "tipo"])
+    add(f"*Il rilevatore vede solo gli errori che spostano un rapporto ({visti}); minimi, scatti, ferie, codice fiscale "
+        f"e anagrafica richiedono di conoscere il contratto, e lì non trova nulla. Su un dominio scritto in regole, le "
+        f"regole vincono; la statistica serve dove una regola non c'è.*")
     add("")
     c = f["coerente"]
     add(f"**Il limite, e come C10 lo restringe.** Un errore coerente passa i controlli aritmetici: il dipendente "

@@ -51,6 +51,9 @@ l'F24: non serve sapere come l'ha calcolata il software paghe.
   controlli fanno quello che dicono, non che troverebbero errori reali: gli errori li ho scelti io.
 - **Su 1.100 alterazioni casuali:** una voce qualsiasi di un cedolino corretto, cambiata di un importo
   a caso. Sopra il centesimo di tolleranza le trovano tutte.
+- **Regole contro statistica:** un rilevatore di anomalie che non conosce il contratto trova 9 cedolini sbagliati
+  su 28, con 8 falsi allarmi; le regole 28 su 28, con nessuno. Vede solo gli errori che spostano un rapporto
+  (contributi, TFR, variazione del netto), non minimi, scatti o anagrafica.
 - **Il limite, ristretto da C10:** un errore *coerente* passa i controlli aritmetici. Un dipendente di
   4° livello inserito al 5°, con il cedolino ricalcolato da capo, torna in ogni voce e prende 61,27 €
   netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima lo trova C10; resta
@@ -115,6 +118,7 @@ pytest
 │   ├── regole.py            le regole del contratto, scritte una volta
 │   ├── controlli.py         i dieci controlli, la tranche di novembre, la valutazione
 │   ├── robustezza.py        alterazioni casuali e l'errore coerente
+│   ├── statistica.py        regole contro un rilevatore statistico
 │   ├── build_foglio.py      il foglio di calcolo con le formule
 │   ├── build_rapporto.py    il rapporto
 │   ├── genera.py            i dati sintetici

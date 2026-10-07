@@ -75,3 +75,15 @@ def test_alterazioni_sopra_la_tolleranza_sempre_trovate():
 def test_limite_dichiarato_errore_coerente():
     c = robustezza.errore_coerente()
     assert c["segnalazioni"] == [] and c["netto_pagato"] < c["netto_giusto"]
+
+
+def test_le_regole_battono_il_rilevatore_statistico():
+    import statistica
+    v = statistica.valutazione()
+    regole = v[v["metodo"].str.startswith("Regole")].iloc[0]
+    stat = v[v["metodo"].str.startswith("Statistico")]
+    assert regole["richiamo"] == 1.0 and regole["falsi_allarmi"] == 0
+    assert (stat["richiamo"] < 0.5).all() and (stat["falsi_allarmi"] > 0).all()
+    pt = statistica.per_tipo().set_index("tipo")
+    assert pt.loc["inps", "trovati_statistico"] == pt.loc["inps", "errori"]        # vede i rapporti
+    assert pt.loc["minimo", "trovati_statistico"] == 0                             # non vede il contratto

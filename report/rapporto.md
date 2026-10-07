@@ -122,6 +122,17 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 
 *Sotto la tolleranza di un centesimo l'alterazione si confonde con un arrotondamento, ed è giusto che passi. Sopra, la trovano tutte: 100%. Per le ferie l'importo è in giorni.*
 
+**Perché regole e non un modello statistico.** Un rilevatore che non sa nulla del contratto confronta ogni cedolino con gli altri su quattro rapporti (contributi su lordo, TFR su retribuzione ordinaria, netto su lordo, netto sul mese prima) e segnala chi si allontana dalla mediana. Sugli stessi errori:
+
+| Metodo | Cedolini sbagliati | Trovati | Falsi allarmi | Precisione |
+|---|---:|---:|---:|---:|
+| Statistico, z oltre 3 | 28 | 10 | 11 | 48% |
+| Statistico, z oltre 3,5 | 28 | 9 | 8 | 53% |
+| Statistico, z oltre 5 | 28 | 9 | 5 | 64% |
+| Regole (C01-C10) | 28 | 28 | 0 | 100% |
+
+*Il rilevatore vede solo gli errori che spostano un rapporto (contributi, TFR, variazioni del netto); minimi, scatti, ferie, codice fiscale e anagrafica richiedono di conoscere il contratto, e lì non trova nulla. Su un dominio scritto in regole, le regole vincono; la statistica serve dove una regola non c'è.*
+
 **Il limite, e come C10 lo restringe.** Un errore coerente passa i controlli aritmetici: il dipendente A010 è assunto al 4° livello; inserito al 5° e ricalcolato da capo, il cedolino torna in ogni voce e prende 61,27 € netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima, senza un evento che lo spieghi, lo trova C10: i due errori di anagrafica inseriti (un livello, un superminimo azzerato) sono segnalati. Resta invisibile solo se è sbagliato fin dall'assunzione: lì serve il confronto con i documenti del cliente, lettera di assunzione e mansioni.
 
 ## 5. Come lo userei in un team payroll
