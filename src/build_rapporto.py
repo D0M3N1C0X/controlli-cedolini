@@ -72,8 +72,8 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
         f"settembre confrontati con quelli di agosto e con gli F24")
     add("**Dati:** Clienti e dipendenti inventati, con errori inseriti apposta; minimi e scatti del CCNL reali, con le "
         "fonti in [docs/fonti.md](../docs/fonti.md)")
-    add("**Strumenti:** Uno script Python e lo stesso controllo in un [foglio di calcolo](../deliverables/foglio_controllo_cedolini.xlsx) "
-        "che si apre anche in Google Sheets")
+    add("**Strumenti:** Uno script Python, lo stesso controllo in un [foglio di calcolo](../deliverables/foglio_controllo_cedolini.xlsx) "
+        "e uno [strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) dove i file restano sul computer")
     add("")
     add("> Nove controlli da passare prima di mandare i cedolini al cliente. Ognuno ricalcola un valore dalle regole "
         "del contratto e lo confronta con il cedolino: non serve sapere come l'ha calcolato il software paghe. "

@@ -6,6 +6,8 @@ on:
     branches: [main]
     paths:
       - report/**
+      - web/**
+      - data/**
       - deliverables/**
       - site-assets/**
       - .github/workflows/pages.yml
@@ -35,6 +37,9 @@ jobs:
           cp report/index.html site/index.html
           cp report/anomalie.csv site/
           cp deliverables/foglio_controllo_cedolini.xlsx site/
+          mkdir -p site/strumento
+          cp web/index.html web/controlli.js web/inputs.json web/modello_cedolini.csv web/modello_f24.csv site/strumento/
+          cp data/cedolini.csv data/f24.csv site/strumento/
 
       - name: Add the link preview
         run: |

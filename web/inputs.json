@@ -1,0 +1,99 @@
+{
+ "ccnl": {
+  "1": {
+   "altri_elementi": 0.0,
+   "contingenza": 537.53,
+   "minimo_2025_03": 2449.33,
+   "minimo_2025_11": 2504.07,
+   "minimo_2026_11": 2558.81,
+   "minimo_2027_02": 2621.36,
+   "paga_base": 1966.54,
+   "scatto": 24.84
+  },
+  "2": {
+   "altri_elementi": 0.0,
+   "contingenza": 532.56,
+   "minimo_2025_03": 2186.25,
+   "minimo_2025_11": 2233.6,
+   "minimo_2026_11": 2280.95,
+   "minimo_2027_02": 2335.06,
+   "paga_base": 1701.04,
+   "scatto": 22.83
+  },
+  "3": {
+   "altri_elementi": 0.0,
+   "contingenza": 527.9,
+   "minimo_2025_03": 1941.37,
+   "minimo_2025_11": 1981.84,
+   "minimo_2026_11": 2022.31,
+   "minimo_2027_02": 2068.56,
+   "paga_base": 1453.94,
+   "scatto": 21.95
+  },
+  "4": {
+   "altri_elementi": 0.0,
+   "contingenza": 524.22,
+   "minimo_2025_03": 1746.68,
+   "minimo_2025_11": 1781.68,
+   "minimo_2026_11": 1816.68,
+   "minimo_2027_02": 1856.68,
+   "paga_base": 1257.46,
+   "scatto": 20.66
+  },
+  "5": {
+   "altri_elementi": 0.0,
+   "contingenza": 521.94,
+   "minimo_2025_03": 1626.39,
+   "minimo_2025_11": 1658.01,
+   "minimo_2026_11": 1689.63,
+   "minimo_2027_02": 1725.77,
+   "paga_base": 1136.07,
+   "scatto": 20.3
+  },
+  "6": {
+   "altri_elementi": 0.0,
+   "contingenza": 519.76,
+   "minimo_2025_03": 1511.31,
+   "minimo_2025_11": 1539.7,
+   "minimo_2026_11": 1568.09,
+   "minimo_2027_02": 1600.54,
+   "paga_base": 1019.94,
+   "scatto": 19.73
+  },
+  "7": {
+   "altri_elementi": 5.16,
+   "contingenza": 517.51,
+   "minimo_2025_03": 1371.58,
+   "minimo_2025_11": 1395.89,
+   "minimo_2026_11": 1420.2,
+   "minimo_2027_02": 1447.98,
+   "paga_base": 873.22,
+   "scatto": 19.47
+  },
+  "Quadri": {
+   "altri_elementi": 0.0,
+   "contingenza": 540.36,
+   "minimo_2025_03": 2662.68,
+   "minimo_2025_11": 2723.45,
+   "minimo_2026_11": 2784.22,
+   "minimo_2027_02": 2853.66,
+   "paga_base": 2183.09,
+   "scatto": 25.46
+  }
+ },
+ "cfg": {
+  "aliquota": 0.0919,
+  "colonna_minimo": "minimo_2025_11",
+  "colonna_minimo_prossimo": "minimo_2026_11",
+  "divisore_tfr": 13.5,
+  "ferie_annue": 26,
+  "mensilita": 14,
+  "mese": "2026-09",
+  "mese_precedente": "2026-08",
+  "scatti_anni": 3,
+  "scatti_max": 10,
+  "soglia": 0.2,
+  "tolleranza": 0.01,
+  "tolleranza_ferie": 0.01
+ }
+}

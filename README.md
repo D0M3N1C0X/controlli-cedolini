@@ -15,7 +15,7 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 > minimi, scatti e ferie del CCNL Terziario Confcommercio con le fonti in [docs/fonti.md](docs/fonti.md).
 > Non è consulenza del lavoro.
 
-### ▶ [Leggi il rapporto di settembre](https://d0m3n1c0x.github.io/controlli-cedolini/) · [Scarica il foglio di controllo](https://github.com/D0M3N1C0X/controlli-cedolini/raw/main/deliverables/foglio_controllo_cedolini.xlsx)
+### ▶ [Prova lo strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) · [Leggi il rapporto di settembre](https://d0m3n1c0x.github.io/controlli-cedolini/) · [Scarica il foglio di controllo](https://github.com/D0M3N1C0X/controlli-cedolini/raw/main/deliverables/foglio_controllo_cedolini.xlsx)
 
 ---
 
@@ -53,8 +53,8 @@ serve sapere come l'ha calcolato il software paghe.
 - **Il limite:** un errore *coerente* passa. Un dipendente di 4° livello inserito al 5°, con il cedolino
   ricalcolato da capo, torna in ogni voce e prende 61,27 € netti in meno al mese. Per questo serve il
   confronto con i documenti del cliente; il test `test_limite_dichiarato_errore_coerente` lo tiene vero.
-- **Due motori, una risposta:** il foglio di calcolo è confrontato con Python su 417 valori; la CI lo
-  ricalcola con LibreOffice e fallisce alla prima differenza.
+- **Tre motori, una risposta:** il foglio di calcolo è confrontato con Python su 417 valori e ricalcolato
+  con LibreOffice nella CI; lo strumento nel browser è confrontato con Python su 1.690 valori.
 
 ## Cosa c'è
 
@@ -64,6 +64,16 @@ serve sapere come l'ha calcolato il software paghe.
 | [Rapporto](report/rapporto.md) | il responsabile del team | Le segnalazioni con cosa fare, l'F24, la tranche di novembre, quanto ci si può fidare dei controlli. |
 | [`anomalie.csv`](report/anomalie.csv) | un altro strumento | Le segnalazioni in formato tabellare, da caricare in un ticket o in un CRM. |
 | [`docs/fonti.md`](docs/fonti.md) | chi verifica | Fonte e stato di ogni regola, e cosa ricontrollare prima di usarlo su dati veri. |
+
+## Usare lo strumento nel browser
+
+[Apri lo strumento](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/), carica il CSV dei cedolini (mese da
+controllare e mese prima) e, se vuoi, quello degli F24. I controlli girano nella pagina: **i file non lasciano il
+computer**. Accetta l'esportazione di Excel in italiano (punto e virgola, virgola decimale, date gg/mm/aaaa); i
+modelli delle colonne sono nella pagina. Con "Usa i dati di esempio" si vede subito il risultato.
+
+Il JavaScript dello strumento è verificato contro Python a ogni modifica: 1.690 confronti su nove casi, comprese le
+alterazioni di mezzo centesimo e il formato italiano.
 
 ## Usare il foglio, senza Python
 

@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Controlli Cedolini</title>
+<meta name="description" content="Nove controlli sui cedolini del mese, nel browser: i dati non lasciano il computer.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500&family=IBM+Plex+Sans:wght@400;500;600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+<style>
+:root{
+  --paper:#fbfcfd; --surface:#ffffff; --ink:#131a24; --ink-soft:#39434f; --muted:#5f6b7a;
+  --line:#e2e7ef; --line-strong:#c9d2df; --accent:#1d4ed8; --accent-wash:#eef3ff; --on-accent:#ffffff;
+  --good:#0c6b59; --good-wash:#e8f5f1; --bad:#b5352c; --bad-wash:#fdeceb; --warn:#8a5a00; --warn-wash:#fdf3dc;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --paper:#0f141b; --surface:#161d26; --ink:#e7ecf3; --ink-soft:#c3cbd6; --muted:#8b97a6;
+    --line:#232c38; --line-strong:#33404f; --accent:#7ba4ff; --accent-wash:#17233a; --on-accent:#0f141b;
+    --good:#5fc6ae; --good-wash:#12291f; --bad:#f08a80; --bad-wash:#2e1b1a; --warn:#f0c060; --warn-wash:#2e2512;
+  }
+}
+:root[data-theme="dark"]{
+  --paper:#0f141b; --surface:#161d26; --ink:#e7ecf3; --ink-soft:#c3cbd6; --muted:#8b97a6;
+  --line:#232c38; --line-strong:#33404f; --accent:#7ba4ff; --accent-wash:#17233a; --on-accent:#0f141b;
+  --good:#5fc6ae; --good-wash:#12291f; --bad:#f08a80; --bad-wash:#2e1b1a; --warn:#f0c060; --warn-wash:#2e2512;
+}
+*{box-sizing:border-box}
+body{margin:0; background:var(--paper); color:var(--ink); -webkit-font-smoothing:antialiased;
+  font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  font-size:15px; line-height:1.55}
+.page{max-width:68rem; margin:0 auto; padding:clamp(1.25rem,3vw,2.5rem) 16px 4rem}
+.eyebrow{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace; font-size:.72rem; letter-spacing:.08em;
+  text-transform:uppercase; color:var(--accent); margin:0 0 .5rem}
+h1,h2{font-family:"Source Serif 4",Georgia,serif; margin:0; text-wrap:balance}
+h1{font-size:clamp(1.8rem,4.5vw,2.5rem); font-weight:600; line-height:1.15}
+h2{font-size:1.2rem; font-weight:600; margin:0 0 .6rem}
+p{margin:.5rem 0 0; color:var(--ink-soft); max-width:46rem}
+a{color:var(--accent); text-underline-offset:2px}
+.card{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:1.1rem; margin-top:1.25rem}
+.privacy{display:flex; gap:.6rem; align-items:flex-start; background:var(--good-wash); color:var(--good);
+  border-radius:10px; padding:.7rem .9rem; margin-top:1rem; font-size:.9rem; max-width:46rem}
+.inputs{display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:1rem}
+@media (max-width:720px){.inputs{grid-template-columns:1fr}}
+label{display:block; font-size:.82rem; font-weight:500; color:var(--muted); margin-bottom:.3rem}
+input[type=file]{font:inherit; font-size:.85rem; width:100%; color:var(--ink-soft)}
+input[type=number], select{font:inherit; width:100%; color:var(--ink); background:var(--surface);
+  border:1px solid var(--line-strong); border-radius:8px; padding:.45rem .6rem}
+input:focus-visible, select:focus-visible, button:focus-visible{outline:2px solid var(--accent); outline-offset:2px}
+.params{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:.75rem; margin-top:1rem}
+@media (max-width:720px){.params{grid-template-columns:1fr}}
+.buttons{display:flex; gap:.5rem; flex-wrap:wrap; margin-top:1rem}
+button{font:inherit; font-size:.88rem; font-weight:500; border-radius:8px; padding:.5rem .9rem; cursor:pointer;
+  border:1px solid var(--line-strong); background:var(--surface); color:var(--ink)}
+button.primary{background:var(--accent); border-color:var(--accent); color:var(--on-accent)}
+button:disabled{opacity:.5; cursor:default}
+.note{font-size:.8rem; color:var(--muted); margin-top:.5rem}
+.error{background:var(--bad-wash); color:var(--bad); border-radius:10px; padding:.7rem .9rem; margin-top:1rem; display:none}
+.kpis{display:grid; grid-template-columns:repeat(4,minmax(0,1fr)); gap:.75rem; margin-top:1.25rem}
+@media (max-width:640px){.kpis{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kpi{background:var(--surface); border:1px solid var(--line); border-radius:12px; padding:.8rem .9rem}
+.kpi .k{font-size:.75rem; color:var(--muted)}
+.kpi .v{font-family:"Source Serif 4",Georgia,serif; font-size:1.6rem; font-weight:600; font-variant-numeric:tabular-nums}
+.filters{display:flex; gap:.5rem; flex-wrap:wrap; margin-bottom:.6rem}
+.filters select{width:auto}
+.table-wrap{overflow-x:auto}
+table{width:100%; border-collapse:collapse; font-size:.86rem}
+th,td{padding:.45rem .5rem; border-bottom:1px solid var(--line); text-align:right; white-space:nowrap}
+th:first-child,td:first-child,th.l,td.l{text-align:left}
+th{font-size:.72rem; font-weight:500; color:var(--muted); text-transform:uppercase; letter-spacing:.04em}
+td{font-variant-numeric:tabular-nums}
+.pill{display:inline-block; border-radius:999px; padding:.05rem .55rem; font-size:.75rem; font-weight:600}
+.pill.alta{background:var(--bad-wash); color:var(--bad)}
+.pill.media{background:var(--warn-wash); color:var(--warn)}
+.pill.ok{background:var(--good-wash); color:var(--good)}
+#risultati{display:none}
+footer{margin-top:2.5rem; padding-top:1rem; border-top:1px solid var(--line); color:var(--muted); font-size:.82rem}
+</style>
+</head>
+<body>
+<main class="page">
+  <p class="eyebrow">Controlli cedolini · nel browser</p>
+  <h1>Controlla i cedolini del mese prima di mandarli al cliente</h1>
+  <p>Nove controlli sul CCNL Terziario Confcommercio: minimi, scatti, contributi, TFR, ferie, quadratura, variazioni
+     anomale, F24 e codice fiscale. In più, quanto costa la tranche del 1° novembre 2026.</p>
+  <div class="privacy" role="note"><span aria-hidden="true">🔒</span><span>I file restano sul tuo computer: i controlli
+     girano in questa pagina e niente viene inviato a un server. Puoi verificarlo staccando la rete dopo il caricamento.</span></div>
+
+  <section class="card">
+    <h2>1. I dati</h2>
+    <div class="inputs">
+      <div><label for="ced">Cedolini (CSV, mese da controllare e mese prima)</label>
+        <input type="file" id="ced" accept=".csv,text/csv"></div>
+      <div><label for="f24">Deleghe F24 per cliente (CSV, facoltativo)</label>
+        <input type="file" id="f24" accept=".csv,text/csv"></div>
+    </div>
+    <p class="note">Separatore virgola o punto e virgola; numeri con punto o virgola decimale; date aaaa-mm-gg o gg/mm/aaaa.
+      Colonne come nel <a href="modello_cedolini.csv" download>modello dei cedolini</a> e nel <a href="modello_f24.csv" download>modello F24</a>.</p>
+    <div class="params">
+      <div><label for="mese">Mese da controllare</label><select id="mese"></select></div>
+      <div><label for="aliquota">Contributo a carico del dipendente</label><input type="number" id="aliquota" step="0.0001" min="0" max="0.2"></div>
+      <div><label for="soglia">Variazione del netto da spiegare</label><input type="number" id="soglia" step="0.01" min="0" max="1"></div>
+    </div>
+    <div class="buttons">
+      <button type="button" class="primary" id="esegui" disabled>Esegui i controlli</button>
+      <button type="button" id="esempio">Usa i dati di esempio</button>
+    </div>
+    <div class="error" id="errore" role="alert"></div>
+  </section>
+
+  <section id="risultati">
+    <div class="kpis" id="kpis"></div>
+    <section class="card">
+      <h2>2. Le segnalazioni</h2>
+      <div class="filters">
+        <select id="f-cliente" aria-label="Filtra per cliente"></select>
+        <select id="f-controllo" aria-label="Filtra per controllo"></select>
+        <button type="button" id="scarica">Scarica le segnalazioni (CSV)</button>
+      </div>
+      <div class="table-wrap"><table id="anomalie"></table></div>
+    </section>
+    <section class="card">
+      <h2>3. Per cliente</h2>
+      <div class="table-wrap"><table id="riepilogo"></table></div>
+    </section>
+    <section class="card">
+      <h2>4. La tranche del 1° novembre 2026, al mese</h2>
+      <div class="table-wrap"><table id="novembre"></table></div>
+      <p class="note">Lordo dipendente. L'assorbimento del superminimo va verificato sulla lettera di assunzione.</p>
+    </section>
+  </section>
+
+  <footer>Stessi calcoli dello script Python e del foglio di calcolo del repository: questo JavaScript è verificato
+    contro Python a ogni modifica. Dati di esempio sintetici; minimi CCNL da fonti secondarie concordi (vedi le fonti).
+    Non è consulenza del lavoro. <a href="../">Rapporto</a> · <a href="https://github.com/D0M3N1C0X/controlli-cedolini">Codice</a>.</footer>
+</main>
+<script type="module">
+import { esegui, novembre, leggiCsv, normalizza, CONTROLLI } from "./controlli.js";
+
+const { cfg: CFG, ccnl: CCNL } = await (await fetch("./inputs.json")).json();
+const $ = (id) => document.getElementById(id);
+const euro = (v) => `${v < 0 ? "−" : ""}${Math.abs(v).toLocaleString("it-IT", { minimumFractionDigits: 2, maximumFractionDigits: 2, useGrouping: "always" })} €`;
+const num = (v, d = 2) => v.toLocaleString("it-IT", { minimumFractionDigits: d, maximumFractionDigits: d, useGrouping: "always" });
+let cedolini = null, deleghe = [], risultato = null;
+$("aliquota").value = CFG.aliquota;
+$("soglia").value = CFG.soglia;
+
+function errore(msg) { const e = $("errore"); e.textContent = msg; e.style.display = msg ? "block" : "none"; }
+
+function carica(testoCed) {
+  errore("");
+  const grezzi = leggiCsv(testoCed);
+  if (!grezzi.length) throw new Error("Il file dei cedolini è vuoto.");
+  const servono = ["mese", "matricola", "cliente", "codice_fiscale", "livello", "data_assunzione", "part_time", "tabellare",
+    "scatti", "superminimo", "straordinari", "lordo", "contributi_inps", "irpef", "altre_trattenute", "netto", "quota_tfr",
+    "ferie_godute", "ferie_residuo"];
+  const mancano = servono.filter((c) => !(c in grezzi[0]));
+  if (mancano.length) throw new Error(`Mancano colonne nel file dei cedolini: ${mancano.join(", ")}.`);
+  const virgola = testoCed.split(/\r?\n/)[0].split(";").length > 1;
+  cedolini = normalizza(grezzi, virgola);
+  const mesi = [...new Set(cedolini.map((r) => r.mese))].sort();
+  $("mese").innerHTML = mesi.map((m) => `<option ${m === mesi[mesi.length - 1] ? "selected" : ""}>${m}</option>`).join("");
+  $("esegui").disabled = false;
+}
+
+function precedente(m) {
+  const [y, mo] = m.split("-").map(Number);
+  return mo === 1 ? `${y - 1}-12` : `${y}-${String(mo - 1).padStart(2, "0")}`;
+}
+
+function controlla() {
+  try {
+    const mese = $("mese").value;
+    const cfg = { ...CFG, mese, aliquota: +$("aliquota").value, soglia: +$("soglia").value };
+    const corr = cedolini.filter((r) => r.mese === mese);
+    const prec = cedolini.filter((r) => r.mese === precedente(mese));
+    const f24 = deleghe.filter((r) => !r.mese || r.mese === mese);
+    const { anomalie, riconciliazione } = esegui(corr, prec, f24, CCNL, cfg);
+    risultato = { anomalie, riconciliazione, nov: novembre(corr, CCNL, cfg), corr, prec, f24 };
+    mostra();
+  } catch (e) { errore(e.message); }
+}
+
+function mostra() {
+  const { anomalie, nov, corr, prec, f24 } = risultato;
+  $("risultati").style.display = "block";
+  const ced = new Set(anomalie.filter((a) => a.matricola).map((a) => a.matricola));
+  $("kpis").innerHTML = [["Cedolini controllati", corr.length.toLocaleString("it-IT")], ["Segnalazioni", anomalie.length],
+    ["Ad alta priorità", anomalie.filter((a) => a.priorita === "alta").length], ["Cedolini da guardare", ced.size]]
+    .map(([k, v]) => `<div class="kpi"><div class="k">${k}</div><div class="v">${v}</div></div>`).join("");
+  errore(!prec.length ? "Nessun cedolino del mese precedente: il residuo ferie (C05) parte da zero e la variazione del netto (C07) non si calcola." : "");
+  const clienti = [...new Set(corr.map((r) => r.cliente))].sort();
+  $("f-cliente").innerHTML = `<option value="">Tutti i clienti</option>` + clienti.map((c) => `<option>${c}</option>`).join("");
+  $("f-controllo").innerHTML = `<option value="">Tutti i controlli</option>` +
+    Object.entries(CONTROLLI).map(([k, [v]]) => `<option value="${k}">${k} ${v}</option>`).join("");
+  tabella();
+  const cod = Object.keys(CONTROLLI);
+  $("riepilogo").innerHTML = `<tr><th>Controllo</th>${clienti.map((c) => `<th>Cliente ${c}</th>`).join("")}<th>Totale</th></tr>` +
+    cod.map((k) => { const n = clienti.map((c) => anomalie.filter((a) => a.controllo === k && a.cliente === c).length);
+      return `<tr><td>${k} ${CONTROLLI[k][0]}</td>${n.map((x) => `<td>${x || "–"}</td>`).join("")}<td><b>${n.reduce((s, x) => s + x, 0)}</b></td></tr>`; }).join("");
+  $("novembre").innerHTML = `<tr><th>Cliente</th><th>Dipendenti</th><th>Aumento</th><th>Assorbito</th><th>Da pagare</th></tr>` +
+    clienti.map((c) => { const s = nov.filter((r) => r.cliente === c); const t = (f) => s.reduce((x, r) => x + r[f], 0);
+      return `<tr><td>Cliente ${c}</td><td>${s.length}</td><td>${euro(t("aumento"))}</td><td>${euro(t("assorbito"))}</td><td><b>${euro(t("da_pagare"))}</b></td></tr>`; }).join("");
+}
+
+function tabella() {
+  const fc = $("f-cliente").value, fk = $("f-controllo").value;
+  const righe = risultato.anomalie.filter((a) => (!fc || a.cliente === fc) && (!fk || a.controllo === fk));
+  const f = (a, v) => (typeof v !== "number" ? v : a.controllo === "C05" ? `${num(v, 2)} gg` : euro(v));
+  $("anomalie").innerHTML = righe.length
+    ? `<tr><th class="l">Matricola</th><th class="l">Cliente</th><th class="l">Controllo</th><th class="l">Priorità</th><th>Atteso</th><th>Trovato</th><th>Differenza</th></tr>` +
+      righe.map((a) => `<tr><td class="l">${a.matricola || "F24"}</td><td class="l">${a.cliente}</td><td class="l">${a.controllo} ${a.voce}</td>
+        <td class="l"><span class="pill ${a.priorita}">${a.priorita}</span></td><td>${f(a, a.atteso)}</td><td>${f(a, a.trovato)}</td>
+        <td>${a.differenza == null ? "–" : f(a, a.differenza)}</td></tr>`).join("")
+    : `<tr><td><span class="pill ok">Nessuna segnalazione</span></td></tr>`;
+}
+
+$("ced").addEventListener("change", async (e) => {
+  try { const f = e.target.files[0]; if (f) carica(await f.text()); } catch (err) { errore(err.message); }
+});
+$("f24").addEventListener("change", async (e) => {
+  try { const f = e.target.files[0]; if (!f) return; const t = await f.text();
+    deleghe = normalizza(leggiCsv(t), t.split(/\r?\n/)[0].split(";").length > 1); } catch (err) { errore(err.message); }
+});
+$("esempio").addEventListener("click", async () => {
+  try {
+    const [c, f] = await Promise.all([fetch("cedolini.csv").then((r) => r.text()), fetch("f24.csv").then((r) => r.text())]);
+    carica(c);
+    deleghe = normalizza(leggiCsv(f), false);
+    controlla();
+  } catch (err) { errore(err.message); }
+});
+$("esegui").addEventListener("click", controlla);
+$("f-cliente").addEventListener("change", tabella);
+$("f-controllo").addEventListener("change", tabella);
+$("scarica").addEventListener("click", () => {
+  const head = ["matricola", "cliente", "controllo", "voce", "priorita", "atteso", "trovato", "differenza"];
+  const csv = [head.join(";"), ...risultato.anomalie.map((a) => head.map((h) => {
+    const v = a[h]; return typeof v === "number" ? String(Math.round(v * 10000) / 10000).replace(".", ",") : (v ?? ""); }).join(";"))].join("\n");
+  const url = URL.createObjectURL(new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" }));
+  const a = Object.assign(document.createElement("a"), { href: url, download: `segnalazioni_${$("mese").value}.csv` });
+  document.body.append(a); a.click(); a.remove(); URL.revokeObjectURL(url);
+});
+</script>
+</body>
+</html>

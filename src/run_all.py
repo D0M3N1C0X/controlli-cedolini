@@ -10,6 +10,7 @@ import time
 
 import build_foglio
 import build_rapporto
+import build_web
 import controlli
 import genera
 import report_html
@@ -28,6 +29,8 @@ def main() -> None:
     build_rapporto.write(o, rob, robustezza.errore_coerente())
     report_html.build()
     print("rapporto -> report/rapporto.md, report/index.html")
+    build_web.write_inputs()
+    print(f"strumento -> web/inputs.json; {build_web.write_vectors()} casi di prova per il JavaScript")
     print(f"fatto in {time.perf_counter() - start:.1f}s")
 
 
