@@ -1,4 +1,4 @@
-// I nove controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
+// I dieci controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
 // tests/js/check_controlli.mjs li fa girare sui dati di casi preparati in Python
 // (tests/fixtures/js_vectors.json) e la CI fallisce alla prima differenza.
 
