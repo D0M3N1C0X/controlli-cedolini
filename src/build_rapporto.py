@@ -23,20 +23,20 @@ COSA_FARE = {
 }
 
 
-def euro(x, d=2):
+def euro(x, d=2) -> str:
     s = f"{abs(x):,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
     return f"{'−' if x < 0 else ''}{s} €"
 
 
-def num(x, d=2):
+def num(x, d=2) -> str:
     return f"{x:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 
-def pct(x, d=0):
+def pct(x, d=0) -> str:
     return f"{x * 100:.{d}f}%".replace(".", ",")
 
 
-def table(head, rows, align):
+def table(head, rows, align) -> str:
     out = ["| " + " | ".join(head) + " |", "|" + "|".join("---:" if a == "r" else "---" for a in align) + "|"]
     return "\n".join(out + ["| " + " | ".join(str(c) for c in r) + " |" for r in rows])
 
@@ -169,8 +169,6 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
         f"Sopra, la trovano tutte: {pct(f['trovate_sopra'])}. Per le ferie l'importo è in giorni.*")
     add("")
     sv = statistica.valutazione()
-    st = sv[sv["metodo"].str.startswith("Statistico")]
-    rg = sv[sv["metodo"].str.startswith("Regole")].iloc[0]
     add("**Perché regole e non un modello statistico.** Un rilevatore che non sa nulla del contratto confronta ogni "
         "cedolino con gli altri su quattro rapporti (contributi su lordo, TFR su retribuzione ordinaria, netto su lordo, "
         "netto sul mese prima) e segnala chi si allontana dalla mediana. Sugli stessi errori:")

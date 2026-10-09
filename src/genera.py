@@ -8,7 +8,7 @@ straordinari dichiarati, un passaggio a part-time.
     python src/genera.py
 """
 import random
-from datetime import date, timedelta
+from datetime import date
 
 import pandas as pd
 
@@ -107,13 +107,13 @@ def main() -> None:
     rng.shuffle(idx)
     pool = iter(idx)
 
-    def prendi(cond=lambda r: True):
+    def prendi(cond=lambda r: True) -> int:
         for i in pool:
             if cond(S.loc[i]):
                 return i
         raise RuntimeError("dati insufficienti")
 
-    def registra(i, tipo, nota):
+    def registra(i, tipo, nota) -> None:
         errori.append({"matricola": S.loc[i, "matricola"], "cliente": S.loc[i, "cliente"], "tipo": tipo, "nota": nota})
 
     # Casi legittimi, da NON segnalare
@@ -215,7 +215,8 @@ def main() -> None:
     f24.loc[f24["cliente"] == "C", "ritenute_1001"] -= 212.40   # una ritenuta rimasta fuori dalla delega
     f24["ritenute_1001"] = f24["ritenute_1001"].round(2)
     f24.to_csv(C.F24, index=False, float_format="%.2f")
-    errori.append({"matricola": "", "cliente": "C", "tipo": "f24", "nota": "F24 con 212,40 € di ritenute in meno dei cedolini"})
+    errori.append({"matricola": "", "cliente": "C", "tipo": "f24",
+                   "nota": "F24 con 212,40 € di ritenute in meno dei cedolini"})
 
     a.to_csv(C.DIPENDENTI, index=False)
     pd.DataFrame(errori).to_csv(C.ERRORI, index=False)

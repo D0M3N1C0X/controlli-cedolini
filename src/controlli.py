@@ -18,14 +18,17 @@ import regole as R
 CONTROLLI = {
     "C01": ("Minimo tabellare", "Paga base + contingenza diversa dal minimo del livello, part-time compreso", "alta"),
     "C02": ("Scatti di anzianità", "Importo degli scatti diverso da quelli maturati dalla data di assunzione", "alta"),
-    "C03": ("Contributi INPS", "Contributo a carico del dipendente diverso da imponibile arrotondato all'euro × aliquota", "alta"),
+    "C03": ("Contributi INPS",
+            "Contributo a carico del dipendente diverso da imponibile arrotondato all'euro × aliquota", "alta"),
     "C04": ("Quota TFR", "Rateo TFR diverso da retribuzione ordinaria × 14 / 13,5 / 12", "media"),
     "C05": ("Residuo ferie", "Residuo diverso da residuo del mese prima + maturate - godute", "media"),
     "C06": ("Quadratura", "Lordo diverso dalla somma delle voci, o netto diverso da lordo meno trattenute", "alta"),
-    "C07": ("Variazione del netto", "Netto oltre il 20% sopra o sotto il mese prima, senza un evento che lo spieghi", "media"),
+    "C07": ("Variazione del netto",
+            "Netto oltre il 20% sopra o sotto il mese prima, senza un evento che lo spieghi", "media"),
     "C08": ("Riconciliazione F24", "Ritenute o contributi in F24 diversi dalla somma dei cedolini del cliente", "alta"),
     "C09": ("Codice fiscale", "Carattere di controllo non valido", "alta"),
-    "C10": ("Anagrafica", "Livello, part-time, superminimo o data di assunzione diversi dal mese prima, senza un evento", "alta"),
+    "C10": ("Anagrafica",
+            "Livello, part-time, superminimo o data di assunzione diversi dal mese prima, senza un evento", "alta"),
 }
 TIPO_CONTROLLO = {"minimo": "C01", "scatto": "C02", "inps": "C03", "tfr": "C04", "ferie": "C05", "netto": "C06",
                   "variazione": "C07", "f24": "C08", "codice_fiscale": "C09",
@@ -42,9 +45,11 @@ def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
     """Il valore atteso di ogni voce controllata, calcolato dalle regole e non dal cedolino."""
     t = R.tabella()
     a = m[["matricola", "cliente", "livello", "part_time"]].copy()
-    a["tabellare"] = [R.centesimi(t.loc[l, C.COLONNA_MINIMO] * p) for l, p in zip(m["livello"], m["part_time"])]
+    a["tabellare"] = [R.centesimi(t.loc[lv, C.COLONNA_MINIMO] * p)
+                      for lv, p in zip(m["livello"], m["part_time"], strict=True)]
     a["scatti_n"] = [R.scatti_maturati(date.fromisoformat(d), C.MESE) for d in m["data_assunzione"]]
-    a["scatti"] = [R.centesimi(t.loc[l, "scatto"] * n * p) for l, n, p in zip(m["livello"], a["scatti_n"], m["part_time"])]
+    a["scatti"] = [R.centesimi(t.loc[lv, "scatto"] * n * p)
+                   for lv, n, p in zip(m["livello"], a["scatti_n"], m["part_time"], strict=True)]
     a["contributi_inps"] = m["lordo"].map(R.contributi)
     ordinaria = m["tabellare"] + m["scatti"] + m["superminimo"]
     a["quota_tfr"] = ordinaria.map(R.quota_tfr)
@@ -75,7 +80,7 @@ def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.D
     prev_by = {r["matricola"]: r for r in prec.to_dict("records")}
     out = []
 
-    def segnala(i, codice, atteso, trovato):
+    def segnala(i, codice, atteso, trovato) -> None:
         diff = trovato - atteso if isinstance(atteso, (int, float)) and isinstance(trovato, (int, float)) else None
         out.append({"matricola": m.loc[i, "matricola"], "cliente": m.loc[i, "cliente"], "controllo": codice,
                     "voce": CONTROLLI[codice][0], "atteso": atteso, "trovato": trovato, "differenza": diff,
@@ -123,7 +128,7 @@ def valutazione(anomalie: pd.DataFrame) -> pd.DataFrame:
     """Per ogni controllo: errori inseriti, trovati, mancati, falsi allarmi."""
     err = pd.read_csv(C.ERRORI, keep_default_na=False)
     err["controllo"] = err["tipo"].map(TIPO_CONTROLLO)
-    chiave = lambda d: set(zip(d["controllo"], d["cliente"], d["matricola"]))
+    chiave = lambda d: set(zip(d["controllo"], d["cliente"], d["matricola"], strict=True))
     attesi_, trovati = chiave(err), chiave(anomalie)
     rows = []
     for codice in CONTROLLI:
@@ -140,12 +145,13 @@ def novembre(m: pd.DataFrame) -> pd.DataFrame:
     t = R.tabella()
     n = m[["matricola", "cliente", "livello", "part_time", "superminimo", "superminimo_assorbibile"]].copy()
     n["superminimo_assorbibile"] = n["superminimo_assorbibile"].astype(str).str.lower() == "true"
-    n["aumento"] = [R.centesimi((t.loc[l, C.COLONNA_MINIMO_PROSSIMO] - t.loc[l, C.COLONNA_MINIMO]) * p)
-                    for l, p in zip(n["livello"], n["part_time"])]
+    n["aumento"] = [R.centesimi((t.loc[lv, C.COLONNA_MINIMO_PROSSIMO] - t.loc[lv, C.COLONNA_MINIMO]) * p)
+                    for lv, p in zip(n["livello"], n["part_time"], strict=True)]
     n["assorbito"] = [min(s, a) if ok else 0.0 for s, a, ok in zip(n["superminimo"], n["aumento"],
-                                                                    n["superminimo_assorbibile"])]
+                                                                    n["superminimo_assorbibile"], strict=True)]
     n["da_pagare"] = (n["aumento"] - n["assorbito"]).map(R.centesimi)
-    n["nuovo_tabellare"] = [R.centesimi(t.loc[l, C.COLONNA_MINIMO_PROSSIMO] * p) for l, p in zip(n["livello"], n["part_time"])]
+    n["nuovo_tabellare"] = [R.centesimi(t.loc[lv, C.COLONNA_MINIMO_PROSSIMO] * p)
+                            for lv, p in zip(n["livello"], n["part_time"], strict=True)]
     n["nuovo_superminimo"] = (n["superminimo"] - n["assorbito"]).map(R.centesimi)
     return n
 

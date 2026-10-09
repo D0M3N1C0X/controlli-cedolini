@@ -7,9 +7,9 @@ import random
 import string
 
 DISPARI = {
-    **dict(zip("0123456789", [1, 0, 5, 7, 9, 13, 15, 17, 19, 21])),
+    **dict(zip("0123456789", [1, 0, 5, 7, 9, 13, 15, 17, 19, 21], strict=True)),
     **dict(zip(string.ascii_uppercase, [1, 0, 5, 7, 9, 13, 15, 17, 19, 21, 2, 4, 18, 20, 11, 3, 6, 8, 12, 14,
-                                         16, 10, 22, 25, 24, 23])),
+                                         16, 10, 22, 25, 24, 23], strict=True)),
 }
 PARI = {**{c: int(c) for c in "0123456789"}, **{c: i for i, c in enumerate(string.ascii_uppercase)}}
 MESI = "ABCDEHLMPRST"

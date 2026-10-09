@@ -7,7 +7,6 @@ import pytest
 
 import codice_fiscale
 import config as C
-import controlli
 import regole as R
 import robustezza
 
@@ -19,7 +18,8 @@ def test_tabella_ccnl_coerente():
     assert (somma == t["minimo_2025_11"]).all()
     # le tranche crescono, e il 4° livello è quello noto: 1.781,68 € da novembre 2025, +35 € a novembre 2026
     assert (t["minimo_2025_03"] < t["minimo_2025_11"]).all() and (t["minimo_2025_11"] < t["minimo_2026_11"]).all()
-    assert t.loc["4", "minimo_2025_11"] == 1781.68 and t.loc["4", "minimo_2026_11"] - t.loc["4", "minimo_2025_11"] == pytest.approx(35)
+    assert t.loc["4", "minimo_2025_11"] == 1781.68
+    assert t.loc["4", "minimo_2026_11"] - t.loc["4", "minimo_2025_11"] == pytest.approx(35)
     assert t.loc["4", "scatto"] == 20.66
 
 

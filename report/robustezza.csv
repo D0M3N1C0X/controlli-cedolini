@@ -832,7 +832,7 @@ ferie_residuo,10.0,True,C05
 superminimo,0.005,False,
 scatti,100.0,True,"C02,C04,C06"
 quota_tfr,10.0,True,C04
-tabellare,0.005,True,C06
+tabellare,0.005,False,
 ferie_residuo,1.0,True,C05
 quota_tfr,1.0,True,C04
 tabellare,0.02,True,"C01,C06"

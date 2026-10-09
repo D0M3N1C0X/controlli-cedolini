@@ -2,21 +2,21 @@
  "ccnl": {
   "1": {
    "altri_elementi": 0.0,
-   "contingenza": 537.53,
-   "minimo_2025_03": 2449.33,
-   "minimo_2025_11": 2504.07,
-   "minimo_2026_11": 2558.81,
+   "contingenza": 537.52,
+   "minimo_2025_03": 2449.32,
+   "minimo_2025_11": 2504.06,
+   "minimo_2026_11": 2558.8,
    "minimo_2027_02": 2621.36,
    "paga_base": 1966.54,
    "scatto": 24.84
   },
   "2": {
    "altri_elementi": 0.0,
-   "contingenza": 532.56,
-   "minimo_2025_03": 2186.25,
-   "minimo_2025_11": 2233.6,
-   "minimo_2026_11": 2280.95,
-   "minimo_2027_02": 2335.06,
+   "contingenza": 532.54,
+   "minimo_2025_03": 2186.23,
+   "minimo_2025_11": 2233.58,
+   "minimo_2026_11": 2280.93,
+   "minimo_2027_02": 2335.04,
    "paga_base": 1701.04,
    "scatto": 22.83
   },
@@ -56,7 +56,7 @@
    "minimo_2025_03": 1511.31,
    "minimo_2025_11": 1539.7,
    "minimo_2026_11": 1568.09,
-   "minimo_2027_02": 1600.54,
+   "minimo_2027_02": 1600.53,
    "paga_base": 1019.94,
    "scatto": 19.73
   },
@@ -71,12 +71,12 @@
    "scatto": 19.47
   },
   "Quadri": {
-   "altri_elementi": 0.0,
-   "contingenza": 540.36,
-   "minimo_2025_03": 2662.68,
-   "minimo_2025_11": 2723.45,
-   "minimo_2026_11": 2784.22,
-   "minimo_2027_02": 2853.66,
+   "altri_elementi": 260.76,
+   "contingenza": 540.37,
+   "minimo_2025_03": 2923.46,
+   "minimo_2025_11": 2984.22,
+   "minimo_2026_11": 3044.98,
+   "minimo_2027_02": 3114.42,
    "paga_base": 2183.09,
    "scatto": 25.46
   }

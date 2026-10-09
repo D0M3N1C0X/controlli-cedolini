@@ -1,7 +1,7 @@
 matricola,cliente,controllo,voce,atteso,trovato,differenza,priorita
 B031,B,C01,Minimo tabellare,890.84,873.34,-17.50,alta
 B036,B,C01,Minimo tabellare,1486.38,1456.03,-30.35,alta
-B044,B,C01,Minimo tabellare,2233.6,2186.25,-47.35,alta
+B044,B,C01,Minimo tabellare,2233.58,2186.23,-47.35,alta
 B052,B,C01,Minimo tabellare,1658.01,1626.39,-31.62,alta
 B064,B,C01,Minimo tabellare,1395.89,1371.58,-24.31,alta
 B082,B,C01,Minimo tabellare,1395.89,1371.58,-24.31,alta
@@ -21,9 +21,9 @@ B055,B,C05,Residuo ferie,13.4016,11.2349,-2.17,media
 B084,B,C05,Residuo ferie,17.9678,15.8011,-2.17,media
 A001,A,C06,Quadratura,1310.0,1347.5,37.50,alta
 C093,C,C06,Quadratura,1528.2,1628.2,100.00,alta
-B090,B,C07,Variazione del netto,1752.09,2374.83,622.74,media
+B090,B,C07,Variazione del netto,1752.08,2374.82,622.74,media
 C099,C,C07,Variazione del netto,1467.12,2045.04,577.92,media
-,C,C08,Riconciliazione F24,6258.1,6045.7,-212.40,alta
+,C,C08,Riconciliazione F24,6345.71,6133.31,-212.40,alta
 B058,B,C09,Codice fiscale,valido,GFZPLG92P01Z321A,,alta
 C107,C,C09,Codice fiscale,valido,ZCCGMF94M55Z282A,,alta
 B070,B,C10,Anagrafica,superminimo 150,superminimo 0,,alta

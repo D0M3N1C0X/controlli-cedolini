@@ -48,6 +48,7 @@ def test_un_cedolino_incollato_viene_controllato(foglio, valori, tmp_path):
     """Chi usa il foglio incolla i propri cedolini: una riga nuova, con il minimo sbagliato, deve
     comparire negli esiti, nel riepilogo e nella tranche di novembre senza toccare le formule."""
     from datetime import date
+
     from openpyxl import load_workbook
     f, path = foglio
     first, last = f.rows

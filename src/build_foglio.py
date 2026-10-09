@@ -13,7 +13,8 @@ from datetime import date, datetime
 from pathlib import Path
 
 from openpyxl import Workbook
-from openpyxl.formatting.rule import CellIsRule, FormulaRule
+from openpyxl.cell.cell import Cell
+from openpyxl.formatting.rule import CellIsRule
 from openpyxl.styles import Alignment, Font, PatternFill
 from openpyxl.utils import get_column_letter as col
 from openpyxl.worksheet.hyperlink import Hyperlink
@@ -38,11 +39,11 @@ EUR = '"€"#,##0.00;-"€"#,##0.00;"-"'
 NUM2, NUM4, PCT = "#,##0.00", "0.0000", "0.00%"
 
 
-def font(color=INK, bold=False, italic=False, size=10):
+def font(color=INK, bold=False, italic=False, size=10) -> Font:
     return Font(name=FONT, color=color, bold=bold, italic=italic, size=size)
 
 
-def put(ws, ref, value, *, color=INK, bold=False, italic=False, size=10, fmt=None, fill=None, wrap=False):
+def put(ws, ref, value, *, color=INK, bold=False, italic=False, size=10, fmt=None, fill=None, wrap=False) -> Cell:
     cell = ws[ref]
     cell.value = value
     cell.font = font(color, bold, italic, size)
@@ -55,7 +56,7 @@ def put(ws, ref, value, *, color=INK, bold=False, italic=False, size=10, fmt=Non
     return cell
 
 
-def header(ws, row, labels, start=1, height=32):
+def header(ws, row, labels, start=1, height=32) -> None:
     for i, label in enumerate(labels):
         c = ws.cell(row=row, column=start + i, value=label)
         c.font = font(WHITE, bold=True)
@@ -64,18 +65,18 @@ def header(ws, row, labels, start=1, height=32):
     ws.row_dimensions[row].height = height
 
 
-def title(ws, text, subtitle=None):
+def title(ws, text, subtitle=None) -> None:
     put(ws, "A1", text, bold=True, size=14)
     if subtitle:
         put(ws, "A2", subtitle, color=MUTED, italic=True)
 
 
-def widths(ws, spec):
+def widths(ws, spec) -> None:
     for k, v in spec.items():
         ws.column_dimensions[k].width = v
 
 
-def plain(x):
+def plain(x) -> object:
     if hasattr(x, "item"):
         x = x.item()
     if isinstance(x, float) and math.isnan(x):
@@ -83,7 +84,7 @@ def plain(x):
     return x
 
 
-def esito_rule(ws, ref):
+def esito_rule(ws, ref) -> None:
     ws.conditional_formatting.add(ref, CellIsRule(operator="equal", formula=['"ERRORE"'], fill=RED_FILL))
     ws.conditional_formatting.add(ref, CellIsRule(operator="equal", formula=['"OK"'], fill=GREEN_FILL))
 
@@ -95,10 +96,10 @@ class Foglio:
         self.R = {}
         self.checks = []
 
-    def check(self, area, item, value, ref):
+    def check(self, area, item, value, ref) -> None:
         self.checks.append((area, item, plain(value), ref))
 
-    def build(self, path: Path):
+    def build(self, path: Path) -> None:
         names = ["Leggimi", "Riepilogo", "Mese", "Mese precedente", "F24", "Novembre 2026", "CCNL", "Parametri",
                  "Codice fiscale", "Riconciliazione"]
         self.wb.active.title = names[0]
@@ -129,7 +130,7 @@ class Foglio:
         normalise(path)
 
     # ---- Inputs -------------------------------------------------------------------------------
-    def parametri(self, ws):
+    def parametri(self, ws) -> None:
         title(ws, "Parametri", "Le regole dei controlli. I valori gialli cambiano gli esiti: vanno presi dal cliente.")
         widths(ws, {"A": 3, "B": 44, "C": 14, "D": 90})
         rows = [
@@ -153,7 +154,7 @@ class Foglio:
             put(ws, f"D{r}", note, color=MUTED, italic=True)
             self.R[key] = f"Parametri!$C${r}"
 
-    def ccnl(self, ws):
+    def ccnl(self, ws) -> None:
         t = R.tabella()
         title(ws, "CCNL Terziario Distribuzione e Servizi (Confcommercio): minimi mensili e scatti",
               "Accordo di rinnovo del 22 marzo 2024. Minimo = paga base + contingenza (+ 5,16 € al 7° livello). Fonti in docs/fonti.md.")
@@ -170,7 +171,7 @@ class Foglio:
         rng = lambda letter: f"CCNL!${letter}${first}:${letter}${last}"
         self.R.update({"lv": rng("A"), "min": rng("F"), "min_next": rng("G"), "scatto": rng("I")})
 
-    def tabelle_cf(self, ws):
+    def tabelle_cf(self, ws) -> None:
         title(ws, "Codice fiscale: valori per il carattere di controllo", "DM 23 dicembre 1976: posizioni dispari e pari.")
         widths(ws, {"A": 10, "B": 12, "C": 12})
         header(ws, 4, ["Carattere", "Dispari", "Pari"], height=20)
@@ -183,7 +184,7 @@ class Foglio:
         self.R.update({"cf_c": f"'Codice fiscale'!$A$5:$A${last}", "cf_d": f"'Codice fiscale'!$B$5:$B${last}",
                        "cf_p": f"'Codice fiscale'!$C$5:$C${last}"})
 
-    def agosto(self, ws):
+    def agosto(self, ws) -> None:
         p = self.o["precedente"]
         title(ws, "Mese precedente: i cedolini del mese prima", "Netto, residuo ferie e anagrafica, per i controlli C05, C07 e C10. Nei dati di esempio: agosto 2026.")
         widths(ws, {"A": 12, "B": 9, "C": 14, "D": 14, "E": 9, "F": 10, "G": 12, "H": 14})
@@ -207,7 +208,7 @@ class Foglio:
         ws.freeze_panes = "A5"
 
     # ---- The checks ------------------------------------------------------------------------------
-    def settembre(self, ws):
+    def settembre(self, ws) -> None:
         R_, m, a = self.R, self.o["mese"], self.o["attesi"]
         title(ws, "Mese: cedolini e controlli (nei dati di esempio, settembre 2026)",
               f"Colonne A-W: i dati del software paghe (blu), fino a {RIGHE} righe. Colonne X-AT: valori attesi ed esiti, in formula.")
@@ -244,8 +245,8 @@ class Foglio:
         # le formule coprono RIGHE righe, così si possono incollare i cedolini di un cliente più grande;
         # le righe vuote restano vuote
         for i in range(first, last + 1):
-            g = lambda expr: f'=IF($A{i}="","",{expr})'
-            lookup = lambda rng: f"INDEX({rng},MATCH(D{i},{R_['lv']},0))"
+            g = lambda expr, i=i: f'=IF($A{i}="","",{expr})'
+            lookup = lambda rng, i=i: f"INDEX({rng},MATCH(D{i},{R_['lv']},0))"
             put(ws, f"X{i}", g(f"ROUND({lookup(R_['min'])}*F{i},2)"), fmt=NUM2)
             put(ws, f"Y{i}", g(f"(YEAR({R_['mese']})*12+MONTH({R_['mese']}))-(YEAR(E{i})*12+MONTH(E{i}))"))
             put(ws, f"Z{i}", g(f"MIN({R_['scatti_max']},MAX(0,INT((Y{i}-1)/36)))"))
@@ -271,7 +272,7 @@ class Foglio:
             put(ws, f"AP{i}", g(f'IF(OR(ABS(N{i}-AF{i})>{tol},ABS(S{i}-AG{i})>{tol}),"ERRORE","OK")'))
             put(ws, f"AQ{i}", g(f'IF(AI{i}="","OK",IF(AND(ABS(AI{i})>{R_["soglia"]},G{i}=""),"ERRORE","OK"))'))
             put(ws, f"AR{i}", g(f'IF(AND(LEN(C{i})=16,RIGHT(C{i},1)=AJ{i}),"OK","ERRORE")'))
-            ag = lambda rng: f"INDEX({R_[rng]},MATCH(A{i},{R_['ag_m']},0))"
+            ag = lambda rng, i=i: f"INDEX({R_[rng]},MATCH(A{i},{R_['ag_m']},0))"
             cambio = (f"OR({ag('ag_liv')}&\"\"<>D{i}&\"\",ABS({ag('ag_pt')}-F{i})>{tol},"
                       f"ABS({ag('ag_sup')}-L{i})>{tol},{ag('ag_dat')}<>E{i})")
             put(ws, f"AS{i}", g(f'IF(ISNA(MATCH(A{i},{R_["ag_m"]},0)),"OK",IF(AND(G{i}="",{cambio}),"ERRORE","OK"))'))
@@ -287,12 +288,12 @@ class Foglio:
         self.R.update({"s_cli": E("B"), "s_m": E("A"), "s_irpef": E("Q"), "s_inps": E("O"), "s_err": E("AT"),
                        **{f"s_{c}": E(letter) for c, letter in zip(
                            ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C09", "C10"],
-                           ["AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS"])}})
+                           ["AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS"], strict=True)}})
         # each Python finding must be an ERRORE in the sheet, and every other row OK
         an = self.o["anomalie"]
         colonna = {"C01": "AK", "C02": "AL", "C03": "AM", "C04": "AN", "C05": "AO", "C06": "AP", "C07": "AQ", "C09": "AR",
                    "C10": "AS"}
-        trovate = set(zip(an["controllo"], an["matricola"]))
+        trovate = set(zip(an["controllo"], an["matricola"], strict=True))
         for k, t in enumerate(m.itertuples(index=False)):
             for codice, letter in colonna.items():
                 if (codice, t.matricola) in trovate or k % 10 == 0:
@@ -301,7 +302,7 @@ class Foglio:
         ws.freeze_panes = "D5"
         ws.auto_filter.ref = f"A4:AT{last}"
 
-    def f24(self, ws):
+    def f24(self, ws) -> None:
         R_, rec = self.R, self.o["riconciliazione_f24"]
         title(ws, "F24 del mese: deleghe contro cedolini",
               "Ritenute IRPEF (codice tributo 1001) e contributi a carico dei dipendenti, per cliente.")
@@ -323,7 +324,7 @@ class Foglio:
         esito_rule(ws, f"H5:H{last}")
         self.R.update({"f24_cli": f"F24!$A$5:$A${last}", "f24_es": f"F24!$H$5:$H${last}"})
 
-    def novembre(self, ws):
+    def novembre(self, ws) -> None:
         R_, n = self.R, self.o["novembre"]
         title(ws, "Novembre 2026: la nuova tranche del CCNL Terziario",
               "Si aggiorna dal foglio Mese. Superminimo assorbibile: verificare la lettera di assunzione di ciascuno.")
@@ -332,11 +333,11 @@ class Foglio:
                        "Aumento mensile", "Assorbito", "Da pagare", "Nuovo tabellare", "Nuovo superminimo"])
         first = 5
         for i in range(first, first + RIGHE):
-            g = lambda expr: f'=IF($A{i}="","",{expr})'
+            g = lambda expr, i=i: f'=IF($A{i}="","",{expr})'
             for letter, src in (("A", "A"), ("B", "B"), ("C", "D"), ("D", "F"), ("E", "L"), ("F", "H")):
                 fmt = NUM2 if letter == "E" else None
                 put(ws, f"{letter}{i}", f'=IF(Mese!$A{i}="","",Mese!{src}{i})', color=GREEN, fmt=fmt)
-            lk = lambda rng: f"INDEX({rng},MATCH(C{i},{R_['lv']},0))"
+            lk = lambda rng, i=i: f"INDEX({rng},MATCH(C{i},{R_['lv']},0))"
             put(ws, f"G{i}", g(f"ROUND(({lk(R_['min_next'])}-{lk(R_['min'])})*D{i},2)"), fmt=NUM2)
             put(ws, f"H{i}", g(f"IF(F{i},MIN(E{i},G{i}),0)"), fmt=NUM2)
             put(ws, f"I{i}", g(f"ROUND(G{i}-H{i},2)"), fmt=NUM2)
@@ -351,7 +352,7 @@ class Foglio:
         self.R.update({"n_cli": N("B"), "n_aum": N("G"), "n_ass": N("H"), "n_pag": N("I")})
         ws.freeze_panes = "B5"
 
-    def riepilogo(self, ws):
+    def riepilogo(self, ws) -> None:
         R_, o = self.R, self.o
         title(ws, "Riepilogo del mese", "Errori per controllo e cliente, e il costo della tranche di novembre.")
         clienti = list(C.CLIENTI)
@@ -359,7 +360,7 @@ class Foglio:
         header(ws, 4, ["Codice", "Controllo", *[f"Cliente {c}" for c in clienti], "Totale"])
         an = o["anomalie"]
         r = 5
-        for codice, (voce, desc, _) in controlli.CONTROLLI.items():
+        for codice, (voce, _desc, _) in controlli.CONTROLLI.items():
             put(ws, f"A{r}", codice, bold=True)
             put(ws, f"B{r}", voce)
             for j, c in enumerate(clienti):
@@ -402,7 +403,7 @@ class Foglio:
             put(ws, f"{letter}{r}", f"={letter}{r - 1}*{R_['mensilita']}", fmt=EUR, bold=True)
         put(ws, f"B{r + 1}", "Lordo dipendente, senza contributi a carico dell'azienda.", color=MUTED, italic=True)
 
-    def riconciliazione(self, ws):
+    def riconciliazione(self, ws) -> None:
         title(ws, "Riconciliazione: formule del foglio contro Python",
               "La colonna D è scritta da src/build_foglio.py con i risultati di pandas; la colonna E è la formula.")
         widths(ws, {"A": 16, "B": 52, "C": 3, "D": 18, "E": 18, "F": 14, "G": 8})
@@ -425,7 +426,7 @@ class Foglio:
         ws.freeze_panes = "A7"
         self.recon = "Riconciliazione!B3"
 
-    def leggimi(self, ws, names):
+    def leggimi(self, ws, names) -> None:
         widths(ws, {"A": 3, "B": 22, "C": 100})
         put(ws, "B2", "Controlli cedolini", bold=True, size=18)
         put(ws, "B3", "Dieci controlli sui cedolini del mese, prima dell'invio al cliente: CCNL Terziario Confcommercio",

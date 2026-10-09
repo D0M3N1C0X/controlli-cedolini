@@ -11,7 +11,7 @@
 - **29 segnalazioni: 28 cedolini e 1 F24**, 21 ad alta priorità; cliente A 6, cliente B 16, cliente C 7.
 - **6 dipendenti sono pagati sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Mancano 175,44 € al mese in tutto, più gli arretrati da novembre 2025.
 - **L'F24 del cliente C ha 212,40 € di ritenute in meno** della somma dei cedolini: va integrato prima della scadenza del versamento.
-- **Dal 1° novembre 2026 i minimi salgono:** 3.927,52 € al mese per 122 dipendenti. Il superminimo assorbibile ne copre 1.478,70 € in 45 casi; restano 2.448,82 € al mese, 34.283 € l'anno su 14 mensilità.
+- **Dal 1° novembre 2026 i minimi salgono:** 3.927,50 € al mese per 122 dipendenti. Il superminimo assorbibile ne copre 1.478,69 € in 45 casi; restano 2.448,81 € al mese, 34.283 € l'anno su 14 mensilità.
 - **I controlli trovano ogni alterazione sopra il centesimo** in 878 prove casuali (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).
 
 ## 1. Le segnalazioni, cedolino per cedolino
@@ -20,7 +20,7 @@
 |---|---|---|---:|---:|---:|---:|
 | B031 | B | C01 | alta | 890,84 € | 873,34 € | −17,50 € |
 | B036 | B | C01 | alta | 1.486,38 € | 1.456,03 € | −30,35 € |
-| B044 | B | C01 | alta | 2.233,60 € | 2.186,25 € | −47,35 € |
+| B044 | B | C01 | alta | 2.233,58 € | 2.186,23 € | −47,35 € |
 | B052 | B | C01 | alta | 1.658,01 € | 1.626,39 € | −31,62 € |
 | B064 | B | C01 | alta | 1.395,89 € | 1.371,58 € | −24,31 € |
 | B082 | B | C01 | alta | 1.395,89 € | 1.371,58 € | −24,31 € |
@@ -40,9 +40,9 @@
 | B084 | B | C05 | media | 17,97 gg | 15,80 gg | -2,17 gg |
 | A001 | A | C06 | alta | 1.310,00 € | 1.347,50 € | 37,50 € |
 | C093 | C | C06 | alta | 1.528,20 € | 1.628,20 € | 100,00 € |
-| B090 | B | C07 | media | 1.752,09 € | 2.374,83 € | 622,74 € |
+| B090 | B | C07 | media | 1.752,08 € | 2.374,82 € | 622,74 € |
 | C099 | C | C07 | media | 1.467,12 € | 2.045,04 € | 577,92 € |
-| F24 | C | C08 | alta | 6.258,10 € | 6.045,70 € | −212,40 € |
+| F24 | C | C08 | alta | 6.345,71 € | 6.133,31 € | −212,40 € |
 | B058 | B | C09 | alta | valido | `GFZPLG92P01Z321A` | - |
 | C107 | C | C09 | alta | valido | `ZCCGMF94M55Z282A` | - |
 | B070 | B | C10 | alta | superminimo 150 | superminimo 0 | - |
@@ -70,8 +70,8 @@
 | Cliente | Ritenute in F24 (1001) | Ritenute nei cedolini | Differenza | Contributi in F24 | Contributi nei cedolini | Differenza |
 |---|---:|---:|---:|---:|---:|---:|
 | A | 4.315,35 € | 4.315,35 € | 0,00 € | 3.049,26 € | 3.049,26 € | 0,00 € |
-| B | 17.977,00 € | 17.977,00 € | 0,00 € | 12.763,85 € | 12.763,85 € | 0,00 € |
-| C | 6.045,70 € | 6.258,10 € | −212,40 € | 4.462,36 € | 4.462,36 € | 0,00 € |
+| B | 18.064,58 € | 18.064,58 € | 0,00 € | 12.787,84 € | 12.787,84 € | 0,00 € |
+| C | 6.133,31 € | 6.345,71 € | −212,40 € | 4.486,35 € | 4.486,35 € | 0,00 € |
 
 *Le ritenute IRPEF dei dati sintetici non sono calcolate con le regole fiscali: servono solo a mostrare la riconciliazione.*
 
@@ -82,8 +82,8 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 | Cliente | Dipendenti | Aumento al mese | Assorbito | Da pagare al mese | Costo annuo (14 mensilità) |
 |---|---:|---:|---:|---:|---:|
 | Cliente A | 18 | 565,41 € | 277,65 € | 287,76 € | 4.029 € |
-| Cliente B | 77 | 2.492,17 € | 897,43 € | 1.594,74 € | 22.326 € |
-| Cliente C | 27 | 869,94 € | 303,62 € | 566,32 € | 7.928 € |
+| Cliente B | 77 | 2.492,16 € | 897,43 € | 1.594,73 € | 22.326 € |
+| Cliente C | 27 | 869,93 € | 303,61 € | 566,32 € | 7.928 € |
 
 *Lordo dipendente, senza i contributi a carico dell'azienda. L'assorbibilità del superminimo dipende dalla lettera di assunzione e dagli accordi aziendali: va verificata dipendente per dipendente prima di comunicarla.*
 
@@ -108,7 +108,7 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 
 | Voce alterata | ± 0,005 € | ± 0,02 € | ± 1,00 € | ± 10,00 € | ± 100,00 € |
 |---|---:|---:|---:|---:|---:|
-| tabellare | 19% | 100% | 100% | 100% | 100% |
+| tabellare | 14% | 100% | 100% | 100% | 100% |
 | scatti | 12% | 100% | 100% | 100% | 100% |
 | superminimo | 10% | 100% | 100% | 100% | 100% |
 | straordinari | 14% | 100% | 100% | 100% | 100% |

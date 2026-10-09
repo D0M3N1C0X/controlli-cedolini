@@ -12,8 +12,19 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
 > **Dati sintetici, regole reali.** Tre clienti e 122 dipendenti inventati, con errori inseriti apposta;
-> minimi, scatti e ferie del CCNL Terziario Confcommercio con le fonti in [docs/fonti.md](docs/fonti.md).
+> minimi (ricostruiti dalla circolare Confcommercio), scatti e ferie del CCNL Terziario con le fonti in
+> [docs/fonti.md](docs/fonti.md).
 > Non è consulenza del lavoro.
+
+> **In English.** Ten pre-release checks on Italian payslips under the retail and services collective
+> agreement (CCNL Terziario): contractual minimums, seniority steps, social security, severance accrual,
+> holiday balances, payslip arithmetic, unexplained swings, tax-payment reconciliation, tax-code validity and
+> undeclared master-data changes, plus the cost of the November 2026 pay increase per client. Built three
+> times, all giving the same results: in Python, as a live-formula spreadsheet (reconciled on 435 values) and
+> as a browser tool where payslip files never leave the computer (checked on 1,807 values). On synthetic data
+> it finds all 29 planted errors with no false alarms. Pay tables are rebuilt to the cent from the employers'
+> association's official note; every rule has its source in [docs/fonti.md](docs/fonti.md). The rest of the
+> repository is in Italian, the language of Italian payroll.
 
 ### ▶ [Prova lo strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) · [Leggi il rapporto di settembre](https://d0m3n1c0x.github.io/controlli-cedolini/) · [Scarica il foglio di controllo](https://github.com/D0M3N1C0X/controlli-cedolini/raw/main/deliverables/foglio_controllo_cedolini.xlsx)
 
@@ -24,7 +35,7 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 | | |
 |---|---|
 | **29 segnalazioni su 122 cedolini e 3 F24**, 21 ad alta priorità. Ognuna con valore atteso, valore trovato e cosa fare. | **6 dipendenti sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Sono 175,44 € al mese, più gli arretrati da novembre 2025. |
-| **Un F24 con 212,40 € di ritenute in meno** della somma dei cedolini del cliente. | **Novembre 2026:** 3.927,52 € al mese di aumenti dei minimi; i superminimi assorbibili ne coprono 1.478,70 €, restano **2.448,82 € al mese**. |
+| **Un F24 con 212,40 € di ritenute in meno** della somma dei cedolini del cliente. | **Novembre 2026:** 3.927,50 € al mese di aumenti dei minimi; i superminimi assorbibili ne coprono 1.478,69 €, restano **2.448,81 € al mese**. |
 
 ## I controlli
 
@@ -70,7 +81,9 @@ l'F24: non serve sapere come l'ha calcolata il software paghe.
 | [`foglio_controllo_cedolini.xlsx`](deliverables/foglio_controllo_cedolini.xlsx) | chi elabora le paghe | Si incollano i cedolini del mese e del mese prima (fino a 250 righe, formule già pronte) e gli F24: esiti OK/ERRORE riga per riga, riepilogo per cliente, tranche di novembre, parametri modificabili, riconciliazione con Python. |
 | [Rapporto](report/rapporto.md) | il responsabile del team | Le segnalazioni con cosa fare, l'F24, la tranche di novembre, quanto ci si può fidare dei controlli. |
 | [`anomalie.csv`](report/anomalie.csv) | un altro strumento | Le segnalazioni in formato tabellare, da caricare in un ticket o in un CRM. |
-| [`docs/fonti.md`](docs/fonti.md) | chi verifica | Fonte e stato di ogni regola, e cosa ricontrollare prima di usarlo su dati veri. |
+| [`docs/fonti.md`](docs/fonti.md) | chi verifica | Fonte e stato di ogni regola, le correzioni fatte e cosa ricontrollare prima di usarlo su dati veri. |
+| [`docs/decisioni.md`](docs/decisioni.md) | chi verifica il metodo | Ogni scelta di metodo, con l'alternativa che ha sostituito e il perché. |
+| [`docs/dizionario-dati.md`](docs/dizionario-dati.md) | chi usa i dati | Ogni colonna, livello, evento e tipo di errore; un test lo tiene completo. |
 
 ## Usare lo strumento nel browser
 
@@ -104,7 +117,10 @@ Test, compreso il foglio calcolato in Python e confrontato con pandas:
 ```bash
 pip install -r requirements-dev.txt
 pytest
+ruff check .                 # lo stesso controllo dello stile della CI; regole in pyproject.toml
 ```
+
+Ogni funzione in `src/` dichiara cosa restituisce; la CI controlla lo stile e misura la copertura dei test.
 
 ## Struttura
 
@@ -126,7 +142,10 @@ pytest
 │   └── run_all.py           tutto in un comando
 ├── deliverables/            il foglio di calcolo
 ├── report/                  rapporto, pagina HTML, segnalazioni
-├── docs/fonti.md
+├── docs/
+│   ├── fonti.md             fonte e stato di ogni regola, correzioni
+│   ├── decisioni.md         le scelte di metodo e le alternative scartate
+│   └── dizionario-dati.md   ogni colonna dei dati
 └── tests/
 ```
 
@@ -136,16 +155,8 @@ pytest
   dell'1% non sono modellati. In uso reale l'aliquota viene dalla posizione INPS del cliente.
 - **Un CCNL, un mese ordinario:** tredicesima, quattordicesima, malattia, cessazioni e conguagli non sono
   controllati. L'IRPEF dei dati sintetici non è calcolata con le regole fiscali: serve solo all'F24.
-- **Fonti secondarie concordi** per minimi e scatti: prima dell'uso vanno ricontrollati sul testo firmato.
-
-## In English
-
-Ten pre-release checks on Italian payslips under the retail and services collective agreement
-(CCNL Terziario): contractual minimums, seniority steps, social security, severance accrual, holiday
-balances, payslip arithmetic, unexplained swings, tax-payment reconciliation, tax-code validity and
-undeclared master-data changes, plus the cost of the November 2026 pay increase per client. Built three
-times, all giving the same results: in Python, as a live-formula spreadsheet (reconciled on 435 values)
-and as a browser tool where payslip files never leave the computer (checked on 1,807 values).
+- **Fonti:** i minimi sono ricostruiti dalla circolare Confcommercio del 29 marzo 2024; gli importi degli scatti
+  vengono da due fonti secondarie concordi e vanno ricontrollati sul testo del CCNL prima dell'uso.
 
 ## Autore
 

@@ -66,7 +66,8 @@ def per_tipo(k: float = 3.5) -> pd.DataFrame:
     segnalati = set(m.loc[(z > k).any(axis=1), "matricola"])
     err = pd.read_csv(C.ERRORI, keep_default_na=False)
     err = err[err["matricola"] != ""]
-    g = err.assign(trovato=err["matricola"].isin(segnalati)).groupby("tipo", sort=False)["trovato"].agg(["count", "sum"])
+    trovati = err.assign(trovato=err["matricola"].isin(segnalati)).groupby("tipo", sort=False)["trovato"]
+    g = trovati.agg(["count", "sum"])
     g = g.rename(columns={"count": "errori", "sum": "trovati_statistico"}).astype(int)
     return g.reset_index()
 
