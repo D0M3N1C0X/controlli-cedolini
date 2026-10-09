@@ -18,7 +18,7 @@ import regole as R
 CONTROLLI = {
     "C01": ("Minimo tabellare", "Paga base + contingenza diversa dal minimo del livello, part-time compreso", "alta"),
     "C02": ("Scatti di anzianità", "Importo degli scatti diverso da quelli maturati dalla data di assunzione", "alta"),
-    "C03": ("Contributi INPS", "Contributo a carico del dipendente diverso da imponibile × aliquota", "alta"),
+    "C03": ("Contributi INPS", "Contributo a carico del dipendente diverso da imponibile arrotondato all'euro × aliquota", "alta"),
     "C04": ("Quota TFR", "Rateo TFR diverso da retribuzione ordinaria × 14 / 13,5 / 12", "media"),
     "C05": ("Residuo ferie", "Residuo diverso da residuo del mese prima + maturate - godute", "media"),
     "C06": ("Quadratura", "Lordo diverso dalla somma delle voci, o netto diverso da lordo meno trattenute", "alta"),
@@ -45,13 +45,13 @@ def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
     a["tabellare"] = [R.centesimi(t.loc[l, C.COLONNA_MINIMO] * p) for l, p in zip(m["livello"], m["part_time"])]
     a["scatti_n"] = [R.scatti_maturati(date.fromisoformat(d), C.MESE) for d in m["data_assunzione"]]
     a["scatti"] = [R.centesimi(t.loc[l, "scatto"] * n * p) for l, n, p in zip(m["livello"], a["scatti_n"], m["part_time"])]
-    a["contributi_inps"] = (m["lordo"] * C.ALIQUOTA_DIPENDENTE).map(R.centesimi)
+    a["contributi_inps"] = m["lordo"].map(R.contributi)
     ordinaria = m["tabellare"] + m["scatti"] + m["superminimo"]
     a["quota_tfr"] = ordinaria.map(R.quota_tfr)
     residuo_prec = m["matricola"].map(prec.set_index("matricola")["ferie_residuo"]).fillna(0.0)
     a["ferie_residuo"] = (residuo_prec + R.ferie_mese() - m["ferie_godute"]).round(4)
-    a["lordo"] = (ordinaria + m["straordinari"]).round(2)
-    a["netto"] = (m["lordo"] - m["contributi_inps"] - m["irpef"] - m["altre_trattenute"]).round(2)
+    a["lordo"] = (ordinaria + m["straordinari"]).map(R.centesimi)
+    a["netto"] = (m["lordo"] - m["contributi_inps"] - m["irpef"] - m["altre_trattenute"]).map(R.centesimi)
     a["netto_prec"] = m["matricola"].map(prec.set_index("matricola")["netto"])
     a["variazione"] = m["netto"] / a["netto_prec"] - 1
     return a
@@ -103,10 +103,10 @@ def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.D
                 segnala(i, "C10", "; ".join(f"{c} {_fmt(a)}" for c, a, _ in cambi),
                         "; ".join(f"{c} {_fmt(b)}" for c, _, b in cambi))
 
-    somme = m.groupby("cliente")[["irpef", "contributi_inps"]].sum().round(2)
+    somme = m.groupby("cliente")[["irpef", "contributi_inps"]].sum().map(R.centesimi)
     rec = f24.set_index("cliente").join(somme)
-    rec["diff_ritenute"] = (rec["ritenute_1001"] - rec["irpef"]).round(2)
-    rec["diff_contributi"] = (rec["contributi_dipendente"] - rec["contributi_inps"]).round(2)
+    rec["diff_ritenute"] = (rec["ritenute_1001"] - rec["irpef"]).map(R.centesimi)
+    rec["diff_contributi"] = (rec["contributi_dipendente"] - rec["contributi_inps"]).map(R.centesimi)
     for cliente, r in rec.iterrows():
         if abs(r["diff_ritenute"]) > C.TOLLERANZA or abs(r["diff_contributi"]) > C.TOLLERANZA:
             voce = "ritenute_1001" if abs(r["diff_ritenute"]) > C.TOLLERANZA else "contributi_dipendente"
@@ -144,9 +144,9 @@ def novembre(m: pd.DataFrame) -> pd.DataFrame:
                     for l, p in zip(n["livello"], n["part_time"])]
     n["assorbito"] = [min(s, a) if ok else 0.0 for s, a, ok in zip(n["superminimo"], n["aumento"],
                                                                     n["superminimo_assorbibile"])]
-    n["da_pagare"] = (n["aumento"] - n["assorbito"]).round(2)
+    n["da_pagare"] = (n["aumento"] - n["assorbito"]).map(R.centesimi)
     n["nuovo_tabellare"] = [R.centesimi(t.loc[l, C.COLONNA_MINIMO_PROSSIMO] * p) for l, p in zip(n["livello"], n["part_time"])]
-    n["nuovo_superminimo"] = (n["superminimo"] - n["assorbito"]).round(2)
+    n["nuovo_superminimo"] = (n["superminimo"] - n["assorbito"]).map(R.centesimi)
     return n
 
 

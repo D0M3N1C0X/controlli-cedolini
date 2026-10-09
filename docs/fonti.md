@@ -21,6 +21,7 @@ Ogni regola che i controlli applicano, da dove viene e quanto è stata verificat
 | F07 | Tredicesima e quattordicesima | Sintesi Filcams CGIL | Fonti concordi |
 | F08 | Carattere di controllo del codice fiscale | DM 23 dicembre 1976; algoritmo verificato sull'esempio `RSSMRA85T10A562S` | Conoscenza generale |
 | F09 | Ritenute su redditi di lavoro dipendente versate in F24 con codice tributo 1001 | Prassi Agenzia delle Entrate | Conoscenza generale |
+| F10 | L'imponibile contributivo si arrotonda all'unità di euro prima di applicare l'aliquota: 1.779,00 × 9,19% = 163,49 € | [ODCEC Torino, "Conosci la tua busta paga?"](https://odcec.torino.it/public/pagine/slides.pdf), p. 24: "Imponibile contributivo 1.779,00 (sempre arrotondato)" | Fonte secondaria, da ricontrollare sulle istruzioni UniEmens |
 
 ## Prima di usarlo su dati veri
 

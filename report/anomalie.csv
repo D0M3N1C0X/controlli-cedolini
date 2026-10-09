@@ -9,21 +9,21 @@ A007,A,C02,Scatti di anzianità,49.68,24.84,-24.84,alta
 A016,A,C02,Scatti di anzianità,61.98,41.32,-20.66,alta
 B025,B,C02,Scatti di anzianità,38.94,19.47,-19.47,alta
 B047,B,C02,Scatti di anzianità,24.84,0.0,-24.84,alta
-A003,A,C03,Contributi INPS,182.12,188.06,5.94,alta
-A012,A,C03,Contributi INPS,139.02,143.56,4.54,alta
-B087,B,C03,Contributi INPS,125.65,129.75,4.10,alta
-C098,C,C03,Contributi INPS,198.83,205.32,6.49,alta
+A003,A,C03,Contributi INPS,182.15,188.09,5.94,alta
+A012,A,C03,Contributi INPS,139.04,143.58,4.54,alta
+B087,B,C03,Contributi INPS,125.63,129.73,4.10,alta
+C098,C,C03,Contributi INPS,198.87,205.36,6.49,alta
 B033,B,C04,Quota TFR,194.92,171.27,-23.65,media
 B059,B,C04,Quota TFR,179.38,171.27,-8.11,media
 C101,C,C04,Quota TFR,157.22,143.28,-13.94,media
 A009,A,C05,Residuo ferie,22.9553,20.7886,-2.17,media
 B055,B,C05,Residuo ferie,13.4016,11.2349,-2.17,media
 B084,B,C05,Residuo ferie,17.9678,15.8011,-2.17,media
-A001,A,C06,Quadratura,1310.02,1347.52,37.50,alta
-C093,C,C06,Quadratura,1528.21,1628.21,100.00,alta
-B090,B,C07,Variazione del netto,1752.11,2374.82,622.71,media
-C099,C,C07,Variazione del netto,1467.14,2045.04,577.90,media
-,C,C08,Riconciliazione F24,6258.18,6045.78,-212.40,alta
+A001,A,C06,Quadratura,1310.0,1347.5,37.50,alta
+C093,C,C06,Quadratura,1528.2,1628.2,100.00,alta
+B090,B,C07,Variazione del netto,1752.09,2374.83,622.74,media
+C099,C,C07,Variazione del netto,1467.12,2045.04,577.92,media
+,C,C08,Riconciliazione F24,6258.1,6045.7,-212.40,alta
 B058,B,C09,Codice fiscale,valido,GFZPLG92P01Z321A,,alta
 C107,C,C09,Codice fiscale,valido,ZCCGMF94M55Z282A,,alta
 B070,B,C10,Anagrafica,superminimo 150,superminimo 0,,alta

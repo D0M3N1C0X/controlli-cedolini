@@ -15,6 +15,12 @@ const fmtValore = (v) => (typeof v === "number" ? String(Number(v.toPrecision(6)
 
 // ---- Arrotondamenti -------------------------------------------------------------------------
 // ROUND di Excel: 15 cifre significative, poi metà per eccesso (come regole.centesimi in Python).
+// Imponibile contributivo all'unità di euro, metà per eccesso (come regole.euro in Python).
+export function euro(x) {
+  const v = Number(Number(x).toPrecision(15));
+  return Math.sign(v) * Math.floor(Math.abs(v) + 0.5);
+}
+
 export function centesimi(x) {
   const s = Number(x).toPrecision(15);
   const neg = s.startsWith("-");
@@ -31,7 +37,6 @@ function rint(v) {
   const r = Math.round(v);
   return Math.abs(v - Math.trunc(v)) === 0.5 ? 2 * Math.round(v / 2) : r;
 }
-export const round2 = (x) => rint(x * 100) / 100;
 export const round4 = (x) => rint(x * 10000) / 10000;
 
 // ---- Codice fiscale (DM 23 dicembre 1976) ------------------------------------------------------
@@ -80,13 +85,13 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
     a.tabellare = centesimi(t[cfg.colonna_minimo] * r.part_time);
     a.scatti_n = scattiMaturati(r.data_assunzione, cfg.mese, cfg);
     a.scatti = centesimi(t.scatto * a.scatti_n * r.part_time);
-    a.contributi_inps = centesimi(r.lordo * cfg.aliquota);
+    a.contributi_inps = centesimi(euro(r.lordo) * cfg.aliquota);
     const ordinaria = r.tabellare + r.scatti + r.superminimo;
     a.quota_tfr = centesimi(ordinaria * cfg.mensilita / cfg.divisore_tfr / 12);
     const p = prevBy.get(r.matricola);
     a.ferie_residuo = round4((p ? p.ferie_residuo : 0) + ferieMese - r.ferie_godute);
-    a.lordo = round2(ordinaria + r.straordinari);
-    a.netto = round2(r.lordo - r.contributi_inps - r.irpef - r.altre_trattenute);
+    a.lordo = centesimi(ordinaria + r.straordinari);
+    a.netto = centesimi(r.lordo - r.contributi_inps - r.irpef - r.altre_trattenute);
     for (const [codice, voce, tol] of [["C01", "tabellare", cfg.tolleranza], ["C02", "scatti", cfg.tolleranza],
       ["C03", "contributi_inps", cfg.tolleranza], ["C04", "quota_tfr", cfg.tolleranza],
       ["C05", "ferie_residuo", cfg.tolleranza_ferie]]) {
@@ -114,8 +119,8 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
   const riconciliazione = [];
   for (const f of f24) {
     const s = somme[f.cliente] || { irpef: 0, contributi_inps: 0 };
-    const irpef = round2(s.irpef), inps = round2(s.contributi_inps);
-    const dr = round2(f.ritenute_1001 - irpef), dc = round2(f.contributi_dipendente - inps);
+    const irpef = centesimi(s.irpef), inps = centesimi(s.contributi_inps);
+    const dr = centesimi(f.ritenute_1001 - irpef), dc = centesimi(f.contributi_dipendente - inps);
     riconciliazione.push({ cliente: f.cliente, ritenute_1001: f.ritenute_1001, irpef, diff_ritenute: dr,
       contributi_dipendente: f.contributi_dipendente, contributi_inps: inps, diff_contributi: dc });
     if (Math.abs(dr) > cfg.tolleranza || Math.abs(dc) > cfg.tolleranza) {
@@ -135,7 +140,7 @@ export function novembre(mese, ccnl, cfg) {
     const t = ccnl[r.livello];
     const aumento = centesimi((t[cfg.colonna_minimo_prossimo] - t[cfg.colonna_minimo]) * r.part_time);
     const assorbito = r.superminimo_assorbibile ? Math.min(r.superminimo, aumento) : 0;
-    return { matricola: r.matricola, cliente: r.cliente, aumento, assorbito, da_pagare: round2(aumento - assorbito) };
+    return { matricola: r.matricola, cliente: r.cliente, aumento, assorbito, da_pagare: centesimi(aumento - assorbito) };
   });
 }
 

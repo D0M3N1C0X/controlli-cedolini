@@ -55,7 +55,7 @@ def test_un_cedolino_incollato_viene_controllato(foglio, valori, tmp_path):
     ws = wb["Mese"]
     r = next(i for i in range(first, last + 1) if ws[f"A{i}"].value is None)
     riga = ["Z999", "B", "RSSMRA85T10A562S", "4", date(2024, 1, 15), 1.0, "", True,
-            1746.68, 0, 0.0, 0.0, 0.0, 1746.68, 160.52, 1586.16, 200.0, 23.79, 1362.37, 150.95, 2.1667, 0.0, 2.1667]
+            1746.68, 0, 0.0, 0.0, 0.0, 1746.68, 160.55, 1586.13, 200.0, 23.79, 1362.34, 150.95, 2.1667, 0.0, 2.1667]
     for j, v in enumerate(riga, start=1):
         ws.cell(row=r, column=j, value=v)
     nuovo = tmp_path / "incollato.xlsx"

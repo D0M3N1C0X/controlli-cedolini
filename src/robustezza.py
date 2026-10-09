@@ -12,6 +12,7 @@ import pandas as pd
 
 import config as C
 import controlli
+import regole as R
 
 VOCI = ["tabellare", "scatti", "superminimo", "straordinari", "lordo", "contributi_inps", "irpef",
         "altre_trattenute", "netto", "quota_tfr", "ferie_residuo"]
@@ -35,7 +36,7 @@ def run(seed: int = 7, prove: int = PROVE) -> pd.DataFrame:
         # i controlli di riga girano sul solo cedolino alterato; l'F24 resta quello trasmesso
         riga, _ = controlli.esegui(x.loc[[i]].reset_index(drop=True), prec, f24.iloc[0:0])
         cliente = x.loc[i, "cliente"]
-        somme = x[x["cliente"] == cliente][["irpef", "contributi_inps"]].sum().round(2)
+        somme = x[x["cliente"] == cliente][["irpef", "contributi_inps"]].sum().map(R.centesimi)
         f = f24.set_index("cliente").loc[cliente]
         c08 = (abs(f["ritenute_1001"] - somme["irpef"]) > C.TOLLERANZA
                or abs(f["contributi_dipendente"] - somme["contributi_inps"]) > C.TOLLERANZA)

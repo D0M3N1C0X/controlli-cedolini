@@ -158,7 +158,7 @@ def main() -> None:
     libero = lambda r: r["evento"] == "" and r["matricola"] not in usati()
     for _ in range(4):        # aliquota sbagliata
         i = prendi(libero)
-        S.loc[i, "contributi_inps"] = R.centesimi(S.loc[i, "lordo"] * 0.0949)
+        S.loc[i, "contributi_inps"] = R.centesimi(R.euro(S.loc[i, "lordo"]) * 0.0949)
         S.loc[i, "imponibile_irpef"] = R.centesimi(S.loc[i, "lordo"] - S.loc[i, "contributi_inps"])
         S.loc[i, "irpef"] = irpef_sintetica(S.loc[i, "imponibile_irpef"])
         S.loc[i, "altre_trattenute"] = R.centesimi(S.loc[i, "imponibile_irpef"] * 0.015)

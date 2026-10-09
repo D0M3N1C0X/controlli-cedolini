@@ -40,6 +40,13 @@ def test_arrotondamento_come_excel():
     assert R.centesimi(2.675) == 2.68
 
 
+def test_contributi_su_imponibile_arrotondato_all_euro():
+    # F10: 1.779,00 x 9,19% = 163,49 (esempio ODCEC Torino); 1.549,91 si arrotonda a 1.550
+    assert R.euro(1549.5) == 1550 and R.euro(1549.49) == 1549
+    assert R.contributi(1779.0) == 163.49
+    assert R.contributi(1549.91) == 142.45      # sul lordo non arrotondato sarebbe 142,44
+
+
 def test_codice_fiscale():
     assert codice_fiscale.valido("RSSMRA85T10A562S")
     assert not codice_fiscale.valido("RSSMRA85T10A562T")

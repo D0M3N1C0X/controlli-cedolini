@@ -250,7 +250,7 @@ class Foglio:
             put(ws, f"Y{i}", g(f"(YEAR({R_['mese']})*12+MONTH({R_['mese']}))-(YEAR(E{i})*12+MONTH(E{i}))"))
             put(ws, f"Z{i}", g(f"MIN({R_['scatti_max']},MAX(0,INT((Y{i}-1)/36)))"))
             put(ws, f"AA{i}", g(f"ROUND({lookup(R_['scatto'])}*Z{i}*F{i},2)"), fmt=NUM2)
-            put(ws, f"AB{i}", g(f"ROUND(N{i}*{R_['aliquota']},2)"), fmt=NUM2)
+            put(ws, f"AB{i}", g(f"ROUND(ROUND(N{i},0)*{R_['aliquota']},2)"), fmt=NUM2)
             put(ws, f"AC{i}", g(f"ROUND((I{i}+K{i}+L{i})*{R_['mensilita']}/{R_['divisore_tfr']}/12,2)"), fmt=NUM2)
             put(ws, f"AD{i}", g(f'IFERROR(INDEX({R_["ag_f"]},MATCH(A{i},{R_["ag_m"]},0)),0)'), color=GREEN, fmt=NUM4)
             put(ws, f"AE{i}", g(f"ROUND(AD{i}+ROUND({R_['ferie']}/12,4)-V{i},4)"), fmt=NUM4)

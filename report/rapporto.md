@@ -28,21 +28,21 @@
 | A016 | A | C02 | alta | 61,98 € | 41,32 € | −20,66 € |
 | B025 | B | C02 | alta | 38,94 € | 19,47 € | −19,47 € |
 | B047 | B | C02 | alta | 24,84 € | 0,00 € | −24,84 € |
-| A003 | A | C03 | alta | 182,12 € | 188,06 € | 5,94 € |
-| A012 | A | C03 | alta | 139,02 € | 143,56 € | 4,54 € |
-| B087 | B | C03 | alta | 125,65 € | 129,75 € | 4,10 € |
-| C098 | C | C03 | alta | 198,83 € | 205,32 € | 6,49 € |
+| A003 | A | C03 | alta | 182,15 € | 188,09 € | 5,94 € |
+| A012 | A | C03 | alta | 139,04 € | 143,58 € | 4,54 € |
+| B087 | B | C03 | alta | 125,63 € | 129,73 € | 4,10 € |
+| C098 | C | C03 | alta | 198,87 € | 205,36 € | 6,49 € |
 | B033 | B | C04 | media | 194,92 € | 171,27 € | −23,65 € |
 | B059 | B | C04 | media | 179,38 € | 171,27 € | −8,11 € |
 | C101 | C | C04 | media | 157,22 € | 143,28 € | −13,94 € |
 | A009 | A | C05 | media | 22,96 gg | 20,79 gg | -2,17 gg |
 | B055 | B | C05 | media | 13,40 gg | 11,23 gg | -2,17 gg |
 | B084 | B | C05 | media | 17,97 gg | 15,80 gg | -2,17 gg |
-| A001 | A | C06 | alta | 1.310,02 € | 1.347,52 € | 37,50 € |
-| C093 | C | C06 | alta | 1.528,21 € | 1.628,21 € | 100,00 € |
-| B090 | B | C07 | media | 1.752,11 € | 2.374,82 € | 622,71 € |
-| C099 | C | C07 | media | 1.467,14 € | 2.045,04 € | 577,90 € |
-| F24 | C | C08 | alta | 6.258,18 € | 6.045,78 € | −212,40 € |
+| A001 | A | C06 | alta | 1.310,00 € | 1.347,50 € | 37,50 € |
+| C093 | C | C06 | alta | 1.528,20 € | 1.628,20 € | 100,00 € |
+| B090 | B | C07 | media | 1.752,09 € | 2.374,83 € | 622,74 € |
+| C099 | C | C07 | media | 1.467,12 € | 2.045,04 € | 577,92 € |
+| F24 | C | C08 | alta | 6.258,10 € | 6.045,70 € | −212,40 € |
 | B058 | B | C09 | alta | valido | `GFZPLG92P01Z321A` | - |
 | C107 | C | C09 | alta | valido | `ZCCGMF94M55Z282A` | - |
 | B070 | B | C10 | alta | superminimo 150 | superminimo 0 | - |
@@ -69,9 +69,9 @@
 
 | Cliente | Ritenute in F24 (1001) | Ritenute nei cedolini | Differenza | Contributi in F24 | Contributi nei cedolini | Differenza |
 |---|---:|---:|---:|---:|---:|---:|
-| A | 4.315,37 € | 4.315,37 € | 0,00 € | 3.049,18 € | 3.049,18 € | 0,00 € |
-| B | 17.977,09 € | 17.977,09 € | 0,00 € | 12.763,70 € | 12.763,70 € | 0,00 € |
-| C | 6.045,78 € | 6.258,18 € | −212,40 € | 4.462,18 € | 4.462,18 € | 0,00 € |
+| A | 4.315,35 € | 4.315,35 € | 0,00 € | 3.049,26 € | 3.049,26 € | 0,00 € |
+| B | 17.977,00 € | 17.977,00 € | 0,00 € | 12.763,85 € | 12.763,85 € | 0,00 € |
+| C | 6.045,70 € | 6.258,10 € | −212,40 € | 4.462,36 € | 4.462,36 € | 0,00 € |
 
 *Le ritenute IRPEF dei dati sintetici non sono calcolate con le regole fiscali: servono solo a mostrare la riconciliazione.*
 
@@ -108,13 +108,13 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 
 | Voce alterata | ± 0,005 € | ± 0,02 € | ± 1,00 € | ± 10,00 € | ± 100,00 € |
 |---|---:|---:|---:|---:|---:|
-| tabellare | 14% | 100% | 100% | 100% | 100% |
+| tabellare | 19% | 100% | 100% | 100% | 100% |
 | scatti | 12% | 100% | 100% | 100% | 100% |
-| superminimo | 0% | 100% | 100% | 100% | 100% |
+| superminimo | 10% | 100% | 100% | 100% | 100% |
 | straordinari | 14% | 100% | 100% | 100% | 100% |
-| lordo | 0% | 100% | 100% | 100% | 100% |
-| contributi inps | 0% | 100% | 100% | 100% | 100% |
-| irpef | 16% | 100% | 100% | 100% | 100% |
+| lordo | 6% | 100% | 100% | 100% | 100% |
+| contributi inps | 54% | 100% | 100% | 100% | 100% |
+| irpef | 11% | 100% | 100% | 100% | 100% |
 | altre trattenute | 0% | 100% | 100% | 100% | 100% |
 | netto | 0% | 100% | 100% | 100% | 100% |
 | quota tfr | 0% | 100% | 100% | 100% | 100% |
@@ -133,7 +133,7 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 
 *Il rilevatore vede solo gli errori che spostano un rapporto (contributi, TFR, variazioni del netto); minimi, scatti, ferie, codice fiscale e anagrafica richiedono di conoscere il contratto, e lì non trova nulla. Su un dominio scritto in regole, le regole vincono; la statistica serve dove una regola non c'è.*
 
-**Il limite, e come C10 lo restringe.** Un errore coerente passa i controlli aritmetici: il dipendente A010 è assunto al 4° livello; inserito al 5° e ricalcolato da capo, il cedolino torna in ogni voce e prende 61,27 € netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima, senza un evento che lo spieghi, lo trova C10: i due errori di anagrafica inseriti (un livello, un superminimo azzerato) sono segnalati. Resta invisibile solo se è sbagliato fin dall'assunzione: lì serve il confronto con i documenti del cliente, lettera di assunzione e mansioni.
+**Il limite, e come C10 lo restringe.** Un errore coerente passa i controlli aritmetici: il dipendente A010 è assunto al 4° livello; inserito al 5° e ricalcolato da capo, il cedolino torna in ogni voce e prende 61,29 € netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima, senza un evento che lo spieghi, lo trova C10: i due errori di anagrafica inseriti (un livello, un superminimo azzerato) sono segnalati. Resta invisibile solo se è sbagliato fin dall'assunzione: lì serve il confronto con i documenti del cliente, lettera di assunzione e mansioni.
 
 ## 5. Come lo userei in un team payroll
 

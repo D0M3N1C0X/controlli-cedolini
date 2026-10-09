@@ -46,8 +46,14 @@ def scatti_importo(livello: str, n: int, part_time: float) -> float:
     return centesimi(tabella().loc[livello, "scatto"] * n * part_time)
 
 
+def euro(x: float) -> float:
+    """Arrotonda all'unità di euro, metà per eccesso: così si arrotonda l'imponibile contributivo (F10)."""
+    return float(Decimal(f"{float(x):.15g}").quantize(Decimal("1"), rounding=ROUND_HALF_UP))
+
+
 def contributi(lordo: float) -> float:
-    return centesimi(lordo * C.ALIQUOTA_DIPENDENTE)
+    """Contributo a carico del dipendente: aliquota sull'imponibile arrotondato all'euro, poi al centesimo."""
+    return centesimi(euro(lordo) * C.ALIQUOTA_DIPENDENTE)
 
 
 def quota_tfr(retribuzione_ordinaria: float) -> float:

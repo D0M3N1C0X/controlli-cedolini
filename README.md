@@ -32,7 +32,7 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 |---|---|---|
 | C01 | Minimo tabellare | Paga base + contingenza = minimo del livello × part-time |
 | C02 | Scatti di anzianità | Scatti maturati dalla data di assunzione (10 trienni, dal mese successivo) × importo del livello |
-| C03 | Contributi INPS | Contributo a carico del dipendente = imponibile × aliquota |
+| C03 | Contributi INPS | Contributo a carico del dipendente = imponibile arrotondato all'euro × aliquota |
 | C04 | Quota TFR | Rateo = retribuzione ordinaria × 14 / 13,5 / 12 |
 | C05 | Residuo ferie | Residuo = residuo del mese prima + 26/12 − godute |
 | C06 | Quadratura | Lordo = somma delle voci; netto = lordo − trattenute |
