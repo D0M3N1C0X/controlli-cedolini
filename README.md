@@ -55,7 +55,7 @@ l'F24: non serve sapere come l'ha calcolata il software paghe.
   su 28, con 8 falsi allarmi; le regole 28 su 28, con nessuno. Vede solo gli errori che spostano un rapporto
   (contributi, TFR, variazione del netto), non minimi, scatti o anagrafica.
 - **Il limite, ristretto da C10:** un errore *coerente* passa i controlli aritmetici. Un dipendente di
-  4° livello inserito al 5°, con il cedolino ricalcolato da capo, torna in ogni voce e prende 61,27 €
+  4° livello inserito al 5°, con il cedolino ricalcolato da capo, torna in ogni voce e prende 61,29 €
   netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima lo trova C10; resta
   invisibile solo se è sbagliato fin dall'assunzione, e lì serve il confronto con i documenti del
   cliente. Il test `test_limite_dichiarato_errore_coerente` tiene vero il limite.
