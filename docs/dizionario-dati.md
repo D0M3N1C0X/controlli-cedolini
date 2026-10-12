@@ -78,6 +78,8 @@ errori elencati in `errori_inseriti.csv`.
 | `ferie_maturate` | giorni | Ferie maturate nel mese: 26 l'anno diviso 12 |
 | `ferie_godute` | giorni | Ferie godute nel mese |
 | `ferie_residuo` | giorni | Residuo ferie a fine mese |
+| `ratei_13` | intero | Dodicesimi di tredicesima maturati nell'anno, fino al mese compreso (F11) |
+| `ratei_14` | intero | Dodicesimi di quattordicesima maturati da luglio, fino al mese compreso (F11) |
 
 | Evento | Significato |
 |---|---|
@@ -117,3 +119,4 @@ Servono a misurare i controlli: ogni errore deve essere trovato, e nient'altro d
 | `f24` | C08 | F24 diverso dalla somma dei cedolini |
 | `codice_fiscale` | C09 | Codice fiscale trascritto male |
 | `anagrafica` | C10 | Livello o superminimo cambiati senza un evento |
+| `ratei` | C11 | Dodicesimi di tredicesima o quattordicesima che non corrispondono ai mesi di servizio |

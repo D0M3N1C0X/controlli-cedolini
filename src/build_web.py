@@ -24,7 +24,7 @@ def cfg() -> dict:
             "colonna_minimo_prossimo": C.COLONNA_MINIMO_PROSSIMO, "aliquota": C.ALIQUOTA_DIPENDENTE,
             "divisore_tfr": C.DIVISORE_TFR, "mensilita": C.MENSILITA, "ferie_annue": C.FERIE_ANNUE,
             "soglia": C.SOGLIA_VARIAZIONE, "tolleranza": C.TOLLERANZA, "tolleranza_ferie": C.TOLLERANZA_FERIE,
-            "scatti_max": C.SCATTI_MAX, "scatti_anni": C.SCATTI_ANNI}
+            "scatti_max": C.SCATTI_MAX, "scatti_anni": C.SCATTI_ANNI, "giorni_mese_intero": C.GIORNI_MESE_INTERO}
 
 
 def ccnl() -> dict:
@@ -32,8 +32,19 @@ def ccnl() -> dict:
     return {lv: {k: float(v) for k, v in row.items()} for lv, row in t.iterrows()}
 
 
+def write_templates(rows: int = 2) -> None:
+    """The two template files the page offers for download, in the format of an Italian Excel export (semicolon,
+    decimal comma), rebuilt from the data so they never drift from the columns the checks read."""
+    ced = pd.read_csv(C.CEDOLINI, dtype={"livello": str, "evento": str}, keep_default_na=False)
+    f24 = pd.read_csv(C.F24)
+    for df, name in ((ced[ced["mese"] == C.MESE_PRECEDENTE].head(rows), "modello_cedolini.csv"), (f24, "modello_f24.csv")):
+        text = df.to_csv(sep=";", index=False, float_format="%.4f", decimal=",")
+        (WEB / name).write_text(text, encoding="utf-8")
+
+
 def write_inputs() -> None:
     WEB.mkdir(exist_ok=True)
+    write_templates()
     (WEB / "inputs.json").write_text(json.dumps({"cfg": cfg(), "ccnl": ccnl()}, indent=1, sort_keys=True,
                                                 ensure_ascii=False) + "\n", encoding="utf-8")
 

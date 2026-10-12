@@ -34,6 +34,19 @@ def test_scatti_maturati(assunzione, mese, attesi):
     assert R.scatti_maturati(assunzione, mese) == attesi
 
 
+@pytest.mark.parametrize("assunzione, mese, r13, r14", [
+    (date(2015, 5, 4), "2026-09", 9, 3),      # in forza da prima del periodo: tutti i mesi
+    (date(2026, 2, 18), "2026-09", 7, 3),     # febbraio con 11 giorni di servizio non matura
+    (date(2026, 3, 17), "2026-09", 7, 3),     # marzo con 15 giorni esatti matura
+    (date(2026, 9, 1), "2026-09", 1, 1),      # assunto nel mese: un dodicesimo per ciascuna
+    (date(2026, 7, 20), "2026-09", 2, 2),     # luglio con 12 giorni non matura, né per la 13ª né per la 14ª
+    (date(2015, 5, 4), "2026-06", 6, 12),     # a giugno la quattordicesima ha l'anno intero, da luglio 2025
+    (date(2025, 12, 10), "2026-02", 2, 3),    # la 13ª riparte a gennaio; la 14ª conta dicembre (22 giorni)
+])
+def test_ratei_tredicesima_e_quattordicesima(assunzione, mese, r13, r14):
+    assert (R.ratei_13(assunzione, mese), R.ratei_14(assunzione, mese)) == (r13, r14)
+
+
 def test_arrotondamento_come_excel():
     assert R.centesimi(34.245) == 34.25
     assert R.centesimi(22.83 * 2 * 0.75) == 34.25

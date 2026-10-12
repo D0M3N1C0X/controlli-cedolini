@@ -22,6 +22,7 @@ Ogni regola che i controlli applicano, da dove viene e quanto è stata verificat
 | F08 | Carattere di controllo del codice fiscale | DM 23 dicembre 1976; algoritmo verificato sull'esempio `RSSMRA85T10A562S` | Conoscenza generale |
 | F09 | Ritenute su redditi di lavoro dipendente versate in F24 con codice tributo 1001 | Prassi Agenzia delle Entrate | Conoscenza generale |
 | F10 | L'imponibile contributivo si espone in unità di euro e il contributo si arrotonda al centesimo (millesimi da 5 a 9 per eccesso): l'aliquota si applica all'imponibile arrotondato all'euro, 1.779,00 × 9,19% = 163,49 € | [INPS, Documento tecnico UniEmens individuale, versione 4.33 del 29/09/2026](https://www.inps.it/content/dam/inps-site/pdf/prestazioni-e-servizi/uniemens-aziende-private/UniEMENSind.pdf): importi interi e contributivi (p. 31), elemento `<Imponibile>` di `<DatiRetributivi>` (p. 52). Esempio di calcolo: [ODCEC Torino, "Conosci la tua busta paga?"](https://odcec.torino.it/public/pagine/slides.pdf), p. 24 | Primaria per il formato; il calcolo sull'imponibile arrotondato è prassi, confermata dall'esempio |
+| F11 | Ratei di tredicesima e quattordicesima: per il servizio inferiore all'anno, tanti dodicesimi quanti i mesi interi di servizio; le frazioni di mese di almeno 15 giorni contano come mese intero. La tredicesima matura nell'anno solare e si paga alla vigilia di Natale; la quattordicesima si paga entro il 1° luglio sulla retribuzione al 30 giugno, quindi matura da luglio a giugno | [Sintesi Filcams CGIL del CCNL Terziario](https://cgil-agb.it/images/Filcams/pdf/commercio/TERZIARIO_confcommercio.pdf), p. 11, "Mensilità aggiuntive" e "Norme comuni" | Primaria (parte firmataria, sintesi) · il periodo luglio-giugno della quattordicesima è dedotto dalla data di pagamento |
 
 ## Prima di usarlo su dati veri
 
@@ -43,6 +44,9 @@ Ogni regola che i controlli applicano, da dove viene e quanto è stata verificat
 | S06 | C10 confronta livello, part-time, superminimo e data di assunzione con il mese prima; un cambio senza evento è una segnalazione | Un errore coerente spesso nasce da un cambio di anagrafica: il cedolino torna, ma il dato è cambiato senza motivo |
 
 ## Correzioni
+
+- **12 ottobre 2026, ratei.** Aggiunto C11 (F11). I file modello dello strumento nel browser avevano ancora
+  i contributi di prima della correzione F10: ora sono generati dai dati.
 
 - **9 ottobre 2026, minimi.** Il confronto con la circolare Confcommercio n. 16/2024 ha trovato tre differenze
   rispetto alle fonti secondarie usate prima: ai Quadri mancavano gli "altri elementi" di 260,76 € al mese;

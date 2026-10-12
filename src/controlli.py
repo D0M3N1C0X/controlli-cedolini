@@ -29,10 +29,12 @@ CONTROLLI = {
     "C09": ("Codice fiscale", "Carattere di controllo non valido", "alta"),
     "C10": ("Anagrafica",
             "Livello, part-time, superminimo o data di assunzione diversi dal mese prima, senza un evento", "alta"),
+    "C11": ("Ratei 13ª e 14ª",
+            "Dodicesimi maturati diversi dai mesi di servizio nel periodo (frazione di 15 giorni intera)", "media"),
 }
 TIPO_CONTROLLO = {"minimo": "C01", "scatto": "C02", "inps": "C03", "tfr": "C04", "ferie": "C05", "netto": "C06",
                   "variazione": "C07", "f24": "C08", "codice_fiscale": "C09",
-                  "anagrafica": "C10"}
+                  "anagrafica": "C10", "ratei": "C11"}
 
 
 def carica() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
@@ -59,6 +61,9 @@ def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
     a["netto"] = (m["lordo"] - m["contributi_inps"] - m["irpef"] - m["altre_trattenute"]).map(R.centesimi)
     a["netto_prec"] = m["matricola"].map(prec.set_index("matricola")["netto"])
     a["variazione"] = m["netto"] / a["netto_prec"] - 1
+    assunti = [date.fromisoformat(d) for d in m["data_assunzione"]]
+    a["ratei_13"] = [R.ratei_13(d, C.MESE) for d in assunti]
+    a["ratei_14"] = [R.ratei_14(d, C.MESE) for d in assunti]
     return a
 
 
@@ -101,6 +106,10 @@ def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.D
             segnala(i, "C07", float(a.loc[i, "netto_prec"]), float(m.loc[i, "netto"]))
         if not codice_fiscale.valido(m.loc[i, "codice_fiscale"]):
             segnala(i, "C09", "valido", m.loc[i, "codice_fiscale"])
+        r13, r14 = int(m.loc[i, "ratei_13"]), int(m.loc[i, "ratei_14"])
+        e13, e14 = int(a.loc[i, "ratei_13"]), int(a.loc[i, "ratei_14"])
+        if (r13, r14) != (e13, e14):
+            segnala(i, "C11", f"13ª {e13}; 14ª {e14}", f"13ª {r13}; 14ª {r14}")
         p = prev_by.get(m.loc[i, "matricola"])
         if p is not None and m.loc[i, "evento"] == "":
             cambi = [(c, p[c], m.loc[i, c]) for c in ANAGRAFICA if _diverso(p[c], m.loc[i, c])]

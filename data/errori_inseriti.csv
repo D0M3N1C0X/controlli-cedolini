@@ -27,4 +27,7 @@ B058,B,codice_fiscale,carattere di controllo errato
 C107,C,codice_fiscale,carattere di controllo errato
 C100,C,anagrafica,"livello passato da 4 a 5 senza evento: il cedolino torna, ma è più basso"
 B070,B,anagrafica,"superminimo azzerato senza evento: il cedolino torna, ma è più basso"
+B034,B,ratei,mese di assunzione con meno di 15 giorni di servizio contato nella tredicesima
+B040,B,ratei,quattordicesima contata da gennaio invece che da luglio
+B079,B,ratei,un dodicesimo di tredicesima in meno senza assenze che lo spieghino
 ,C,f24,"F24 con 212,40 € di ritenute in meno dei cedolini"

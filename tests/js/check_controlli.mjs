@@ -1,6 +1,6 @@
 // Rifà con web/controlli.js ogni caso calcolato in Python. Esce con 1 alla prima differenza.
 import { readFileSync } from "node:fs";
-import { esegui, novembre, leggiCsv, normalizza } from "../../web/controlli.js";
+import { esegui, novembre, leggiCsv, normalizza, ratei } from "../../web/controlli.js";
 
 const V = JSON.parse(readFileSync(new URL("../fixtures/js_vectors.json", import.meta.url)));
 const close = (a, b) => (typeof a === "number" && typeof b === "number" ? Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(b)) : a === b);
@@ -32,6 +32,13 @@ V.cases.forEach((c, k) => {
     }
   });
 });
+// I ratei sui casi limite, gli stessi di tests/test_controlli.py
+for (const [assunzione, mese, r13, r14] of [["2015-05-04", "2026-09", 9, 3], ["2026-02-18", "2026-09", 7, 3],
+  ["2026-03-17", "2026-09", 7, 3], ["2026-09-01", "2026-09", 1, 1], ["2026-07-20", "2026-09", 2, 2],
+  ["2015-05-04", "2026-06", 6, 12], ["2025-12-10", "2026-02", 2, 3]]) {
+  const [a13, a14] = ratei(assunzione, mese, V.cfg);
+  expect(a13 === r13 && a14 === r14, `ratei ${assunzione} a ${mese}: ${a13}/${a14} contro ${r13}/${r14}`);
+}
 // Lo stesso file esportato da un Excel in italiano: punto e virgola, virgola decimale, date gg/mm/aaaa.
 const csv = readFileSync(new URL("../../data/cedolini.csv", import.meta.url), "utf8").trim().split("\n");
 const head = csv[0].split(",");

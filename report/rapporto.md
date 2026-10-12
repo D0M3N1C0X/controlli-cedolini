@@ -8,11 +8,11 @@
 
 ## In sintesi
 
-- **29 segnalazioni: 28 cedolini e 1 F24**, 21 ad alta priorità; cliente A 6, cliente B 16, cliente C 7.
+- **32 segnalazioni: 31 cedolini e 1 F24**, 21 ad alta priorità; cliente A 6, cliente B 19, cliente C 7.
 - **6 dipendenti sono pagati sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Mancano 175,44 € al mese in tutto, più gli arretrati da novembre 2025.
 - **L'F24 del cliente C ha 212,40 € di ritenute in meno** della somma dei cedolini: va integrato prima della scadenza del versamento.
 - **Dal 1° novembre 2026 i minimi salgono:** 3.927,50 € al mese per 122 dipendenti. Il superminimo assorbibile ne copre 1.478,69 € in 45 casi; restano 2.448,81 € al mese, 34.283 € l'anno su 14 mensilità.
-- **I controlli trovano ogni alterazione sopra il centesimo** in 878 prove casuali (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).
+- **I controlli trovano ogni alterazione sopra il centesimo** in 872 prove casuali (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).
 
 ## 1. Le segnalazioni, cedolino per cedolino
 
@@ -47,6 +47,9 @@
 | C107 | C | C09 | alta | valido | `ZCCGMF94M55Z282A` | - |
 | B070 | B | C10 | alta | superminimo 150 | superminimo 0 | - |
 | C100 | C | C10 | alta | livello 4 | livello 5 | - |
+| B034 | B | C11 | media | 13ª 7; 14ª 3 | 13ª 8; 14ª 3 | - |
+| B040 | B | C11 | media | 13ª 9; 14ª 3 | 13ª 9; 14ª 9 | - |
+| B079 | B | C11 | media | 13ª 9; 14ª 3 | 13ª 8; 14ª 3 | - |
 
 **Cosa fare, per controllo**
 
@@ -62,6 +65,7 @@
 | C08 Riconciliazione F24 | Integrare la delega prima della scadenza del versamento |
 | C09 Codice fiscale | Correggere il codice fiscale in anagrafica |
 | C10 Anagrafica | Verificare il cambio con il cliente e con i documenti: se non c'è stato, correggere l'anagrafica |
+| C11 Ratei 13ª e 14ª | Ricontare i dodicesimi dalla data di assunzione e correggere i ratei prima della tredicesima di dicembre |
 
 *C07 non dice che il cedolino è sbagliato: dice che il netto è cambiato di oltre il 20% senza un evento registrato. Le assunzioni del mese, gli straordinari dichiarati e il passaggio a part-time non sono segnalati.*
 
@@ -89,7 +93,7 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 
 ## 4. Quanto ci si può fidare dei controlli
 
-**Sugli errori inseriti.** 29 su 29, nessun falso allarme. Dimostra che i controlli fanno quello che dicono, non che troverebbero errori reali: gli errori li ho scelti io.
+**Sugli errori inseriti.** 32 su 32, nessun falso allarme. Dimostra che i controlli fanno quello che dicono, non che troverebbero errori reali: gli errori li ho scelti io.
 
 | Controllo | Errori inseriti | Trovati | Mancati | Falsi allarmi |
 |---|---:|---:|---:|---:|
@@ -103,18 +107,19 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 | C08 Riconciliazione F24 | 1 | 1 | 0 | 0 |
 | C09 Codice fiscale | 2 | 2 | 0 | 0 |
 | C10 Anagrafica | 2 | 2 | 0 | 0 |
+| C11 Ratei 13ª e 14ª | 3 | 3 | 0 | 0 |
 
 **Su alterazioni casuali.** 1.100 prove: una voce a caso di un cedolino corretto, cambiata di un importo a caso. La tabella dice quante volte almeno un controllo se ne accorge.
 
 | Voce alterata | ± 0,005 € | ± 0,02 € | ± 1,00 € | ± 10,00 € | ± 100,00 € |
 |---|---:|---:|---:|---:|---:|
-| tabellare | 14% | 100% | 100% | 100% | 100% |
-| scatti | 12% | 100% | 100% | 100% | 100% |
-| superminimo | 10% | 100% | 100% | 100% | 100% |
-| straordinari | 14% | 100% | 100% | 100% | 100% |
-| lordo | 6% | 100% | 100% | 100% | 100% |
-| contributi inps | 54% | 100% | 100% | 100% | 100% |
-| irpef | 11% | 100% | 100% | 100% | 100% |
+| tabellare | 8% | 100% | 100% | 100% | 100% |
+| scatti | 6% | 100% | 100% | 100% | 100% |
+| superminimo | 9% | 100% | 100% | 100% | 100% |
+| straordinari | 5% | 100% | 100% | 100% | 100% |
+| lordo | 0% | 100% | 100% | 100% | 100% |
+| contributi inps | 57% | 100% | 100% | 100% | 100% |
+| irpef | 0% | 100% | 100% | 100% | 100% |
 | altre trattenute | 0% | 100% | 100% | 100% | 100% |
 | netto | 0% | 100% | 100% | 100% | 100% |
 | quota tfr | 0% | 100% | 100% | 100% | 100% |
@@ -126,10 +131,10 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 
 | Metodo | Cedolini sbagliati | Trovati | Falsi allarmi | Precisione |
 |---|---:|---:|---:|---:|
-| Statistico, z oltre 3 | 28 | 10 | 11 | 48% |
-| Statistico, z oltre 3,5 | 28 | 9 | 8 | 53% |
-| Statistico, z oltre 5 | 28 | 9 | 5 | 64% |
-| Regole (C01-C10) | 28 | 28 | 0 | 100% |
+| Statistico, z oltre 3 | 31 | 10 | 11 | 48% |
+| Statistico, z oltre 3,5 | 31 | 9 | 8 | 53% |
+| Statistico, z oltre 5 | 31 | 9 | 5 | 64% |
+| Regole (C01-C11) | 31 | 31 | 0 | 100% |
 
 *Il rilevatore vede solo gli errori che spostano un rapporto (contributi, TFR, variazioni del netto); minimi, scatti, ferie, codice fiscale e anagrafica richiedono di conoscere il contratto, e lì non trova nulla. Su un dominio scritto in regole, le regole vincono; la statistica serve dove una regola non c'è.*
 

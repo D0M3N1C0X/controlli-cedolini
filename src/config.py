@@ -47,3 +47,6 @@ FERIE_ANNUE = 26
 SOGLIA_VARIAZIONE = 0.20
 TOLLERANZA = 0.01                # euro: un centesimo di arrotondamento
 TOLLERANZA_FERIE = 0.01          # giorni
+# Ratei di tredicesima e quattordicesima: un dodicesimo per mese di servizio nel periodo (gennaio-dicembre per la
+# tredicesima, luglio-giugno per la quattordicesima); la frazione di mese di almeno 15 giorni conta intera (F11).
+GIORNI_MESE_INTERO = 15

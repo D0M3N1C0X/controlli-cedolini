@@ -7,6 +7,7 @@ straordinari dichiarati, un passaggio a part-time.
 
     python src/genera.py
 """
+import calendar
 import random
 from datetime import date
 
@@ -76,7 +77,8 @@ def cedolino(d: pd.Series, mese: str, rng: random.Random, residuo_prec: float, s
             "straordinari": straordinari, "lordo": lordo, "contributi_inps": inps, "imponibile_irpef": imponibile,
             "irpef": irpef, "altre_trattenute": altre, "netto": R.centesimi(imponibile - irpef - altre),
             "quota_tfr": R.quota_tfr(ordinaria), "ferie_maturate": maturate, "ferie_godute": ferie_godute,
-            "ferie_residuo": round(residuo_prec + maturate - ferie_godute, 4)}
+            "ferie_residuo": round(residuo_prec + maturate - ferie_godute, 4),
+            "ratei_13": R.ratei_13(assunzione, mese), "ratei_14": R.ratei_14(assunzione, mese)}
 
 
 def ricalcola(r: dict) -> dict:
@@ -202,9 +204,28 @@ def main() -> None:
     S.loc[i] = pd.Series(ricalcola(S.loc[i].to_dict()))
     registra(i, "anagrafica", "superminimo azzerato senza evento: il cedolino torna, ma è più basso")
 
+    # ratei di tredicesima e quattordicesima sbagliati: il cedolino torna in ogni importo, i dodicesimi no
+    anno = R.primo_del_mese(C.MESE).year
+
+    def pochi_giorni(r) -> bool:
+        """Assunto quest'anno, con meno di 15 giorni di servizio nel mese di assunzione: quel mese non matura."""
+        d = date.fromisoformat(r["data_assunzione"])
+        return d.year == anno and calendar.monthrange(d.year, d.month)[1] - d.day + 1 < C.GIORNI_MESE_INTERO
+
+    i = next(i for i in S.index if libero(S.loc[i]) and pochi_giorni(S.loc[i]))
+    S.loc[i, "ratei_13"] += 1
+    registra(i, "ratei", "mese di assunzione con meno di 15 giorni di servizio contato nella tredicesima")
+    da_gennaio = lambda r: R.ratei_13(date.fromisoformat(r["data_assunzione"]), C.MESE)
+    i = prendi(lambda r: libero(r) and da_gennaio(r) != r["ratei_14"])
+    S.loc[i, "ratei_14"] = da_gennaio(S.loc[i])
+    registra(i, "ratei", "quattordicesima contata da gennaio invece che da luglio")
+    i = prendi(lambda r: libero(r) and r["ratei_13"] > 1)
+    S.loc[i, "ratei_13"] -= 1
+    registra(i, "ratei", "un dodicesimo di tredicesima in meno senza assenze che lo spieghino")
+
     S = pd.concat([S, pd.DataFrame(nuovi)], ignore_index=True)
     ced = pd.concat([pd.DataFrame(ago), S], ignore_index=True)
-    for col in ("scatti_n",):
+    for col in ("scatti_n", "ratei_13", "ratei_14"):
         ced[col] = ced[col].astype(int)
     ced.to_csv(C.CEDOLINI, index=False, float_format="%.4f")
 

@@ -3,6 +3,7 @@ Le regole contrattuali che i controlli applicano, scritte una volta sola. Le ste
 riscritte come formule nel foglio di controllo (build_foglio.py), e il foglio Riconciliazione
 verifica che diano lo stesso risultato.
 """
+import calendar
 from datetime import date
 from decimal import ROUND_HALF_UP, Decimal
 
@@ -30,6 +31,28 @@ def scatti_maturati(assunzione: date, mese: str) -> int:
         if (inizio.year, inizio.month) > (y, m):
             n = k
     return n
+
+
+def dodicesimi(assunzione: date, mese: str, inizio: date) -> int:
+    """Mesi di servizio da `inizio` al mese del cedolino compreso. Il mese di assunzione conta se i giorni di
+    servizio sono almeno GIORNI_MESE_INTERO; chi è assunto prima di `inizio` matura tutti i mesi del periodo."""
+    fine = primo_del_mese(mese)
+    if assunzione <= inizio:
+        return (fine.year - inizio.year) * 12 + fine.month - inizio.month + 1
+    giorni = calendar.monthrange(assunzione.year, assunzione.month)[1] - assunzione.day + 1
+    return ((fine.year - assunzione.year) * 12 + fine.month - assunzione.month
+            + (1 if giorni >= C.GIORNI_MESE_INTERO else 0))
+
+
+def ratei_13(assunzione: date, mese: str) -> int:
+    """Dodicesimi di tredicesima maturati nell'anno solare, fino al mese del cedolino."""
+    return dodicesimi(assunzione, mese, date(primo_del_mese(mese).year, 1, 1))
+
+
+def ratei_14(assunzione: date, mese: str) -> int:
+    """Dodicesimi di quattordicesima maturati da luglio (dell'anno, o di quello prima se il mese è prima di luglio)."""
+    m = primo_del_mese(mese)
+    return dodicesimi(assunzione, mese, date(m.year if m.month >= 7 else m.year - 1, 7, 1))
 
 
 def centesimi(x: float) -> float:

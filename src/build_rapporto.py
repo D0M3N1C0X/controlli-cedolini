@@ -20,6 +20,7 @@ COSA_FARE = {
     "C08": "Integrare la delega prima della scadenza del versamento",
     "C09": "Correggere il codice fiscale in anagrafica",
     "C10": "Verificare il cambio con il cliente e con i documenti: se non c'è stato, correggere l'anagrafica",
+    "C11": "Ricontare i dodicesimi dalla data di assunzione e correggere i ratei prima della tredicesima di dicembre",
 }
 
 
@@ -103,7 +104,7 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     for t in an.itertuples(index=False):
         if t.controllo == "C09":
             atteso, trovato, diff = "valido", f"`{t.trovato}`", "-"
-        elif t.controllo == "C10":
+        elif t.controllo in ("C10", "C11"):
             atteso, trovato, diff = t.atteso, t.trovato, "-"
         elif t.controllo == "C05":
             atteso, trovato, diff = f"{num(t.atteso, 2)} gg", f"{num(t.trovato, 2)} gg", f"{num(t.differenza, 2)} gg"

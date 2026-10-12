@@ -1,4 +1,4 @@
-// I dieci controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
+// Gli undici controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
 // tests/js/check_controlli.mjs li fa girare sui dati di casi preparati in Python
 // (tests/fixtures/js_vectors.json) e la CI fallisce alla prima differenza.
 
@@ -6,7 +6,7 @@ export const CONTROLLI = {
   C01: ["Minimo tabellare", "alta"], C02: ["Scatti di anzianità", "alta"], C03: ["Contributi INPS", "alta"],
   C04: ["Quota TFR", "media"], C05: ["Residuo ferie", "media"], C06: ["Quadratura", "alta"],
   C07: ["Variazione del netto", "media"], C08: ["Riconciliazione F24", "alta"], C09: ["Codice fiscale", "alta"],
-  C10: ["Anagrafica", "alta"],
+  C10: ["Anagrafica", "alta"], C11: ["Ratei 13ª e 14ª", "media"],
 };
 
 const ANAGRAFICA = ["livello", "part_time", "superminimo", "data_assunzione"];
@@ -68,6 +68,22 @@ export function scattiMaturati(assunzione, mese, cfg) {
   return n;
 }
 
+// Dodicesimi di tredicesima (da gennaio) e quattordicesima (da luglio) fino al mese del cedolino compreso: il mese
+// di assunzione conta se ha almeno cfg.giorni_mese_intero giorni di servizio (come regole.dodicesimi in Python).
+export function dodicesimi(assunzione, mese, inizioAnno, inizioMese, cfg) {
+  const [ya, ma, da] = assunzione.split("-").map(Number);
+  const [y, m] = mese.split("-").map(Number);
+  const daInizio = ya < inizioAnno || (ya === inizioAnno && (ma < inizioMese || (ma === inizioMese && da === 1)));
+  if (daInizio) return (y - inizioAnno) * 12 + m - inizioMese + 1;
+  const giorni = new Date(Date.UTC(ya, ma, 0)).getUTCDate() - da + 1;
+  return (y - ya) * 12 + m - ma + (giorni >= cfg.giorni_mese_intero ? 1 : 0);
+}
+
+export function ratei(assunzione, mese, cfg) {
+  const [y, m] = mese.split("-").map(Number);
+  return [dodicesimi(assunzione, mese, y, 1, cfg), dodicesimi(assunzione, mese, m >= 7 ? y : y - 1, 7, cfg)];
+}
+
 // ---- Controlli --------------------------------------------------------------------------------
 // righe: oggetti con i campi di data/cedolini.csv, già convertiti in numeri e date ISO.
 export function esegui(mese, prec, f24, ccnl, cfg) {
@@ -104,6 +120,10 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
       if (Math.abs(v) > cfg.soglia && !r.evento) segnala(r, "C07", p.netto, r.netto);
     }
     if (!cfValido(r.codice_fiscale)) segnala(r, "C09", "valido", r.codice_fiscale);
+    if (r.ratei_13 != null && r.ratei_14 != null) {        // colonne facoltative: senza, C11 non si applica
+      const [e13, e14] = ratei(r.data_assunzione, cfg.mese, cfg);
+      if (r.ratei_13 !== e13 || r.ratei_14 !== e14) segnala(r, "C11", `13ª ${e13}; 14ª ${e14}`, `13ª ${r.ratei_13}; 14ª ${r.ratei_14}`);
+    }
     if (p && !r.evento) {
       const cambi = ANAGRAFICA.filter((c) => (typeof p[c] === "number" && typeof r[c] === "number"
         ? Math.abs(p[c] - r[c]) > cfg.tolleranza : String(p[c]) !== String(r[c])));
@@ -185,6 +205,9 @@ export function normalizza(righe, decimaleVirgola) {
   return righe.map((r) => {
     const o = { ...r };
     for (const k of NUMERI) if (k in o) o[k] = numero(o[k], decimaleVirgola);
+    for (const k of ["ratei_13", "ratei_14"]) {           // facoltative: vuote vuol dire "non indicate", non zero
+      o[k] = k in o && String(o[k]).trim() !== "" ? numero(o[k], decimaleVirgola) : null;
+    }
     if ("data_assunzione" in o) o.data_assunzione = data(o.data_assunzione);
     if ("superminimo_assorbibile" in o) o.superminimo_assorbibile = /^(true|1|s[iì]|vero|x)$/i.test(String(o.superminimo_assorbibile));
     if ("livello" in o) o.livello = String(o.livello).replace(/[°º]/g, "").trim();
