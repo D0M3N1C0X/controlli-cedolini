@@ -42,7 +42,7 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 
 | Codice | Controllo | Come |
 |---|---|---|
-| C01 | Minimo tabellare | Paga base + contingenza = minimo del livello × part-time |
+| C01 | Minimo tabellare | Paga base, altri elementi e contingenza = minimo del livello × part-time |
 | C02 | Scatti di anzianità | Scatti maturati dalla data di assunzione (10 trienni, dal mese successivo) × importo del livello |
 | C03 | Contributi INPS | Contributo a carico del dipendente = imponibile arrotondato all'euro × aliquota |
 | C04 | Quota TFR | Rateo = retribuzione ordinaria × 14 / 13,5 / 12 |
@@ -84,6 +84,10 @@ l'F24: non serve sapere come l'ha calcolata il software paghe.
 | [Rapporto](report/rapporto.md) | il responsabile del team | Le segnalazioni con cosa fare, l'F24, la tranche di novembre, quanto ci si può fidare dei controlli. |
 | [`anomalie.csv`](report/anomalie.csv) | un altro strumento | Le segnalazioni in formato tabellare, da caricare in un ticket o in un CRM. |
 | [`docs/fonti.md`](docs/fonti.md) | chi verifica | Fonte e stato di ogni regola, le correzioni fatte e cosa ricontrollare prima di usarlo su dati veri. |
+| [`docs/catalogo-controlli.md`](docs/catalogo-controlli.md) | chi usa i controlli | Una scheda per controllo: regola, fonte, formula del foglio, esempio vero, cause tipiche, cosa fare, limiti. |
+| [`docs/guida-operativa.md`](docs/guida-operativa.md) | il team paghe | La procedura del mese: chi fa cosa, smistamento delle segnalazioni, criteri di rilascio, registro. |
+| [`docs/architettura.md`](docs/architettura.md) | chi mantiene il codice | Come restano uguali Python, foglio e browser; come si aggiunge un controllo o si aggiorna il contratto. |
+| [`docs/roadmap.md`](docs/roadmap.md) · [`CHANGELOG.md`](CHANGELOG.md) | chi decide | Cosa viene dopo e perché; cosa è cambiato a ogni versione. |
 | [`docs/decisioni.md`](docs/decisioni.md) | chi verifica il metodo | Ogni scelta di metodo, con l'alternativa che ha sostituito e il perché. |
 | [`docs/dizionario-dati.md`](docs/dizionario-dati.md) | chi usa i dati | Ogni colonna, livello, evento e tipo di errore; un test lo tiene completo. |
 
@@ -93,6 +97,8 @@ l'F24: non serve sapere come l'ha calcolata il software paghe.
 controllare e mese prima) e, se vuoi, quello degli F24. I controlli girano nella pagina: **i file non lasciano il
 computer**. Accetta l'esportazione di Excel in italiano (punto e virgola, virgola decimale, date gg/mm/aaaa); i
 modelli delle colonne sono nella pagina. Con "Usa i dati di esempio" si vede subito il risultato.
+La pagina dello strumento non carica script esterni; il rapporto online conta le visite con GoatCounter,
+senza cookie né dati personali.
 
 Il JavaScript dello strumento è verificato contro Python a ogni modifica: 1.952 confronti su nove casi e sui casi limite dei ratei, comprese le
 alterazioni di mezzo centesimo e il formato italiano.
@@ -140,11 +146,16 @@ Ogni funzione in `src/` dichiara cosa restituisce; la CI controlla lo stile e mi
 │   ├── statistica.py        regole contro un rilevatore statistico
 │   ├── build_foglio.py      il foglio di calcolo con le formule
 │   ├── build_rapporto.py    il rapporto
+│   ├── build_catalogo.py    il catalogo dei controlli, dalle regole e dal foglio
 │   ├── genera.py            i dati sintetici
 │   └── run_all.py           tutto in un comando
 ├── deliverables/            il foglio di calcolo
 ├── report/                  rapporto, pagina HTML, segnalazioni
 ├── docs/
+│   ├── catalogo-controlli.md una scheda per controllo, generata dal codice
+│   ├── guida-operativa.md   la procedura del mese per il team paghe
+│   ├── architettura.md      come restano uguali le tre versioni
+│   ├── roadmap.md           cosa viene dopo
 │   ├── fonti.md             fonte e stato di ogni regola, correzioni
 │   ├── decisioni.md         le scelte di metodo e le alternative scartate
 │   └── dizionario-dati.md   ogni colonna dei dati

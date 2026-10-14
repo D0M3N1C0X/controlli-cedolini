@@ -26,3 +26,14 @@ def test_ogni_livello_evento_e_tipo_ha_una_voce() -> None:
     nomi = ({r["livello"] for r in righe(C.CCNL)} | {r["evento"] for r in righe(C.CEDOLINI) if r["evento"]}
             | {r["tipo"] for r in righe(C.ERRORI)})
     assert sorted(n for n in nomi if not descritto(n)) == []
+
+
+def test_il_catalogo_e_aggiornato_e_completo() -> None:
+    """Il catalogo è generato da codice, foglio e segnalazioni: se uno cambia, va rigenerato."""
+    import build_catalogo
+    import controlli
+    testo = build_catalogo.testo()
+    assert (C.ROOT / "docs" / "catalogo-controlli.md").read_text(encoding="utf-8") == testo
+    for codice in controlli.CONTROLLI:
+        assert f"## {codice} · " in testo
+        assert codice in build_catalogo.SCHEDE and codice in build_catalogo.FOGLIO_COLONNE

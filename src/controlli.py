@@ -16,7 +16,8 @@ import config as C
 import regole as R
 
 CONTROLLI = {
-    "C01": ("Minimo tabellare", "Paga base + contingenza diversa dal minimo del livello, part-time compreso", "alta"),
+    "C01": ("Minimo tabellare", "Tabellare diverso dal minimo del livello (paga base, altri elementi, contingenza), "
+                                 "part-time compreso", "alta"),
     "C02": ("Scatti di anzianità", "Importo degli scatti diverso da quelli maturati dalla data di assunzione", "alta"),
     "C03": ("Contributi INPS",
             "Contributo a carico del dipendente diverso da imponibile arrotondato all'euro × aliquota", "alta"),

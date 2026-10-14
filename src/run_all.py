@@ -8,6 +8,7 @@ Deterministico: stessi dati, stessi risultati.
 """
 import time
 
+import build_catalogo
 import build_foglio
 import build_rapporto
 import build_web
@@ -29,6 +30,8 @@ def main() -> None:
     build_rapporto.write(o, rob, robustezza.errore_coerente())
     report_html.build()
     print("rapporto -> report/rapporto.md, report/index.html")
+    build_catalogo.write()
+    print("catalogo -> docs/catalogo-controlli.md")
     build_web.write_inputs()
     print(f"strumento -> web/inputs.json; {build_web.write_vectors()} casi di prova per il JavaScript")
     print(f"fatto in {time.perf_counter() - start:.1f}s")
