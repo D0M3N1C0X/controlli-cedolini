@@ -21,6 +21,11 @@ COSA_FARE = {
     "C09": "Correggere il codice fiscale in anagrafica",
     "C10": "Verificare il cambio con il cliente e con i documenti: se non c'è stato, correggere l'anagrafica",
     "C11": "Ricontare i dodicesimi dalla data di assunzione e correggere i ratei prima della tredicesima di dicembre",
+    "C12": "Ricalcolare la mensilità con i dodicesimi giusti, da gennaio per la tredicesima e da luglio per la "
+           "quattordicesima, e pagare la differenza",
+    "C13": "Ricalcolare le ferie non godute a 1/26 della retribuzione mensile per giorno e pagare la differenza",
+    "C14": "Verificare la data della lettera: se il preavviso non è stato lavorato tutto, va pagata l'indennità "
+           "sostitutiva per i giorni mancanti",
 }
 
 
@@ -78,7 +83,7 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add("**Strumenti:** Uno script Python, lo stesso controllo in un [foglio di calcolo](../deliverables/foglio_controllo_cedolini.xlsx) "
         "e uno [strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) dove i file restano sul computer")
     add("")
-    add("> Dieci controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano "
+    add("> Quattordici controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano "
         "ogni voce dalle regole del contratto, o la confrontano con il mese prima e con l'F24: non serve sapere come "
         "l'ha calcolata il software paghe. "
         "Non è consulenza del lavoro.")
@@ -106,6 +111,8 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
             atteso, trovato, diff = "valido", f"`{t.trovato}`", "-"
         elif t.controllo in ("C10", "C11"):
             atteso, trovato, diff = t.atteso, t.trovato, "-"
+        elif t.controllo == "C14":
+            atteso, trovato, diff = f"{num(t.atteso, 0)} gg", f"{num(t.trovato, 0)} gg", f"{num(t.differenza, 0)} gg"
         elif t.controllo == "C05":
             atteso, trovato, diff = f"{num(t.atteso, 2)} gg", f"{num(t.trovato, 2)} gg", f"{num(t.differenza, 2)} gg"
         else:
@@ -180,10 +187,15 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add("")
     pt = statistica.per_tipo()
     nomi = {"minimo": "minimi", "scatto": "scatti", "inps": "contributi", "tfr": "TFR", "ferie": "ferie", "netto": "netto",
-            "variazione": "variazioni del netto", "codice_fiscale": "codice fiscale", "anagrafica": "anagrafica"}
-    visti = ", ".join(nomi[t] for t in pt.loc[pt["trovati_statistico"] > 0, "tipo"])
+            "variazione": "variazioni del netto", "codice_fiscale": "codice fiscale", "anagrafica": "anagrafica",
+            "ratei": "ratei", "tredicesima": "mensilità aggiuntive", "ferie_liquidate": "ferie non godute",
+            "preavviso": "preavviso"}
+    uscita = {"tredicesima", "ferie_liquidate", "preavviso"}
+    visti = ", ".join(nomi[t] for t in pt.loc[(pt["trovati_statistico"] > 0) & ~pt["tipo"].isin(uscita), "tipo"])
     add(f"*Il rilevatore vede solo gli errori che spostano un rapporto ({visti}); minimi, scatti, ferie, codice fiscale "
-        f"e anagrafica richiedono di conoscere il contratto, e lì non trova nulla. Su un dominio scritto in regole, le "
+        f"e anagrafica richiedono di conoscere il contratto, e lì non trova nulla. I cedolini di uscita li segnala "
+        f"tutti, giusti o sbagliati, perché il netto salta rispetto al mese prima: così prende anche gli errori di "
+        f"cessazione, ma i cedolini di uscita corretti diventano falsi allarmi. Su un dominio scritto in regole, le "
         f"regole vincono; la statistica serve dove una regola non c'è.*")
     add("")
     c = f["coerente"]

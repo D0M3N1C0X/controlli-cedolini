@@ -24,7 +24,9 @@ def cfg() -> dict:
             "colonna_minimo_prossimo": C.COLONNA_MINIMO_PROSSIMO, "aliquota": C.ALIQUOTA_DIPENDENTE,
             "divisore_tfr": C.DIVISORE_TFR, "mensilita": C.MENSILITA, "ferie_annue": C.FERIE_ANNUE,
             "soglia": C.SOGLIA_VARIAZIONE, "tolleranza": C.TOLLERANZA, "tolleranza_ferie": C.TOLLERANZA_FERIE,
-            "scatti_max": C.SCATTI_MAX, "scatti_anni": C.SCATTI_ANNI, "giorni_mese_intero": C.GIORNI_MESE_INTERO}
+            "scatti_max": C.SCATTI_MAX, "scatti_anni": C.SCATTI_ANNI, "giorni_mese_intero": C.GIORNI_MESE_INTERO,
+            "divisore_giornaliero": C.DIVISORE_GIORNALIERO, "prossima_tranche": C.PROSSIMA_TRANCHE.isoformat(),
+            "preavviso": {tipo: {lv: list(g) for lv, g in t.items()} for tipo, t in C.PREAVVISO.items()}}
 
 
 def ccnl() -> dict:
@@ -93,6 +95,15 @@ def write_vectors(n: int = 8, seed: int = 11) -> int:
         for _ in range(rng.randint(3, 12)):
             i, voce = rng.choice(list(x.index)), rng.choice(VOCI)
             v = round(float(x.loc[i, voce]) + rng.choice([-1, 1]) * rng.choice([0.005, 0.01, 0.02, 0.5, 3, 40]), 4)
+            x.loc[i, voce] = v
+            patch.append([int(i), voce, v])
+        uscite = [k for k in x.index if x.loc[k, "data_cessazione"] != ""]
+        for _ in range(rng.randint(1, 3)):                         # le voci di chi lascia, anche a mezzo centesimo
+            i, voce = rng.choice(uscite), rng.choice(["tredicesima", "quattordicesima", "ferie_liquidate", "preavviso_giorni"])
+            if voce == "preavviso_giorni":
+                v = str(max(0, int(x.loc[i, voce]) + rng.choice([-30, -1, 0, 1])))
+            else:
+                v = f"{float(x.loc[i, voce]) + rng.choice([-1, 1]) * rng.choice([0.005, 0.01, 0.02, 25]):.3f}"
             x.loc[i, voce] = v
             patch.append([int(i), voce, v])
         i = rng.choice(list(x.index))                              # un codice fiscale trascritto male

@@ -65,6 +65,24 @@
    "descrizione": "Dodicesimi maturati diversi dai mesi di servizio nel periodo (frazione di 15 giorni intera)",
    "cosa_fare": "Ricontare i dodicesimi dalla data di assunzione e correggere i ratei prima della tredicesima di dicembre",
    "priorita": "media"
+  },
+  "C12": {
+   "nome": "Tredicesima e quattordicesima pagate",
+   "descrizione": "Importo diverso dalla retribuzione mensile per i dodicesimi maturati, a dicembre o alla cessazione",
+   "cosa_fare": "Ricalcolare la mensilità con i dodicesimi giusti, da gennaio per la tredicesima e da luglio per la quattordicesima, e pagare la differenza",
+   "priorita": "alta"
+  },
+  "C13": {
+   "nome": "Ferie non godute",
+   "descrizione": "Alla cessazione, ferie residue pagate diversamente da 1/26 della retribuzione mensile al giorno",
+   "cosa_fare": "Ricalcolare le ferie non godute a 1/26 della retribuzione mensile per giorno e pagare la differenza",
+   "priorita": "alta"
+  },
+  "C14": {
+   "nome": "Preavviso",
+   "descrizione": "Alla cessazione, giorni di preavviso sotto il minimo del CCNL per livello e anni di servizio",
+   "cosa_fare": "Verificare la data della lettera: se il preavviso non è stato lavorato tutto, va pagata l'indennità sostitutiva per i giorni mancanti",
+   "priorita": "alta"
   }
  },
  "en": {
@@ -133,6 +151,24 @@
    "descrizione": "Twelfths earned different from the months of service in the period (15 days count as a month)",
    "cosa_fare": "Recount the twelfths from the hiring date and correct the accruals before December's 13th month",
    "priorita": "medium"
+  },
+  "C12": {
+   "nome": "13th and 14th month paid",
+   "descrizione": "Amount different from monthly pay × twelfths earned, in December or when employment ends",
+   "cosa_fare": "Recompute with the right twelfths (from January for the 13th, from July for the 14th) and pay the difference",
+   "priorita": "high"
+  },
+  "C13": {
+   "nome": "Untaken holiday",
+   "descrizione": "Untaken holiday paid at leaving different from monthly pay / 26 × days left",
+   "cosa_fare": "Recompute untaken holiday at 1/26 of monthly pay per day and pay the difference",
+   "priorita": "high"
+  },
+  "C14": {
+   "nome": "Notice period",
+   "descrizione": "Notice shorter than the CCNL minimum for grade, years of service and who ends the contract",
+   "cosa_fare": "Check the date of the letter: notice not worked in full is paid as an allowance for the missing days",
+   "priorita": "high"
   }
  }
 }

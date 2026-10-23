@@ -1,8 +1,8 @@
 # Controlli cedolini
 
-Undici controlli da passare sui cedolini del mese **prima di mandarli al cliente**: minimi e scatti del
-CCNL Terziario, contributi, TFR, ferie, quadratura, variazioni anomale, F24, codice fiscale, anagrafica e
-ratei di tredicesima e quattordicesima. In più,
+Quattordici controlli da passare sui cedolini del mese **prima di mandarli al cliente**: minimi e scatti del
+CCNL Terziario, contributi, TFR, ferie, quadratura, variazioni anomale, F24, codice fiscale, anagrafica,
+ratei di tredicesima e quattordicesima e, per chi lascia, mensilità aggiuntive, ferie non godute e preavviso. In più,
 quanto costa a ogni cliente la **tranche CCNL del 1° novembre 2026** e quanto ne assorbono i
 superminimi. Gli stessi controlli esistono in Python e in un **foglio di calcolo con formule vive**,
 che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codice.
@@ -13,17 +13,18 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 ![license](https://img.shields.io/badge/license-MIT-lightgrey)
 
 > **Dati sintetici, regole reali.** Tre clienti e 122 dipendenti inventati, con errori inseriti apposta;
-> minimi (ricostruiti dalla circolare Confcommercio), scatti e ferie del CCNL Terziario con le fonti in
+> minimi (ricostruiti dalla circolare Confcommercio), scatti, ferie e preavviso del CCNL Terziario con le fonti in
 > [docs/fonti.md](docs/fonti.md).
 > Non è consulenza del lavoro.
 
-> **In English.** Eleven pre-release checks on Italian payslips under the retail and services collective
+> **In English.** Fourteen pre-release checks on Italian payslips under the retail and services collective
 > agreement (CCNL Terziario): contractual minimums, seniority steps, social security, severance accrual,
 > holiday balances, payslip arithmetic, unexplained swings, tax-payment reconciliation, tax-code validity,
-> undeclared master-data changes and 13th/14th-month accruals, plus the cost of the November 2026 pay
-> increase per client. Built three times, all giving the same results: in Python, as a live-formula spreadsheet (reconciled on 496 values) and
-> as a browser tool where payslip files never leave the computer (checked on 1,952 values). On synthetic data
-> it finds all 32 planted errors with no false alarms. Pay tables are rebuilt to the cent from the employers'
+> undeclared master-data changes, 13th/14th-month accruals and, for leavers, 13th/14th-month pay, untaken
+> holiday and notice period, plus the cost of the November 2026 pay increase per client. Built three times,
+> all giving the same results: in Python, as a live-formula spreadsheet (reconciled on 563 values) and
+> as a browser tool where payslip files never leave the computer (checked on 2,184 values). On synthetic data
+> it finds all 35 planted errors with no false alarms. Pay tables are rebuilt to the cent from the employers'
 > association's official note; every rule has its source in [docs/fonti.md](docs/fonti.md). The rest of the
 > repository is in Italian, the language of Italian payroll.
 
@@ -35,8 +36,9 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 
 | | |
 |---|---|
-| **32 segnalazioni su 122 cedolini e 3 F24**, 21 ad alta priorità. Ognuna con valore atteso, valore trovato e cosa fare. | **6 dipendenti sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Sono 175,44 € al mese, più gli arretrati da novembre 2025. |
-| **Un F24 con 212,40 € di ritenute in meno** della somma dei cedolini del cliente. | **Novembre 2026:** 3.927,50 € al mese di aumenti dei minimi; i superminimi assorbibili ne coprono 1.478,69 €, restano **2.448,81 € al mese**. |
+| **35 segnalazioni su 122 cedolini e 3 F24**, 24 ad alta priorità. Ognuna con valore atteso, valore trovato e cosa fare. | **6 dipendenti sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Sono 175,44 € al mese, più gli arretrati da novembre 2025. |
+| **Un F24 con 212,40 € di ritenute in meno** della somma dei cedolini del cliente. | **Novembre 2026:** 3.792,05 € al mese di aumenti dei minimi per chi resta; i superminimi assorbibili ne coprono 1.385,82 €, restano **2.406,23 € al mese**. |
+| **Cinque cessazioni a fine settembre**, tre con un errore: quattordicesima contata da gennaio, ferie non godute a 1/30, licenziamento con metà del preavviso. | |
 
 ## I controlli
 
@@ -48,32 +50,40 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 | C04 | Quota TFR | Rateo = retribuzione ordinaria × 14 / 13,5 / 12 |
 | C05 | Residuo ferie | Residuo = residuo del mese prima + 26/12 − godute |
 | C06 | Quadratura | Lordo = somma delle voci; netto = lordo − trattenute |
-| C07 | Variazione del netto | Oltre il 20% sul mese prima senza un evento registrato (assunzione, straordinari, part-time) |
+| C07 | Variazione del netto | Oltre il 20% sul mese prima senza un evento registrato (assunzione, straordinari, part-time, cessazione) |
 | C08 | Riconciliazione F24 | Ritenute (1001) e contributi in delega = somma dei cedolini del cliente |
 | C09 | Codice fiscale | Carattere di controllo |
 | C10 | Anagrafica | Livello, part-time, superminimo o data di assunzione diversi dal mese prima senza un evento: l'errore coerente che nasce da un cambio |
 | C11 | Ratei 13ª e 14ª | Dodicesimi di tredicesima (da gennaio) e quattordicesima (da luglio) diversi dai mesi di servizio: il mese di assunzione conta se ha almeno 15 giorni |
+| C12 | Tredicesima e quattordicesima pagate | Retribuzione mensile × dodicesimi maturati / 12: a dicembre i ratei, alla cessazione i mesi fino all'uscita (l'ultimo conta con almeno 15 giorni) |
+| C13 | Ferie non godute | Alla cessazione, retribuzione mensile / 26 × giorni di residuo |
+| C14 | Preavviso | Giorni di calendario almeno pari al minimo del CCNL per livello, anni di servizio e dimissioni o licenziamento |
+
+Le colonne di C11-C14 sono facoltative: se l'export non le ha, quei controlli non si applicano e gli altri
+funzionano lo stesso. Un cedolino di uscita senza le sue voci, però, non quadra in C06: il lordo comprende
+importi che il file non riporta.
 
 I controlli **ricalcolano ogni voce dalle regole del contratto**, o la confrontano con il mese prima e con
 l'F24: non serve sapere come l'ha calcolata il software paghe.
 
 ## Quanto ci si può fidare
 
-- **Sugli errori inseriti:** 32 trovati su 32, nessun falso allarme, e nessuna segnalazione sui casi
-  legittimi (assunzioni del mese, straordinari dichiarati, passaggio a part-time). Dimostra che i
+- **Sugli errori inseriti:** 35 trovati su 35, nessun falso allarme, e nessuna segnalazione sui casi
+  legittimi (assunzioni del mese, straordinari dichiarati, passaggio a part-time, cessazioni corrette). Dimostra che i
   controlli fanno quello che dicono, non che troverebbero errori reali: gli errori li ho scelti io.
 - **Su 1.100 alterazioni casuali:** una voce qualsiasi di un cedolino corretto, cambiata di un importo
   a caso. Sopra il centesimo di tolleranza le trovano tutte.
-- **Regole contro statistica:** un rilevatore di anomalie che non conosce il contratto trova 9 cedolini sbagliati
-  su 31, con 8 falsi allarmi; le regole 31 su 31, con nessuno. Vede solo gli errori che spostano un rapporto
-  (contributi, TFR, variazione del netto), non minimi, scatti, anagrafica o ratei.
+- **Regole contro statistica:** un rilevatore di anomalie che non conosce il contratto trova 12 cedolini sbagliati
+  su 34, con 6 falsi allarmi; le regole 34 su 34, con nessuno. Vede solo gli errori che spostano un rapporto
+  (contributi, TFR, variazione del netto), non minimi, scatti, anagrafica o ratei. I cedolini di uscita li
+  segnala tutti, giusti o sbagliati, perché il netto salta.
 - **Il limite, ristretto da C10:** un errore *coerente* passa i controlli aritmetici. Un dipendente di
   4° livello inserito al 5°, con il cedolino ricalcolato da capo, torna in ogni voce e prende 61,29 €
   netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima lo trova C10; resta
   invisibile solo se è sbagliato fin dall'assunzione, e lì serve il confronto con i documenti del
   cliente. Il test `test_limite_dichiarato_errore_coerente` tiene vero il limite.
-- **Tre motori, una risposta:** il foglio di calcolo è confrontato con Python su 496 valori e ricalcolato
-  con LibreOffice nella CI; lo strumento nel browser è confrontato con Python su 1.952 valori. La verifica del
+- **Tre motori, una risposta:** il foglio di calcolo è confrontato con Python su 563 valori e ricalcolato
+  con LibreOffice nella CI; lo strumento nel browser è confrontato con Python su 2.184 valori. La verifica del
   foglio usa [excel-twin](https://github.com/D0M3N1C0X/excel-twin), una piccola libreria condivisa dal portfolio.
 
 ## Cosa c'è
@@ -106,14 +116,14 @@ software paghe: i cedolini del mese, se vuoi quelli del mese prima e le deleghe 
 
 Con "Prova con i dati di esempio" si vede subito il risultato.
 
-Il JavaScript dello strumento è verificato contro Python a ogni modifica: 1.952 confronti su nove casi e sui casi limite dei ratei, comprese le
+Il JavaScript dello strumento è verificato contro Python a ogni modifica: 2.184 confronti su nove casi e sui casi limite di ratei e cessazioni, comprese le
 alterazioni di mezzo centesimo e il formato italiano.
 
 ## Usare il foglio, senza Python
 
 1. Apri [`foglio_controllo_cedolini.xlsx`](deliverables/foglio_controllo_cedolini.xlsx) in Excel o LibreOffice, oppure importalo in Google Sheets.
 2. Nel foglio **Parametri** imposta il mese e l'aliquota INPS del cliente.
-3. Incolla i cedolini del mese nel foglio **Mese** (colonne A-W, fino a 250 righe) e quelli del mese prima in **Mese precedente**; gli importi delle deleghe vanno nel foglio **F24**.
+3. Incolla i cedolini del mese nel foglio **Mese** (colonne A-W; i ratei in AU-AV e le voci di chi lascia in AZ-BE, se ci sono; fino a 250 righe) e quelli del mese prima in **Mese precedente**; gli importi delle deleghe vanno nel foglio **F24**.
 4. Leggi il **Riepilogo**, poi filtra il foglio Mese sulla colonna *Errori*. Il foglio **Novembre 2026** si aggiorna da solo.
 
 I dati di esempio già presenti si possono cancellare: le formule restano.
@@ -147,7 +157,7 @@ Ogni funzione in `src/` dichiara cosa restituisce; la CI controlla lo stile e mi
 ├── src/
 │   ├── config.py            parametri e soglie
 │   ├── regole.py            le regole del contratto, scritte una volta
-│   ├── controlli.py         gli undici controlli, la tranche di novembre, la valutazione
+│   ├── controlli.py         i quattordici controlli, la tranche di novembre, la valutazione
 │   ├── robustezza.py        alterazioni casuali e l'errore coerente
 │   ├── statistica.py        regole contro un rilevatore statistico
 │   ├── build_foglio.py      il foglio di calcolo con le formule
@@ -172,8 +182,9 @@ Ogni funzione in `src/` dichiara cosa restituisce; la CI controlla lo stile e mi
 
 - **Contributi semplificati:** un'aliquota del 9,19% per tutti; FIS, CIGS e contributo aggiuntivo
   dell'1% non sono modellati. In uso reale l'aliquota viene dalla posizione INPS del cliente.
-- **Un CCNL, un mese ordinario:** tredicesima, quattordicesima, malattia, cessazioni e conguagli non sono
-  controllati. L'IRPEF dei dati sintetici non è calcolata con le regole fiscali: serve solo all'F24.
+- **Un CCNL, un mese senza assenze:** malattia, aspettativa, conguagli e l'indennità sostitutiva del
+  preavviso non sono controllati; delle cessazioni si controllano mensilità aggiuntive, ferie non godute e
+  giorni di preavviso, non il TFR liquidato. L'IRPEF dei dati sintetici non è calcolata con le regole fiscali: serve solo all'F24.
 - **Fonti:** i minimi sono ricostruiti dalla circolare Confcommercio del 29 marzo 2024; gli importi degli scatti
   vengono da due fonti secondarie concordi e vanno ricontrollati sul testo del CCNL prima dell'uso.
 

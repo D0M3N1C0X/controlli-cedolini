@@ -50,3 +50,13 @@ TOLLERANZA_FERIE = 0.01          # giorni
 # Ratei di tredicesima e quattordicesima: un dodicesimo per mese di servizio nel periodo (gennaio-dicembre per la
 # tredicesima, luglio-giugno per la quattordicesima); la frazione di mese di almeno 15 giorni conta intera (F11).
 GIORNI_MESE_INTERO = 15
+# Cessazioni. Quota giornaliera della retribuzione = retribuzione mensile / 26; ogni giorno di ferie non goduto si
+# paga 1/26 della retribuzione mensile di fatto (F12). Preavviso minimo in giorni, per dimissioni e licenziamento,
+# per livello e anni di servizio: fino a 5, dal 6° al 10°, oltre il 10° (F13). Vale anche per il part-time.
+DIVISORE_GIORNALIERO = 26
+PREAVVISO = {
+    "dimissioni": {"Quadri": (45, 60, 90), "1": (45, 60, 90), "2": (20, 30, 45), "3": (20, 30, 45),
+                   "4": (15, 20, 30), "5": (15, 20, 30), "6": (10, 15, 15), "7": (10, 15, 15)},
+    "licenziamento": {"Quadri": (60, 90, 120), "1": (60, 90, 120), "2": (30, 45, 60), "3": (30, 45, 60),
+                      "4": (20, 30, 45), "5": (20, 30, 45), "6": (15, 20, 20), "7": (15, 20, 20)},
+}

@@ -23,10 +23,13 @@ FOGLIO_COLONNE = {
     "C04": ("Mese", ["AC"], "AN"), "C05": ("Mese", ["AD", "AE"], "AO"), "C06": ("Mese", ["AF", "AG"], "AP"),
     "C07": ("Mese", ["AH", "AI"], "AQ"), "C08": ("F24", ["C", "D", "F", "G"], "H"), "C09": ("Mese", ["AJ"], "AR"),
     "C10": ("Mese", [], "AS"), "C11": ("Mese", ["AW", "AX"], "AY"),
+    "C12": ("Mese", ["BF", "BG", "BH", "BI", "BJ"], "BK"), "C13": ("Mese", ["BL"], "BM"),
+    "C14": ("Mese", ["BN", "BO"], "BP"),
 }
 FONTI = {
     "C01": ["F01", "F02"], "C02": ["F03", "S04"], "C03": ["F05", "F10"], "C04": ["F06", "S03"], "C05": ["F04"],
     "C06": ["S01"], "C07": ["S02"], "C08": ["F09"], "C09": ["F08"], "C10": ["S06"], "C11": ["F11"],
+    "C12": ["F11"], "C13": ["F12", "F04"], "C14": ["F13"],
 }
 
 SCHEDE = {
@@ -122,6 +125,35 @@ SCHEDE = {
                    "Non considera i periodi non retribuiti che riducono i ratei, come l'aspettativa.",
                    "Le colonne dei ratei sono facoltative: senza, C11 non si applica (D15)."],
     },
+    "C12": {
+        "regola": "Tredicesima e quattordicesima sono la retribuzione mensile (tabellare, scatti e superminimo) per i "
+                  "dodicesimi maturati, diviso 12. A dicembre i dodicesimi sono quelli dei ratei; alla cessazione si "
+                  "contano fino alla data di uscita, e l'ultimo mese conta se ha almeno 15 giorni.",
+        "cause": ["Quattordicesima liquidata con i dodicesimi da gennaio invece che da luglio.",
+                  "Ultimo mese contato intero con meno di 15 giorni di servizio.",
+                  "Mensilità calcolata sulla retribuzione senza scatti o superminimo."],
+        "limiti": ["Non considera i periodi non retribuiti che riducono i dodicesimi, come l'aspettativa.",
+                   "Le colonne sono facoltative: se il cedolino non riporta l'importo, C12 non si applica (D16)."],
+    },
+    "C13": {
+        "regola": "Alla cessazione le ferie maturate e non godute si pagano a 1/26 della retribuzione mensile per "
+                  "ogni giorno di residuo.",
+        "cause": ["Quota giornaliera calcolata dividendo per 30 invece che per 26.",
+                  "Residuo ferie di fine rapporto non aggiornato con la maturazione dell'ultimo mese."],
+        "limiti": ["Usa il residuo ferie del cedolino, che C05 controlla a parte.",
+                   "Non considera i permessi (ROL ed ex festività), che hanno un loro divisore orario (D17)."],
+    },
+    "C14": {
+        "regola": "Il preavviso, in giorni di calendario, è almeno quello del CCNL per livello, anni di servizio "
+                  "(fino a 5, dal 6° al 10°, oltre il 10°) e per chi recede: dimissioni o licenziamento.",
+        "cause": ["Tabella delle dimissioni usata per un licenziamento.",
+                  "Anni di servizio contati male, sulla soglia dei 5 o dei 10 anni."],
+        "limiti": ["Controlla i giorni di preavviso, non l'importo dell'indennità sostitutiva (D18).",
+                   "Non applica le anzianità convenzionali che il CCNL riconosce ad alcune categorie, né le regole "
+                   "degli operatori di vendita.",
+                   "Si applica solo a dimissioni e licenziamento: per giusta causa o altri tipi di cessazione il "
+                   "preavviso non è dovuto e il controllo tace."],
+    },
 }
 
 
@@ -155,6 +187,9 @@ def _esempio(codice: str, an: pd.DataFrame) -> str:
                 f"differenza {_numero(r['differenza'])}.")
     if codice == "C09":
         return f"{chi}: il codice «{r['trovato']}» ha un carattere di controllo non valido."
+    if codice == "C14":
+        return (f"{chi}: preavviso minimo {float(r['atteso']):.0f} giorni, sul cedolino {float(r['trovato']):.0f} "
+                f"giorni.")
     if codice in ("C10", "C11"):
         return f"{chi}: atteso «{r['atteso']}», sul cedolino «{r['trovato']}»."
     return (f"{chi}: atteso {_numero(r['atteso'])}, sul cedolino {_numero(r['trovato'])}, "

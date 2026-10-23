@@ -50,7 +50,7 @@ def valutazione(soglie=SOGLIE) -> pd.DataFrame:
                      "trovati": len(segnalati & sbagliati), "falsi_allarmi": len(segnalati - sbagliati)})
     an, _ = controlli.esegui(m, prec, controlli.carica()[2])
     regole = set(an.loc[an["matricola"] != "", "matricola"])
-    rows.append({"metodo": "Regole (C01-C11)", "errori": len(sbagliati), "trovati": len(regole & sbagliati),
+    rows.append({"metodo": "Regole (C01-C14)", "errori": len(sbagliati), "trovati": len(regole & sbagliati),
                  "falsi_allarmi": len(regole - sbagliati)})
     t = pd.DataFrame(rows)
     t[["errori", "trovati", "falsi_allarmi"]] = t[["errori", "trovati", "falsi_allarmi"]].astype(int)

@@ -1,6 +1,7 @@
 // Rifà con web/controlli.js ogni caso calcolato in Python. Esce con 1 alla prima differenza.
 import { readFileSync } from "node:fs";
-import { esegui, novembre, leggiCsv, normalizza, ratei } from "../../web/controlli.js";
+import { esegui, novembre, leggiCsv, normalizza, ratei, dodicesimiAllaCessazione, inizio13, inizio14, preavvisoMinimo }
+  from "../../web/controlli.js";
 
 const V = JSON.parse(readFileSync(new URL("../fixtures/js_vectors.json", import.meta.url)));
 const close = (a, b) => (typeof a === "number" && typeof b === "number" ? Math.abs(a - b) <= 1e-9 * Math.max(1, Math.abs(b)) : a === b);
@@ -39,11 +40,26 @@ for (const [assunzione, mese, r13, r14] of [["2015-05-04", "2026-09", 9, 3], ["2
   const [a13, a14] = ratei(assunzione, mese, V.cfg);
   expect(a13 === r13 && a14 === r14, `ratei ${assunzione} a ${mese}: ${a13}/${a14} contro ${r13}/${r14}`);
 }
+// Le cessazioni sui casi limite, gli stessi di tests/test_cessazioni.py
+for (const [assunzione, cessazione, n13, n14] of [["2015-05-04", "2026-09-30", 9, 3], ["2015-05-04", "2026-09-14", 8, 2],
+  ["2015-05-04", "2026-09-15", 9, 3], ["2026-03-18", "2026-09-30", 6, 3], ["2026-03-17", "2026-09-30", 7, 3],
+  ["2026-09-10", "2026-09-24", 1, 1], ["2026-09-10", "2026-09-23", 0, 0], ["2020-01-01", "2026-03-31", 3, 9],
+  ["2026-10-01", "2026-09-30", 0, 0]]) {
+  const a13 = dodicesimiAllaCessazione(assunzione, cessazione, inizio13(cessazione), V.cfg);
+  const a14 = dodicesimiAllaCessazione(assunzione, cessazione, inizio14(cessazione), V.cfg);
+  expect(a13 === n13 && a14 === n14, `cessazione ${assunzione} al ${cessazione}: ${a13}/${a14} contro ${n13}/${n14}`);
+}
+for (const [tipo, livello, assunzione, cessazione, giorni] of [["dimissioni", "4", "2021-10-01", "2026-09-30", 15],
+  ["dimissioni", "4", "2021-09-30", "2026-09-30", 20], ["licenziamento", "Quadri", "2016-09-30", "2026-09-30", 120],
+  ["licenziamento", "Quadri", "2016-10-01", "2026-09-30", 90], ["licenziamento", "7", "2000-01-01", "2026-09-30", 20]]) {
+  const g = preavvisoMinimo(tipo, livello, assunzione, cessazione, V.cfg);
+  expect(g === giorni, `preavviso ${tipo} ${livello} ${assunzione}-${cessazione}: ${g} contro ${giorni}`);
+}
 // Lo stesso file esportato da un Excel in italiano: punto e virgola, virgola decimale, date gg/mm/aaaa.
 const csv = readFileSync(new URL("../../data/cedolini.csv", import.meta.url), "utf8").trim().split("\n");
 const head = csv[0].split(",");
 const ita = [head.join(";"), ...csv.slice(1).map((l) => l.split(",").map((v, i) => {
-  if (head[i] === "data_assunzione") { const [y, m, d] = v.split("-"); return `${d}/${m}/${y}`; }
+  if ((head[i] === "data_assunzione" || head[i] === "data_cessazione") && v) { const [y, m, d] = v.split("-"); return `${d}/${m}/${y}`; }
   return /^-?\d+\.\d+$/.test(v) ? v.replace(".", ",") : v;
 }).join(";"))].join("\n");
 const righe = normalizza(leggiCsv(ita), true);

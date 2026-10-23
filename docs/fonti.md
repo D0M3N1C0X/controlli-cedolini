@@ -24,6 +24,9 @@ Ogni regola che i controlli applicano, da dove viene e quanto è stata verificat
 | F10 | L'imponibile contributivo si espone in unità di euro e il contributo si arrotonda al centesimo (millesimi da 5 a 9 per eccesso): l'aliquota si applica all'imponibile arrotondato all'euro, 1.779,00 × 9,19% = 163,49 € | [INPS, Documento tecnico UniEmens individuale, versione 4.33 del 29/09/2026](https://www.inps.it/content/dam/inps-site/pdf/prestazioni-e-servizi/uniemens-aziende-private/UniEMENSind.pdf): importi interi e contributivi (p. 31), elemento `<Imponibile>` di `<DatiRetributivi>` (p. 52). Esempio di calcolo: [ODCEC Torino, "Conosci la tua busta paga?"](https://odcec.torino.it/public/pagine/slides.pdf), p. 24 | Primaria per il formato; il calcolo sull'imponibile arrotondato è prassi, confermata dall'esempio |
 | F11 | Ratei di tredicesima e quattordicesima: per il servizio inferiore all'anno, tanti dodicesimi quanti i mesi interi di servizio; le frazioni di mese di almeno 15 giorni contano come mese intero. La tredicesima matura nell'anno solare e si paga alla vigilia di Natale; la quattordicesima si paga entro il 1° luglio sulla retribuzione al 30 giugno, quindi matura da luglio a giugno | [Sintesi Filcams CGIL del CCNL Terziario](https://cgil-agb.it/images/Filcams/pdf/commercio/TERZIARIO_confcommercio.pdf), p. 11, "Mensilità aggiuntive" e "Norme comuni" | Primaria (parte firmataria, sintesi) · il periodo luglio-giugno della quattordicesima è dedotto dalla data di pagamento |
 
+| F12 | La quota giornaliera della retribuzione si ottiene dividendo la retribuzione mensile per 26; alla cessazione le ferie maturate e non godute si pagano con un'indennità sostitutiva, a quota giornaliera per giorno di residuo | [Sintesi Filcams CGIL del CCNL Terziario](https://cgil-agb.it/images/Filcams/pdf/commercio/TERZIARIO_confcommercio.pdf), p. 4, "Quota oraria e giornaliera", e p. 18, "Ferie" | Primaria (parte firmataria, sintesi) · l'indennità per le ferie non godute alla quota giornaliera è prassi, la sintesi non la scrive in formula |
+| F13 | Preavviso in giorni di calendario, per livello e anni di servizio (fino a 5, dal 6° al 10°, oltre il 10°): dimissioni Quadri e 1° 45/60/90, 2° e 3° 20/30/45, 4° e 5° 15/20/30, 6° e 7° 10/15/15; licenziamento Quadri e 1° 60/90/120, 2° e 3° 30/45/60, 4° e 5° 20/30/45, 6° e 7° 15/20/20 | [Sintesi Filcams CGIL del CCNL Terziario](https://cgil-agb.it/images/Filcams/pdf/commercio/TERZIARIO_confcommercio.pdf), pp. 24-25, "Estinzione del rapporto · Preavviso" | Primaria (parte firmataria, sintesi) |
+
 ## Prima di usarlo su dati veri
 
 - **Ricontrollare F03 (scatti) sul testo del CCNL**: gli importi vengono da due fonti secondarie concordi.
@@ -44,6 +47,9 @@ Ogni regola che i controlli applicano, da dove viene e quanto è stata verificat
 | S06 | C10 confronta livello, part-time, superminimo e data di assunzione con il mese prima; un cambio senza evento è una segnalazione | Un errore coerente spesso nasce da un cambio di anagrafica: il cedolino torna, ma il dato è cambiato senza motivo |
 
 ## Correzioni
+
+- **23 ottobre 2026, cessazioni.** Aggiunti C12 (F11), C13 (F12) e C14 (F13): tredicesima e quattordicesima
+  pagate, ferie non godute e preavviso. Cinque cessazioni nei dati di esempio, tre con un errore inserito.
 
 - **12 ottobre 2026, ratei.** Aggiunto C11 (F11). I file modello dello strumento nel browser avevano ancora
   i contributi di prima della correzione F10: ora sono generati dai dati.

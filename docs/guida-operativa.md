@@ -42,10 +42,12 @@ segnalano: è il loro mestiere.
 **2. L'export.** Dal software paghe: i cedolini del mese e quelli del mese prima, con le colonne del
 [modello](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/modello_cedolini.csv); l'F24 del mese, con
 ritenute 1001 e contributi per cliente. I ratei di tredicesima e quattordicesima sono facoltativi: senza, C11 non
-si applica.
+si applica. Per chi lascia, l'evento `cessazione` con data, tipo (dimissioni o licenziamento), giorni di preavviso,
+mensilità aggiuntive e ferie non godute pagate: senza queste colonne, C12-C14 non si applicano e il cedolino di
+uscita non quadra in C06, perché il lordo comprende importi che il file non riporta.
 
 **3. I controlli.** Nello strumento: caricare i due file e premere "Esegui i controlli". Nel foglio: incollare i
-cedolini nel foglio Mese (colonne A-W, ratei in AU-AV), quelli del mese prima nel foglio Mese precedente,
+cedolini nel foglio Mese (colonne A-W, ratei in AU-AV, voci di chi lascia in AZ-BE), quelli del mese prima nel foglio Mese precedente,
 l'F24 nel foglio F24.
 
 **4. Lo smistamento.** Ogni segnalazione ha valore atteso, valore trovato e cosa fare.

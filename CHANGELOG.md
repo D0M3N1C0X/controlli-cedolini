@@ -5,8 +5,19 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
 
 ## [Non rilasciato]
 
+## [1.3.0] - 2026-10-23
+
 ### Aggiunto
 
+- **C12, tredicesima e quattordicesima pagate**: retribuzione mensile per i dodicesimi maturati, a dicembre dai ratei
+  e alla cessazione fino alla data di uscita (fonte F11).
+- **C13, ferie non godute**: alla cessazione, 1/26 della retribuzione mensile per giorno di residuo (fonte F12).
+- **C14, preavviso**: giorni di calendario almeno pari al minimo del CCNL per livello, anni di servizio e tipo di
+  recesso (fonte F13).
+- Sei colonne facoltative per chi lascia, nello script, nel foglio (AZ-BE) e nello strumento nel browser, che le
+  abbina da sole quando hanno nomi comuni. Cinque cessazioni nei dati di esempio, tre con un errore inserito.
+- Strumento nel browser: file Excel (.xlsx) oltre ai CSV, abbinamento guidato delle colonne, esito scaricabile in
+  Excel e stampabile, italiano e inglese.
 - [Catalogo dei controlli](docs/catalogo-controlli.md): una scheda per controllo, generata da codice, foglio e
   segnalazioni, con un test che lo tiene aggiornato.
 - [Guida operativa](docs/guida-operativa.md): la procedura mensile del team paghe, con ruoli e criteri di rilascio.
@@ -16,6 +27,8 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
 ### Cambiato
 
 - La descrizione di C01 nomina anche gli altri elementi del minimo.
+- La tranche di novembre esclude chi lascia prima del 1° novembre: nello script, nel foglio e nel browser.
+- Il confronto con il rilevatore statistico dice che segnala tutti i cedolini di uscita, giusti o sbagliati.
 
 ## [1.2.0] - 2026-10-12
 
@@ -47,7 +60,8 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
 Prima versione completa: dieci controlli (C01-C10), la tranche di novembre 2026, il foglio con formule vive e lo
 strumento nel browser.
 
-[Non rilasciato]: https://github.com/D0M3N1C0X/controlli-cedolini/compare/v1.2.0...HEAD
+[Non rilasciato]: https://github.com/D0M3N1C0X/controlli-cedolini/compare/v1.3.0...HEAD
+[1.3.0]: https://github.com/D0M3N1C0X/controlli-cedolini/releases/tag/v1.3.0
 [1.2.0]: https://github.com/D0M3N1C0X/controlli-cedolini/releases/tag/v1.2.0
 [1.1.0]: https://github.com/D0M3N1C0X/controlli-cedolini/releases/tag/v1.1.0
 [1.0.0]: https://github.com/D0M3N1C0X/controlli-cedolini/releases/tag/v1.0.0

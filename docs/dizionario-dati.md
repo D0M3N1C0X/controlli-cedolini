@@ -80,12 +80,19 @@ errori elencati in `errori_inseriti.csv`.
 | `ferie_residuo` | giorni | Residuo ferie a fine mese |
 | `ratei_13` | intero | Dodicesimi di tredicesima maturati nell'anno, fino al mese compreso (F11) |
 | `ratei_14` | intero | Dodicesimi di quattordicesima maturati da luglio, fino al mese compreso (F11) |
+| `data_cessazione` | data | Ultimo giorno di lavoro; vuoto per chi resta |
+| `tipo_cessazione` | testo | `dimissioni` o `licenziamento`; vuoto per chi resta |
+| `preavviso_giorni` | intero | Giorni di calendario di preavviso dati o ricevuti (F13); vuoto per chi resta |
+| `tredicesima` | euro | Tredicesima pagata nel mese: a dicembre o alla cessazione; vuoto se non pagata |
+| `quattordicesima` | euro | Quattordicesima pagata nel mese: a luglio o alla cessazione; vuoto se non pagata |
+| `ferie_liquidate` | euro | Ferie non godute pagate alla cessazione (F12); vuoto per chi resta |
 
 | Evento | Significato |
 |---|---|
 | `assunzione` | Assunto nel mese: nessun cedolino il mese prima |
 | `straordinari` | Straordinari che spiegano un netto più alto |
 | `variazione part-time` | Cambio di percentuale di part-time, comunicato |
+| `cessazione` | Ultimo cedolino: con data, tipo e preavviso, le mensilità aggiuntive e le ferie non godute |
 
 ## `data/f24.csv`: le deleghe F24 di settembre 2026, una per cliente
 
@@ -120,3 +127,6 @@ Servono a misurare i controlli: ogni errore deve essere trovato, e nient'altro d
 | `codice_fiscale` | C09 | Codice fiscale trascritto male |
 | `anagrafica` | C10 | Livello o superminimo cambiati senza un evento |
 | `ratei` | C11 | Dodicesimi di tredicesima o quattordicesima che non corrispondono ai mesi di servizio |
+| `tredicesima` | C12 | Mensilità aggiuntiva pagata con i dodicesimi sbagliati |
+| `ferie_liquidate` | C13 | Ferie non godute pagate con un divisore diverso da 26 |
+| `preavviso` | C14 | Preavviso più corto del minimo del CCNL |

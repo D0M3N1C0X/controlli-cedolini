@@ -30,4 +30,7 @@ B070,B,anagrafica,"superminimo azzerato senza evento: il cedolino torna, ma è p
 B034,B,ratei,mese di assunzione con meno di 15 giorni di servizio contato nella tredicesima
 B040,B,ratei,quattordicesima contata da gennaio invece che da luglio
 B079,B,ratei,un dodicesimo di tredicesima in meno senza assenze che lo spieghino
+A011,A,ferie_liquidate,ferie non godute pagate a 1/30 della retribuzione invece che a 1/26
+B092,B,tredicesima,quattordicesima liquidata con i dodicesimi da gennaio invece che da luglio
+B045,B,preavviso,licenziamento con metà del preavviso minimo del CCNL
 ,C,f24,"F24 con 212,40 € di ritenute in meno dei cedolini"

@@ -74,7 +74,8 @@ def test_trova_tutti_gli_errori_inseriti_senza_falsi_allarmi(out):
 
 def test_casi_legittimi_non_segnalati(out):
     m, an = out["mese"], out["anomalie"]
-    legittimi = m.loc[m["evento"] != "", "matricola"]
+    sbagliati = set(pd.read_csv(C.ERRORI, keep_default_na=False)["matricola"])
+    legittimi = m.loc[(m["evento"] != "") & ~m["matricola"].isin(sbagliati), "matricola"]
     assert len(legittimi) >= 8
     assert an[an["matricola"].isin(legittimi)].empty
 

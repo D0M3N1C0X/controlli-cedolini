@@ -1,6 +1,6 @@
 # Architettura: una regola, tre motori
 
-Gli stessi undici controlli esistono tre volte, per tre modi di lavorare: uno script Python, un foglio di calcolo con
+Gli stessi quattordici controlli esistono tre volte, per tre modi di lavorare: uno script Python, un foglio di calcolo con
 formule vive e una pagina web che gira solo nel browser. Il rischio di avere tre copie è che divergano. Questa
 pagina spiega come restano uguali, e come si cambia qualcosa senza romperle.
 
@@ -11,7 +11,7 @@ flowchart LR
     T["data/ccnl_terziario.csv<br>minimi e scatti"] --> R["src/regole.py<br>le regole, una volta"]
     P["src/config.py<br>parametri e soglie"] --> R
     G["src/genera.py<br>dati sintetici ed errori registrati"] --> D["data/cedolini.csv<br>data/f24.csv"]
-    R --> K["src/controlli.py<br>C01-C11 e valutazione"]
+    R --> K["src/controlli.py<br>C01-C14 e valutazione"]
     D --> K
     K --> F["src/build_foglio.py<br>foglio con formule vive"]
     K --> W["src/build_web.py<br>parametri e casi di prova per il browser"]
@@ -27,8 +27,8 @@ con lui.
 
 | Verifica | Dove | Cosa garantisce |
 |---|---|---|
-| Foglio contro Python | foglio Riconciliazione, `src/check_workbook.py` | 496 valori del foglio uguali a quelli di Python, con le formule calcolate due volte: in Python con [excel-twin](https://github.com/D0M3N1C0X/excel-twin) nei test, con LibreOffice nella CI |
-| Browser contro Python | `tests/js/check_controlli.mjs` | 1.952 valori uguali su nove casi alterati a caso, sui casi limite dei ratei e sul CSV in formato italiano |
+| Foglio contro Python | foglio Riconciliazione, `src/check_workbook.py` | 563 valori del foglio uguali a quelli di Python, con le formule calcolate due volte: in Python con [excel-twin](https://github.com/D0M3N1C0X/excel-twin) nei test, con LibreOffice nella CI |
+| Browser contro Python | `tests/js/check_controlli.mjs` | 2.184 valori uguali su nove casi alterati a caso, sui casi limite di ratei e cessazioni e sul CSV in formato italiano |
 | Errori inseriti | `tests/test_controlli.py` | Ogni errore registrato in `data/errori_inseriti.csv` è trovato, e nessun altro cedolino è segnalato |
 | Cifre del README | `tests/test_readme.py` | Ogni numero citato nel README è quello che il codice produce oggi |
 | Documenti | `tests/test_docs.py` | Dizionario dei dati e catalogo completi e aggiornati |
@@ -37,7 +37,7 @@ con lui.
 
 ## Come si aggiunge un controllo
 
-La lista viene da C11, l'ultimo aggiunto. Per molti passi, se manca, un test fallisce (catalogo, dizionario dei
+La lista viene da C12-C14, gli ultimi aggiunti. Per molti passi, se manca, un test fallisce (catalogo, dizionario dei
 dati, README, confronto con il browser); per il foglio conta la riconciliazione, quindi la voce va aggiunta anche lì.
 
 1. **La regola**, con la fonte: una funzione in `src/regole.py`, il parametro in `src/config.py`, la riga nel

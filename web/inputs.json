@@ -85,12 +85,100 @@
   "aliquota": 0.0919,
   "colonna_minimo": "minimo_2025_11",
   "colonna_minimo_prossimo": "minimo_2026_11",
+  "divisore_giornaliero": 26,
   "divisore_tfr": 13.5,
   "ferie_annue": 26,
   "giorni_mese_intero": 15,
   "mensilita": 14,
   "mese": "2026-09",
   "mese_precedente": "2026-08",
+  "preavviso": {
+   "dimissioni": {
+    "1": [
+     45,
+     60,
+     90
+    ],
+    "2": [
+     20,
+     30,
+     45
+    ],
+    "3": [
+     20,
+     30,
+     45
+    ],
+    "4": [
+     15,
+     20,
+     30
+    ],
+    "5": [
+     15,
+     20,
+     30
+    ],
+    "6": [
+     10,
+     15,
+     15
+    ],
+    "7": [
+     10,
+     15,
+     15
+    ],
+    "Quadri": [
+     45,
+     60,
+     90
+    ]
+   },
+   "licenziamento": {
+    "1": [
+     60,
+     90,
+     120
+    ],
+    "2": [
+     30,
+     45,
+     60
+    ],
+    "3": [
+     30,
+     45,
+     60
+    ],
+    "4": [
+     20,
+     30,
+     45
+    ],
+    "5": [
+     20,
+     30,
+     45
+    ],
+    "6": [
+     15,
+     20,
+     20
+    ],
+    "7": [
+     15,
+     20,
+     20
+    ],
+    "Quadri": [
+     60,
+     90,
+     120
+    ]
+   }
+  },
+  "prossima_tranche": "2026-11-01",
   "scatti_anni": 3,
   "scatti_max": 10,
   "soglia": 0.2,

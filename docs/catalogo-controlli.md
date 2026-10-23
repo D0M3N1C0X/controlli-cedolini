@@ -15,6 +15,9 @@ Una scheda per controllo: cosa controlla, da quale regola, dove sta nel foglio, 
 | [C09 · Codice fiscale](#c09--codice-fiscale) | alta | Carattere di controllo non valido |
 | [C10 · Anagrafica](#c10--anagrafica) | alta | Livello, part-time, superminimo o data di assunzione diversi dal mese prima, senza un evento |
 | [C11 · Ratei 13ª e 14ª](#c11--ratei-13ª-e-14ª) | media | Dodicesimi maturati diversi dai mesi di servizio nel periodo (frazione di 15 giorni intera) |
+| [C12 · Tredicesima e quattordicesima pagate](#c12--tredicesima-e-quattordicesima-pagate) | alta | Importo diverso dalla retribuzione mensile per i dodicesimi maturati, a dicembre o alla cessazione |
+| [C13 · Ferie non godute](#c13--ferie-non-godute) | alta | Alla cessazione, ferie residue pagate diversamente da 1/26 della retribuzione mensile al giorno |
+| [C14 · Preavviso](#c14--preavviso) | alta | Alla cessazione, giorni di preavviso sotto il minimo del CCNL per livello e anni di servizio |
 
 ## C01 · Minimo tabellare
 
@@ -191,7 +194,7 @@ AO  C05 Ferie
 
 ```
 AF  Lordo atteso
-    =IF($A5="","",ROUND(I5+K5+L5+M5,2))
+    =IF($A5="","",ROUND(I5+K5+L5+M5+N(BC5)+N(BD5)+N(BE5),2))
 AG  Netto atteso
     =IF($A5="","",ROUND(N5-O5-Q5-R5,2))
 AP  C06 Quadratura
@@ -268,7 +271,7 @@ H  C08 Esito
     =IF(OR(ABS(D5)>Parametri!$C$11,ABS(G5)>Parametri!$C$11),"ERRORE","OK")
 ```
 
-**Un esempio dal mese di settembre 2026.** Cliente C: somma dei cedolini 6.345,71 €, nell'F24 6.133,31 €, differenza −212,40 €.
+**Un esempio dal mese di settembre 2026.** Cliente C: somma dei cedolini 7.214,66 €, nell'F24 7.002,26 €, differenza −212,40 €.
 
 **Cause tipiche.**
 
@@ -375,3 +378,108 @@ AY  C11 Ratei
 - Controlla il numero di dodicesimi, non l'importo (D14).
 - Non considera i periodi non retribuiti che riducono i ratei, come l'aspettativa.
 - Le colonne dei ratei sono facoltative: senza, C11 non si applica (D15).
+
+## C12 · Tredicesima e quattordicesima pagate
+
+**Priorità alta.** Importo diverso dalla retribuzione mensile per i dodicesimi maturati, a dicembre o alla cessazione.
+
+**La regola.** Tredicesima e quattordicesima sono la retribuzione mensile (tabellare, scatti e superminimo) per i dodicesimi maturati, diviso 12. A dicembre i dodicesimi sono quelli dei ratei; alla cessazione si contano fino alla data di uscita, e l'ultimo mese conta se ha almeno 15 giorni.
+
+**Fonti.** [F11](fonti.md).
+
+**Nel foglio** (foglio Mese, riga 5; le altre righe sono uguali):
+
+```
+BF  Retribuzione mensile
+    =IF($A5="","",ROUND(I5+K5+L5,2))
+BG  Dodicesimi 13ª
+    =IF($A5="","",IF(AZ5="",AW5,IF(AZ5<MAX(E5,DATE(YEAR(AZ5),1,1)),0,IF((YEAR(AZ5)*12+MONTH(AZ5))=(YEAR(MAX(E5,DATE(YEAR(AZ5),1,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5),1,1)))),IF(AZ5-MAX(E5,DATE(YEAR(AZ5),1,1))+1>=Parametri!$C$14,1,0),(YEAR(AZ5)*12+MONTH(AZ5))-(YEAR(MAX(E5,DATE(YEAR(AZ5),1,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5),1,1))))-1+IF(DAY(EOMONTH(MAX(E5,DATE(YEAR(AZ5),1,1)),0))-DAY(MAX(E5,DATE(YEAR(AZ5),1,1)))+1>=Parametri!$C$14,1,0)+IF(DAY(AZ5)>=Parametri!$C$14,1,0)))))
+BH  Dodicesimi 14ª
+    =IF($A5="","",IF(AZ5="",AX5,IF(AZ5<MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)),0,IF((YEAR(AZ5)*12+MONTH(AZ5))=(YEAR(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))),IF(AZ5-MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1))+1>=Parametri!$C$14,1,0),(YEAR(AZ5)*12+MONTH(AZ5))-(YEAR(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1))))-1+IF(DAY(EOMONTH(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)),0))-DAY(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))+1>=Parametri!$C$14,1,0)+IF(DAY(AZ5)>=Parametri!$C$14,1,0)))))
+BI  Tredicesima attesa
+    =IF($A5="","",ROUND(BF5*BG5/12,2))
+BJ  Quattordicesima attesa
+    =IF($A5="","",ROUND(BF5*BH5/12,2))
+BK  C12 Mensilità
+    =IF($A5="","",IF(IF(BC5="",FALSE,ABS(BC5-BI5)>Parametri!$C$11),"ERRORE",IF(IF(BD5="",FALSE,ABS(BD5-BJ5)>Parametri!$C$11),"ERRORE","OK")))
+```
+
+**Un esempio dal mese di settembre 2026.** Dipendente B092, cliente B: atteso 452,38 €, sul cedolino 1.357,13 €, differenza 904,75 €.
+
+**Cause tipiche.**
+
+- Quattordicesima liquidata con i dodicesimi da gennaio invece che da luglio.
+- Ultimo mese contato intero con meno di 15 giorni di servizio.
+- Mensilità calcolata sulla retribuzione senza scatti o superminimo.
+
+**Cosa fare.** Ricalcolare la mensilità con i dodicesimi giusti, da gennaio per la tredicesima e da luglio per la quattordicesima, e pagare la differenza.
+
+**Limiti.**
+
+- Non considera i periodi non retribuiti che riducono i dodicesimi, come l'aspettativa.
+- Le colonne sono facoltative: se il cedolino non riporta l'importo, C12 non si applica (D16).
+
+## C13 · Ferie non godute
+
+**Priorità alta.** Alla cessazione, ferie residue pagate diversamente da 1/26 della retribuzione mensile al giorno.
+
+**La regola.** Alla cessazione le ferie maturate e non godute si pagano a 1/26 della retribuzione mensile per ogni giorno di residuo.
+
+**Fonti.** [F12](fonti.md), [F04](fonti.md).
+
+**Nel foglio** (foglio Mese, riga 5; le altre righe sono uguali):
+
+```
+BL  Ferie liquidate attese
+    =IF($A5="","",IF(AZ5="","",ROUND(BF5/Parametri!$C$15*W5,2)))
+BM  C13 Ferie
+    =IF($A5="","",IF(OR(AZ5="",BE5=""),"OK",IF(ABS(BE5-BL5)>Parametri!$C$11,"ERRORE","OK")))
+```
+
+**Un esempio dal mese di settembre 2026.** Dipendente A011, cliente A: atteso 2.148,97 €, sul cedolino 1.862,44 €, differenza −286,53 €.
+
+**Cause tipiche.**
+
+- Quota giornaliera calcolata dividendo per 30 invece che per 26.
+- Residuo ferie di fine rapporto non aggiornato con la maturazione dell'ultimo mese.
+
+**Cosa fare.** Ricalcolare le ferie non godute a 1/26 della retribuzione mensile per giorno e pagare la differenza.
+
+**Limiti.**
+
+- Usa il residuo ferie del cedolino, che C05 controlla a parte.
+- Non considera i permessi (ROL ed ex festività), che hanno un loro divisore orario (D17).
+
+## C14 · Preavviso
+
+**Priorità alta.** Alla cessazione, giorni di preavviso sotto il minimo del CCNL per livello e anni di servizio.
+
+**La regola.** Il preavviso, in giorni di calendario, è almeno quello del CCNL per livello, anni di servizio (fino a 5, dal 6° al 10°, oltre il 10°) e per chi recede: dimissioni o licenziamento.
+
+**Fonti.** [F13](fonti.md).
+
+**Nel foglio** (foglio Mese, riga 5; le altre righe sono uguali):
+
+```
+BN  Anni di servizio
+    =IF($A5="","",IF(AZ5="","",YEAR(AZ5)-YEAR(E5)-IF(OR(MONTH(AZ5)<MONTH(E5),AND(MONTH(AZ5)=MONTH(E5),DAY(AZ5)<DAY(E5))),1,0)))
+BO  Preavviso minimo
+    =IF($A5="","",IF(OR(AZ5="",AND(BA5<>"dimissioni",BA5<>"licenziamento")),"",INDEX(CCNL!$K$5:$P$12,MATCH(D5,CCNL!$A$5:$A$12,0),IF(BA5="licenziamento",3,0)+IF(BN5<5,1,IF(BN5<10,2,3)))))
+BP  C14 Preavviso
+    =IF($A5="","",IF(OR(BO5="",BB5=""),"OK",IF(BB5<BO5,"ERRORE","OK")))
+```
+
+**Un esempio dal mese di settembre 2026.** Dipendente B045, cliente B: preavviso minimo 20 giorni, sul cedolino 10 giorni.
+
+**Cause tipiche.**
+
+- Tabella delle dimissioni usata per un licenziamento.
+- Anni di servizio contati male, sulla soglia dei 5 o dei 10 anni.
+
+**Cosa fare.** Verificare la data della lettera: se il preavviso non è stato lavorato tutto, va pagata l'indennità sostitutiva per i giorni mancanti.
+
+**Limiti.**
+
+- Controlla i giorni di preavviso, non l'importo dell'indennità sostitutiva (D18).
+- Non applica le anzianità convenzionali che il CCNL riconosce ad alcune categorie, né le regole degli operatori di vendita.
+- Si applica solo a dimissioni e licenziamento: per giusta causa o altri tipi di cessazione il preavviso non è dovuto e il controllo tace.

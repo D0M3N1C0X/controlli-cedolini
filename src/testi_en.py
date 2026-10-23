@@ -38,6 +38,16 @@ CONTROLLI_EN = {
     "C11": ("13th and 14th month accruals",
             "Twelfths earned different from the months of service in the period (15 days count as a month)",
             "Recount the twelfths from the hiring date and correct the accruals before December's 13th month"),
+    "C12": ("13th and 14th month paid",
+            "Amount different from monthly pay × twelfths earned, in December or when employment ends",
+            "Recompute with the right twelfths (from January for the 13th, from July for the 14th) and pay the "
+            "difference"),
+    "C13": ("Untaken holiday",
+            "Untaken holiday paid at leaving different from monthly pay / 26 × days left",
+            "Recompute untaken holiday at 1/26 of monthly pay per day and pay the difference"),
+    "C14": ("Notice period",
+            "Notice shorter than the CCNL minimum for grade, years of service and who ends the contract",
+            "Check the date of the letter: notice not worked in full is paid as an allowance for the missing days"),
 }
 
 PRIORITA_EN = {"alta": "high", "media": "medium"}

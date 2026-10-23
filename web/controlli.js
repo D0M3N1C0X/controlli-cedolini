@@ -1,4 +1,4 @@
-// Gli undici controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
+// I quattordici controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
 // tests/js/check_controlli.mjs li fa girare sui dati di casi preparati in Python
 // (tests/fixtures/js_vectors.json) e la CI fallisce alla prima differenza.
 
@@ -7,6 +7,7 @@ export const CONTROLLI = {
   C04: ["Quota TFR", "media"], C05: ["Residuo ferie", "media"], C06: ["Quadratura", "alta"],
   C07: ["Variazione del netto", "media"], C08: ["Riconciliazione F24", "alta"], C09: ["Codice fiscale", "alta"],
   C10: ["Anagrafica", "alta"], C11: ["Ratei 13ª e 14ª", "media"],
+  C12: ["Tredicesima e quattordicesima pagate", "alta"], C13: ["Ferie non godute", "alta"], C14: ["Preavviso", "alta"],
 };
 
 const ANAGRAFICA = ["livello", "part_time", "superminimo", "data_assunzione"];
@@ -84,6 +85,34 @@ export function ratei(assunzione, mese, cfg) {
   return [dodicesimi(assunzione, mese, y, 1, cfg), dodicesimi(assunzione, mese, m >= 7 ? y : y - 1, 7, cfg)];
 }
 
+// Mesi di servizio da `inizio` alla data di cessazione: il primo e l'ultimo mese contano se hanno almeno
+// cfg.giorni_mese_intero giorni (come regole.dodicesimi_alla_cessazione in Python). Date ISO.
+const giorno = (iso) => { const [y, m, d] = iso.split("-").map(Number); return Date.UTC(y, m - 1, d); };
+export function dodicesimiAllaCessazione(assunzione, cessazione, inizio, cfg) {
+  const da = assunzione > inizio ? assunzione : inizio;
+  if (cessazione < da) return 0;
+  const [y0, m0, d0] = da.split("-").map(Number);
+  const [y1, m1, d1] = cessazione.split("-").map(Number);
+  if (y0 === y1 && m0 === m1) return (giorno(cessazione) - giorno(da)) / 86400000 + 1 >= cfg.giorni_mese_intero ? 1 : 0;
+  const primo = new Date(Date.UTC(y0, m0, 0)).getUTCDate() - d0 + 1 >= cfg.giorni_mese_intero;
+  const ultimo = d1 >= cfg.giorni_mese_intero;
+  return (y1 - y0) * 12 + m1 - m0 - 1 + (primo ? 1 : 0) + (ultimo ? 1 : 0);
+}
+export const inizio13 = (iso) => `${iso.slice(0, 4)}-01-01`;
+export const inizio14 = (iso) => { const y = Number(iso.slice(0, 4)); return `${Number(iso.slice(5, 7)) >= 7 ? y : y - 1}-07-01`; };
+
+export function anniDiServizio(assunzione, al) {
+  const [ya, ma, da] = assunzione.split("-").map(Number);
+  const [y, m, d] = al.split("-").map(Number);
+  return y - ya - (m < ma || (m === ma && d < da) ? 1 : 0);
+}
+
+// Giorni di preavviso del CCNL: fino a 5 anni di servizio, dal 6° al 10°, oltre il 10° (F13).
+export function preavvisoMinimo(tipo, livello, assunzione, cessazione, cfg) {
+  const anni = anniDiServizio(assunzione, cessazione);
+  return cfg.preavviso[tipo][livello][anni < 5 ? 0 : anni < 10 ? 1 : 2];
+}
+
 // ---- Controlli --------------------------------------------------------------------------------
 // righe: oggetti con i campi di data/cedolini.csv, già convertiti in numeri e date ISO.
 export function esegui(mese, prec, f24, ccnl, cfg) {
@@ -94,6 +123,27 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
     atteso, trovato, differenza: typeof atteso === "number" && typeof trovato === "number" ? trovato - atteso : null,
     priorita: CONTROLLI[codice][1] });
   const ferieMese = Math.round((cfg.ferie_annue / 12) * 10000) / 10000;
+  // C12-C14: le voci pagate a dicembre o alla cessazione, quando il cedolino le riporta (come _cessazione in Python)
+  function cessazione(r) {
+    const mensile = centesimi(r.tabellare + r.scatti + r.superminimo);
+    const ces = vuoto(r.data_cessazione) ? null : String(r.data_cessazione);
+    for (const [voce, inizio, k] of [["tredicesima", inizio13, 0], ["quattordicesima", inizio14, 1]]) {
+      if (vuoto(r[voce])) continue;
+      const n = ces ? dodicesimiAllaCessazione(r.data_assunzione, ces, inizio(ces), cfg) : ratei(r.data_assunzione, cfg.mese, cfg)[k];
+      const atteso = centesimi(mensile * n / 12), trovato = Number(r[voce]);
+      if (Math.abs(trovato - atteso) > cfg.tolleranza) { segnala(r, "C12", atteso, trovato); break; }
+    }
+    if (!ces) return;
+    if (!vuoto(r.ferie_liquidate)) {
+      const atteso = centesimi(mensile / cfg.divisore_giornaliero * r.ferie_residuo), trovato = Number(r.ferie_liquidate);
+      if (Math.abs(trovato - atteso) > cfg.tolleranza) segnala(r, "C13", atteso, trovato);
+    }
+    const tipo = String(r.tipo_cessazione ?? "").trim().toLowerCase();
+    if (tipo in cfg.preavviso && !vuoto(r.preavviso_giorni)) {
+      const minimo = preavvisoMinimo(tipo, String(r.livello), r.data_assunzione, ces, cfg);
+      if (Math.trunc(Number(r.preavviso_giorni)) < minimo) segnala(r, "C14", minimo, Number(r.preavviso_giorni));
+    }
+  }
   for (const r of mese) {
     const t = ccnl[r.livello];
     if (!t) { segnala(r, "C01", "livello CCNL valido", r.livello); continue; }
@@ -106,7 +156,8 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
     a.quota_tfr = centesimi(ordinaria * cfg.mensilita / cfg.divisore_tfr / 12);
     const p = prevBy.get(r.matricola);
     a.ferie_residuo = round4((p ? p.ferie_residuo : 0) + ferieMese - r.ferie_godute);
-    a.lordo = centesimi(ordinaria + r.straordinari);
+    const extra = ["tredicesima", "quattordicesima", "ferie_liquidate"].reduce((s, k) => s + (vuoto(r[k]) ? 0 : Number(r[k])), 0);
+    a.lordo = centesimi(ordinaria + r.straordinari + extra);
     a.netto = centesimi(r.lordo - r.contributi_inps - r.irpef - r.altre_trattenute);
     for (const [codice, voce, tol] of [["C01", "tabellare", cfg.tolleranza], ["C02", "scatti", cfg.tolleranza],
       ["C03", "contributi_inps", cfg.tolleranza], ["C04", "quota_tfr", cfg.tolleranza],
@@ -124,6 +175,7 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
       const [e13, e14] = ratei(r.data_assunzione, cfg.mese, cfg);
       if (r.ratei_13 !== e13 || r.ratei_14 !== e14) segnala(r, "C11", `13ª ${e13}; 14ª ${e14}`, `13ª ${r.ratei_13}; 14ª ${r.ratei_14}`);
     }
+    cessazione(r);
     if (p && !r.evento) {
       const cambi = ANAGRAFICA.filter((c) => (typeof p[c] === "number" && typeof r[c] === "number"
         ? Math.abs(p[c] - r[c]) > cfg.tolleranza : String(p[c]) !== String(r[c])));
@@ -156,13 +208,16 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
 }
 
 export function novembre(mese, ccnl, cfg) {
-  return mese.filter((r) => ccnl[r.livello]).map((r) => {
+  // chi lascia prima della tranche non la riceve
+  return mese.filter((r) => ccnl[r.livello] && (vuoto(r.data_cessazione) || r.data_cessazione >= cfg.prossima_tranche)).map((r) => {
     const t = ccnl[r.livello];
     const aumento = centesimi((t[cfg.colonna_minimo_prossimo] - t[cfg.colonna_minimo]) * r.part_time);
     const assorbito = r.superminimo_assorbibile ? Math.min(r.superminimo, aumento) : 0;
     return { matricola: r.matricola, cliente: r.cliente, aumento, assorbito, da_pagare: centesimi(aumento - assorbito) };
   });
 }
+
+const vuoto = (v) => v == null || (typeof v === "number" && Number.isNaN(v)) || String(v).trim() === "";
 
 // ---- Lettura dei CSV -----------------------------------------------------------------------------
 // Accetta virgola o punto e virgola come separatore, e la virgola decimale delle esportazioni italiane.
@@ -182,6 +237,8 @@ export function leggiCsv(testo) {
 const NUMERI = ["part_time", "tabellare", "scatti_n", "scatti", "superminimo", "straordinari", "lordo", "contributi_inps",
   "imponibile_irpef", "irpef", "altre_trattenute", "netto", "quota_tfr", "ferie_maturate", "ferie_godute", "ferie_residuo",
   "ritenute_1001", "contributi_dipendente"];
+
+const FACOLTATIVI = ["ratei_13", "ratei_14", "preavviso_giorni", "tredicesima", "quattordicesima", "ferie_liquidate"];
 
 export function numero(s, decimaleVirgola) {
   if (s === "" || s == null) return 0;
@@ -205,10 +262,12 @@ export function normalizza(righe, decimaleVirgola) {
   return righe.map((r) => {
     const o = { ...r };
     for (const k of NUMERI) if (k in o) o[k] = numero(o[k], decimaleVirgola);
-    for (const k of ["ratei_13", "ratei_14"]) {           // facoltative: vuote vuol dire "non indicate", non zero
+    for (const k of FACOLTATIVI) {                        // facoltative: vuote vuol dire "non indicate", non zero
       o[k] = k in o && String(o[k]).trim() !== "" ? numero(o[k], decimaleVirgola) : null;
     }
     if ("data_assunzione" in o) o.data_assunzione = data(o.data_assunzione);
+    o.data_cessazione = vuoto(o.data_cessazione) ? null : data(o.data_cessazione);
+    o.tipo_cessazione = String(o.tipo_cessazione ?? "").trim().toLowerCase();
     if ("superminimo_assorbibile" in o) o.superminimo_assorbibile = /^(true|1|s[iì]|vero|x)$/i.test(String(o.superminimo_assorbibile));
     if ("livello" in o) o.livello = String(o.livello).replace(/[°º]/g, "").trim();
     if ("evento" in o) o.evento = String(o.evento || "").trim();

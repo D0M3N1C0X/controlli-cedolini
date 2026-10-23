@@ -148,6 +148,8 @@ class Foglio:
             ("scatti_max", "Scatti massimi", C.SCATTI_MAX, "0", None, "CCNL Terziario: 10 scatti triennali."),
             ("giorni_mese", "Giorni di servizio che fanno un mese intero", C.GIORNI_MESE_INTERO, "0", None,
              "CCNL Terziario: per tredicesima e quattordicesima, le frazioni di almeno 15 giorni contano come mese intero."),
+            ("divisore_giornaliero", "Divisore della quota giornaliera", C.DIVISORE_GIORNALIERO, "0", None,
+             "CCNL Terziario: la quota giornaliera è la retribuzione mensile divisa 26; vale per le ferie non godute."),
         ]
         header(ws, 4, ["", "Parametro", "Valore", "Fonte e note"], height=20)
         for r, (key, label, value, fmt, fill, note) in enumerate(rows, start=5):
@@ -159,8 +161,9 @@ class Foglio:
     def ccnl(self, ws) -> None:
         t = R.tabella()
         title(ws, "CCNL Terziario Distribuzione e Servizi (Confcommercio): minimi mensili e scatti",
-              "Accordo di rinnovo del 22 marzo 2024. Minimo = paga base + contingenza (+ 5,16 € al 7° livello). Fonti in docs/fonti.md.")
-        widths(ws, {"A": 10, **{col(k): 14 for k in range(2, 10)}})
+              "Minimo = paga base + altri elementi + contingenza ed EDR (circolare Confcommercio del 29 marzo 2024). "
+              "Preavviso in giorni, per anni di servizio (sintesi Filcams). Fonti in docs/fonti.md.")
+        widths(ws, {"A": 10, **{col(k): 14 for k in range(2, 17)}})
         header(ws, 4, ["Livello", "Paga base", "Contingenza", "Altri elementi", "Minimo dal 03/2025",
                        "Minimo dal 11/2025", "Minimo dal 11/2026", "Minimo dal 02/2027", "Scatto"])
         first = 5
@@ -170,8 +173,15 @@ class Foglio:
                                    "minimo_2026_11", "minimo_2027_02", "scatto"]):
                 put(ws, f"{col(2 + j)}{i}", float(r[c]), color=BLUE, fmt=NUM2)
         last = first + len(t) - 1
+        # preavviso minimo (F13): dimissioni e licenziamento, fino a 5 anni, dal 6° al 10°, oltre il 10°
+        header(ws, 4, ["Dimissioni fino a 5 anni", "Dimissioni 6-10 anni", "Dimissioni oltre 10 anni",
+                       "Licenziamento fino a 5 anni", "Licenziamento 6-10 anni", "Licenziamento oltre 10 anni"], start=11)
+        for i, lv in enumerate(t.index, start=first):
+            for j, giorni in enumerate([*C.PREAVVISO["dimissioni"][lv], *C.PREAVVISO["licenziamento"][lv]]):
+                put(ws, f"{col(11 + j)}{i}", giorni, color=BLUE)
         rng = lambda letter: f"CCNL!${letter}${first}:${letter}${last}"
-        self.R.update({"lv": rng("A"), "min": rng("F"), "min_next": rng("G"), "scatto": rng("I")})
+        self.R.update({"lv": rng("A"), "min": rng("F"), "min_next": rng("G"), "scatto": rng("I"),
+                       "preavviso": f"CCNL!$K${first}:$P${last}"})
 
     def tabelle_cf(self, ws) -> None:
         title(ws, "Codice fiscale: valori per il carattere di controllo", "DM 23 dicembre 1976: posizioni dispari e pari.")
@@ -213,7 +223,7 @@ class Foglio:
     def settembre(self, ws) -> None:
         R_, m, a = self.R, self.o["mese"], self.o["attesi"]
         title(ws, "Mese: cedolini e controlli (nei dati di esempio, settembre 2026)",
-              f"Colonne A-W e AU-AV: i dati del software paghe (blu), fino a {RIGHE} righe. Le altre: valori attesi ed "
+              f"Colonne A-W, AU-AV e AZ-BE: i dati del software paghe (blu), fino a {RIGHE} righe. Le altre: valori attesi ed "
               "esiti, in formula.")
         inputs = ["matricola", "cliente", "codice_fiscale", "livello", "data_assunzione", "part_time", "evento",
                   "superminimo_assorbibile", "tabellare", "scatti_n", "scatti", "superminimo", "straordinari", "lordo",
@@ -225,7 +235,11 @@ class Foglio:
             "Variazione", "Controllo CF",
             "C01 Minimo", "C02 Scatti", "C03 INPS", "C04 TFR", "C05 Ferie", "C06 Quadratura", "C07 Variazione",
             "C09 Cod. fiscale", "C10 Anagrafica", "Errori",
-            "Ratei 13ª", "Ratei 14ª", "Ratei 13ª attesi", "Ratei 14ª attesi", "C11 Ratei"]
+            "Ratei 13ª", "Ratei 14ª", "Ratei 13ª attesi", "Ratei 14ª attesi", "C11 Ratei",
+            "Data cessazione", "Tipo cessazione", "Giorni di preavviso", "Tredicesima pagata", "Quattordicesima pagata",
+            "Ferie liquidate", "Retribuzione mensile", "Dodicesimi 13ª", "Dodicesimi 14ª", "Tredicesima attesa",
+            "Quattordicesima attesa", "C12 Mensilità", "Ferie liquidate attese", "C13 Ferie", "Anni di servizio",
+            "Preavviso minimo", "C14 Preavviso"]
         header(ws, 4, heads, height=44)
         widths(ws, {**{col(k): 11 for k in range(1, len(heads) + 1)}, "C": 19, "G": 14})
         first = 5
@@ -249,6 +263,14 @@ class Foglio:
             # i ratei vengono dopo le colonne calcolate, così le formule già scritte non si spostano
             put(ws, f"AU{i}", int(t.ratei_13), color=BLUE)
             put(ws, f"AV{i}", int(t.ratei_14), color=BLUE)
+            # voci della cessazione, dopo i ratei: vuote se il dipendente resta
+            if str(t.data_cessazione).strip():
+                put(ws, f"AZ{i}", date.fromisoformat(t.data_cessazione), color=BLUE, fmt="DD/MM/YYYY")
+                put(ws, f"BA{i}", t.tipo_cessazione, color=BLUE)
+                put(ws, f"BB{i}", int(float(t.preavviso_giorni)), color=BLUE)
+            for letter, name in (("BC", "tredicesima"), ("BD", "quattordicesima"), ("BE", "ferie_liquidate")):
+                if str(getattr(t, name)).strip():
+                    put(ws, f"{letter}{i}", float(getattr(t, name)), color=BLUE, fmt=NUM2)
         # le formule coprono RIGHE righe, così si possono incollare i cedolini di un cliente più grande;
         # le righe vuote restano vuote
         for i in range(first, last + 1):
@@ -262,7 +284,7 @@ class Foglio:
             put(ws, f"AC{i}", g(f"ROUND((I{i}+K{i}+L{i})*{R_['mensilita']}/{R_['divisore_tfr']}/12,2)"), fmt=NUM2)
             put(ws, f"AD{i}", g(f'IFERROR(INDEX({R_["ag_f"]},MATCH(A{i},{R_["ag_m"]},0)),0)'), color=GREEN, fmt=NUM4)
             put(ws, f"AE{i}", g(f"ROUND(AD{i}+ROUND({R_['ferie']}/12,4)-V{i},4)"), fmt=NUM4)
-            put(ws, f"AF{i}", g(f"ROUND(I{i}+K{i}+L{i}+M{i},2)"), fmt=NUM2)
+            put(ws, f"AF{i}", g(f"ROUND(I{i}+K{i}+L{i}+M{i}+N(BC{i})+N(BD{i})+N(BE{i}),2)"), fmt=NUM2)
             put(ws, f"AG{i}", g(f"ROUND(N{i}-O{i}-Q{i}-R{i},2)"), fmt=NUM2)
             put(ws, f"AH{i}", g(f'IFERROR(INDEX({R_["ag_n"]},MATCH(A{i},{R_["ag_m"]},0)),"")'), color=GREEN, fmt=NUM2)
             put(ws, f"AI{i}", g(f'IF(AH{i}="","",S{i}/AH{i}-1)'), fmt=PCT)
@@ -283,7 +305,8 @@ class Foglio:
             cambio = (f"OR({ag('ag_liv')}&\"\"<>D{i}&\"\",ABS({ag('ag_pt')}-F{i})>{tol},"
                       f"ABS({ag('ag_sup')}-L{i})>{tol},{ag('ag_dat')}<>E{i})")
             put(ws, f"AS{i}", g(f'IF(ISNA(MATCH(A{i},{R_["ag_m"]},0)),"OK",IF(AND(G{i}="",{cambio}),"ERRORE","OK"))'))
-            put(ws, f"AT{i}", g(f'COUNTIF(AK{i}:AS{i},"ERRORE")+COUNTIF(AY{i},"ERRORE")'), bold=True)
+            put(ws, f"AT{i}", g(f'COUNTIF(AK{i}:AS{i},"ERRORE")+COUNTIF(AY{i},"ERRORE")+COUNTIF(BK{i},"ERRORE")'
+                                f'+COUNTIF(BM{i},"ERRORE")+COUNTIF(BP{i},"ERRORE")'), bold=True)
             # C11: dodicesimi dal 1° gennaio (13ª) e dal 1° luglio (14ª); il mese di assunzione conta se ha almeno
             # "giorni_mese" giorni di servizio
             mese, gm = R_["mese"], R_["giorni_mese"]
@@ -294,8 +317,43 @@ class Foglio:
             put(ws, f"AX{i}", g(f"IF(E{i}<={inizio14},(YEAR({mese})*12+MONTH({mese}))-(YEAR({inizio14})*12"
                                 f"+MONTH({inizio14}))+1,{dopo})"))
             put(ws, f"AY{i}", g(f'IF(AND(AU{i}="",AV{i}=""),"OK",IF(OR(AU{i}<>AW{i},AV{i}<>AX{i}),"ERRORE","OK"))'))
+            # C12-C14: dodicesimi fino alla cessazione, con la regola dei 15 giorni al primo e all'ultimo mese
+            tol, dg = R_["tolleranza"], R_["divisore_giornaliero"]
+
+            def fino_a_cessazione(inizio: str, i=i, gm=gm) -> str:
+                da = f"MAX(E{i},{inizio})"
+                stesso = f"(YEAR(AZ{i})*12+MONTH(AZ{i}))=(YEAR({da})*12+MONTH({da}))"
+                return (f"IF(AZ{i}<{da},0,IF({stesso},IF(AZ{i}-{da}+1>={gm},1,0),"
+                        f"(YEAR(AZ{i})*12+MONTH(AZ{i}))-(YEAR({da})*12+MONTH({da}))-1"
+                        f"+IF(DAY(EOMONTH({da},0))-DAY({da})+1>={gm},1,0)+IF(DAY(AZ{i})>={gm},1,0)))")
+            put(ws, f"BF{i}", g(f"ROUND(I{i}+K{i}+L{i},2)"), fmt=NUM2)
+            put(ws, f"BG{i}", g(f'IF(AZ{i}="",AW{i},{fino_a_cessazione(f"DATE(YEAR(AZ{i}),1,1)")})'))
+            put(ws, f"BH{i}", g(f'IF(AZ{i}="",AX{i},{fino_a_cessazione(f"DATE(YEAR(AZ{i})-IF(MONTH(AZ{i})<7,1,0),7,1)")})'))
+            put(ws, f"BI{i}", g(f"ROUND(BF{i}*BG{i}/12,2)"), fmt=NUM2)
+            put(ws, f"BJ{i}", g(f"ROUND(BF{i}*BH{i}/12,2)"), fmt=NUM2)
+            put(ws, f"BK{i}", g(f'IF(IF(BC{i}="",FALSE,ABS(BC{i}-BI{i})>{tol}),"ERRORE",'
+                                f'IF(IF(BD{i}="",FALSE,ABS(BD{i}-BJ{i})>{tol}),"ERRORE","OK"))'))
+            put(ws, f"BL{i}", g(f'IF(AZ{i}="","",ROUND(BF{i}/{dg}*W{i},2))'), fmt=NUM2)
+            put(ws, f"BM{i}", g(f'IF(OR(AZ{i}="",BE{i}=""),"OK",IF(ABS(BE{i}-BL{i})>{tol},"ERRORE","OK"))'))
+            put(ws, f"BN{i}", g(f'IF(AZ{i}="","",YEAR(AZ{i})-YEAR(E{i})-IF(OR(MONTH(AZ{i})<MONTH(E{i}),'
+                                f'AND(MONTH(AZ{i})=MONTH(E{i}),DAY(AZ{i})<DAY(E{i}))),1,0))'))
+            put(ws, f"BO{i}", g(f'IF(OR(AZ{i}="",AND(BA{i}<>"dimissioni",BA{i}<>"licenziamento")),"",INDEX({R_["preavviso"]},MATCH(D{i},{R_["lv"]},0),'
+                                f'IF(BA{i}="licenziamento",3,0)+IF(BN{i}<5,1,IF(BN{i}<10,2,3))))'))
+            put(ws, f"BP{i}", g(f'IF(OR(BO{i}="",BB{i}=""),"OK",IF(BB{i}<BO{i},"ERRORE","OK"))'))
         for i, t in enumerate(m.itertuples(index=False), start=first):
             k = i - first
+            if str(t.data_cessazione).strip():
+                ces, mensile = date.fromisoformat(t.data_cessazione), round(t.tabellare + t.scatti + t.superminimo, 2)
+                assunto = date.fromisoformat(t.data_assunzione)
+                self.check("Mese", f"{t.matricola} tredicesima attesa", R.mensilita_aggiuntiva(
+                    mensile, R.dodicesimi_alla_cessazione(assunto, ces, R.inizio_13(ces))), f"Mese!BI{i}")
+                self.check("Mese", f"{t.matricola} quattordicesima attesa", R.mensilita_aggiuntiva(
+                    mensile, R.dodicesimi_alla_cessazione(assunto, ces, R.inizio_14(ces))), f"Mese!BJ{i}")
+                self.check("Mese", f"{t.matricola} ferie liquidate attese", R.ferie_non_godute(mensile, t.ferie_residuo),
+                           f"Mese!BL{i}")
+                if t.tipo_cessazione in C.PREAVVISO:
+                    self.check("Mese", f"{t.matricola} preavviso minimo", float(R.preavviso_minimo(
+                        t.tipo_cessazione, str(t.livello), assunto, ces)), f"Mese!BO{i}")
             if k % 6 == 0:
                 for letter, name in (("X", "tabellare"), ("Z", "scatti_n"), ("AA", "scatti"), ("AB", "contributi_inps"),
                                      ("AC", "quota_tfr"), ("AE", "ferie_residuo"), ("AG", "netto"), ("AW", "ratei_13"),
@@ -303,15 +361,17 @@ class Foglio:
                     self.check("Mese", f"{t.matricola} {name} atteso", a.loc[k, name], f"Mese!{letter}{i}")
         esito_rule(ws, f"AK{first}:AS{last}")
         esito_rule(ws, f"AY{first}:AY{last}")
+        for letter in ("BK", "BM", "BP"):
+            esito_rule(ws, f"{letter}{first}:{letter}{last}")
         E = lambda letter: f"Mese!${letter}${first}:${letter}${last}"
         self.R.update({"s_cli": E("B"), "s_m": E("A"), "s_irpef": E("Q"), "s_inps": E("O"), "s_err": E("AT"),
                        **{f"s_{c}": E(letter) for c, letter in zip(
-                           ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C09", "C10", "C11"],
-                           ["AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AY"], strict=True)}})
+                           ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C09", "C10", "C11", "C12", "C13", "C14"],
+                           ["AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AY", "BK", "BM", "BP"], strict=True)}})
         # each Python finding must be an ERRORE in the sheet, and every other row OK
         an = self.o["anomalie"]
         colonna = {"C01": "AK", "C02": "AL", "C03": "AM", "C04": "AN", "C05": "AO", "C06": "AP", "C07": "AQ", "C09": "AR",
-                   "C10": "AS", "C11": "AY"}
+                   "C10": "AS", "C11": "AY", "C12": "BK", "C13": "BM", "C14": "BP"}
         trovate = set(zip(an["controllo"], an["matricola"], strict=True))
         for k, t in enumerate(m.itertuples(index=False)):
             for codice, letter in colonna.items():
@@ -319,7 +379,7 @@ class Foglio:
                     esito = "ERRORE" if (codice, t.matricola) in trovate else "OK"
                     self.check("Mese", f"{t.matricola} {codice}", esito, f"Mese!{letter}{first + k}")
         ws.freeze_panes = "D5"
-        ws.auto_filter.ref = f"A4:AY{last}"
+        ws.auto_filter.ref = f"A4:BP{last}"
 
     def f24(self, ws) -> None:
         R_, rec = self.R, self.o["riconciliazione_f24"]
@@ -344,12 +404,15 @@ class Foglio:
         self.R.update({"f24_cli": f"F24!$A$5:$A${last}", "f24_es": f"F24!$H$5:$H${last}"})
 
     def novembre(self, ws) -> None:
-        R_, n = self.R, self.o["novembre"]
+        R_, n, m = self.R, self.o["novembre"], self.o["mese"]
         title(ws, "Novembre 2026: la nuova tranche del CCNL Terziario",
-              "Si aggiorna dal foglio Mese. Superminimo assorbibile: verificare la lettera di assunzione di ciascuno.")
-        widths(ws, {"A": 12, "B": 9, "C": 9, "D": 10, "E": 12, "F": 12, "G": 12, "H": 12, "I": 12, "J": 14, "K": 14})
+              "Si aggiorna dal foglio Mese. Chi esce prima della tranche non la riceve. Superminimo assorbibile: "
+              "verificare la lettera di assunzione di ciascuno.")
+        widths(ws, {"A": 12, "B": 9, "C": 9, "D": 10, "E": 12, "F": 12, "G": 12, "H": 12, "I": 12, "J": 14, "K": 14,
+                    "L": 16})
         header(ws, 4, ["Matricola", "Cliente", "Livello", "Part-time", "Superminimo", "Assorbibile",
-                       "Aumento mensile", "Assorbito", "Da pagare", "Nuovo tabellare", "Nuovo superminimo"])
+                       "Aumento mensile", "Assorbito", "Da pagare", "Nuovo tabellare", "Nuovo superminimo", "Cessazione"])
+        tr = C.PROSSIMA_TRANCHE
         first = 5
         for i in range(first, first + RIGHE):
             g = lambda expr, i=i: f'=IF($A{i}="","",{expr})'
@@ -357,15 +420,21 @@ class Foglio:
                 fmt = NUM2 if letter == "E" else None
                 put(ws, f"{letter}{i}", f'=IF(Mese!$A{i}="","",Mese!{src}{i})', color=GREEN, fmt=fmt)
             lk = lambda rng, i=i: f"INDEX({rng},MATCH(C{i},{R_['lv']},0))"
-            put(ws, f"G{i}", g(f"ROUND(({lk(R_['min_next'])}-{lk(R_['min'])})*D{i},2)"), fmt=NUM2)
+            esce = f'AND(Mese!$AZ{i}<>"",Mese!$AZ{i}<DATE({tr.year},{tr.month},{tr.day}))'
+            put(ws, f"G{i}", g(f"IF({esce},0,ROUND(({lk(R_['min_next'])}-{lk(R_['min'])})*D{i},2))"), fmt=NUM2)
             put(ws, f"H{i}", g(f"IF(F{i},MIN(E{i},G{i}),0)"), fmt=NUM2)
             put(ws, f"I{i}", g(f"ROUND(G{i}-H{i},2)"), fmt=NUM2)
-            put(ws, f"J{i}", g(f"ROUND({lk(R_['min_next'])}*D{i},2)"), fmt=NUM2)
+            put(ws, f"J{i}", g(f'IF({esce},"",ROUND({lk(R_["min_next"])}*D{i},2))'), fmt=NUM2)
             put(ws, f"K{i}", g(f"ROUND(E{i}-H{i},2)"), fmt=NUM2)
-        for i, t in enumerate(n.itertuples(index=False), start=first):
-            if (i - first) % 5 == 0:
+            put(ws, f"L{i}", g(f'IF({esce},"esce prima","")'))
+        per_matricola = n.set_index("matricola")
+        for i, matricola in enumerate(m["matricola"], start=first):
+            if matricola not in per_matricola.index:            # esce prima della tranche: niente aumento
+                self.check("Novembre 2026", f"{matricola} aumento", 0.0, f"'Novembre 2026'!G{i}")
+            elif (i - first) % 5 == 0:
+                t = per_matricola.loc[matricola]
                 for letter, name in (("G", "aumento"), ("H", "assorbito"), ("I", "da_pagare"), ("J", "nuovo_tabellare")):
-                    self.check("Novembre 2026", f"{t.matricola} {name}", float(getattr(t, name)), f"'Novembre 2026'!{letter}{i}")
+                    self.check("Novembre 2026", f"{matricola} {name}", float(t[name]), f"'Novembre 2026'!{letter}{i}")
         last = first + RIGHE - 1
         N = lambda letter: f"'Novembre 2026'!${letter}${first}:${letter}${last}"
         self.R.update({"n_cli": N("B"), "n_aum": N("G"), "n_ass": N("H"), "n_pag": N("I")})
@@ -448,11 +517,11 @@ class Foglio:
     def leggimi(self, ws, names) -> None:
         widths(ws, {"A": 3, "B": 22, "C": 100})
         put(ws, "B2", "Controlli cedolini", bold=True, size=18)
-        put(ws, "B3", "Dieci controlli sui cedolini del mese, prima dell'invio al cliente: CCNL Terziario Confcommercio",
+        put(ws, "B3", "Quattordici controlli sui cedolini del mese, prima dell'invio al cliente: CCNL Terziario Confcommercio",
             color=MUTED, size=12)
         put(ws, "B5", "Come si usa", bold=True, size=11)
         for i, text in enumerate([
-            f"1. Imposta il mese nei Parametri. Incolla i cedolini del mese nel foglio Mese (colonne A-W, più i ratei di tredicesima e quattordicesima in AU-AV, fino a {RIGHE} righe) e quelli del mese prima nel foglio Mese precedente.",
+            f"1. Imposta il mese nei Parametri. Incolla i cedolini del mese nel foglio Mese (colonne A-W, più i ratei di tredicesima e quattordicesima in AU-AV e le voci di chi cessa in AZ-BE, fino a {RIGHE} righe) e quelli del mese prima nel foglio Mese precedente.",
             "2. Incolla gli importi delle deleghe F24 nel foglio F24 (colonne B ed E).",
             "3. Controlla i parametri gialli nel foglio Parametri: l'aliquota INPS va presa dal cliente.",
             "4. Leggi il Riepilogo e filtra il foglio Mese sulla colonna Errori maggiore di zero.",

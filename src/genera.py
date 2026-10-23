@@ -78,13 +78,21 @@ def cedolino(d: pd.Series, mese: str, rng: random.Random, residuo_prec: float, s
             "irpef": irpef, "altre_trattenute": altre, "netto": R.centesimi(imponibile - irpef - altre),
             "quota_tfr": R.quota_tfr(ordinaria), "ferie_maturate": maturate, "ferie_godute": ferie_godute,
             "ferie_residuo": round(residuo_prec + maturate - ferie_godute, 4),
-            "ratei_13": R.ratei_13(assunzione, mese), "ratei_14": R.ratei_14(assunzione, mese)}
+            "ratei_13": R.ratei_13(assunzione, mese), "ratei_14": R.ratei_14(assunzione, mese),
+            # voci della cessazione: vuote finché il dipendente resta
+            "data_cessazione": "", "tipo_cessazione": "", "preavviso_giorni": "", "tredicesima": "",
+            "quattordicesima": "", "ferie_liquidate": ""}
+
+
+def _importo(v) -> float:
+    return 0.0 if v in ("", None) or (isinstance(v, float) and v != v) else float(v)
 
 
 def ricalcola(r: dict) -> dict:
     """Dopo una modifica a monte, rifà a cascata le voci che il software paghe deriverebbe."""
     ordinaria = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
-    r["lordo"] = R.centesimi(ordinaria + r["straordinari"])
+    r["lordo"] = R.centesimi(ordinaria + r["straordinari"] + sum(_importo(r.get(k)) for k in
+                                                                 ("tredicesima", "quattordicesima", "ferie_liquidate")))
     r["contributi_inps"] = R.contributi(r["lordo"])
     r["imponibile_irpef"] = R.centesimi(r["lordo"] - r["contributi_inps"])
     r["irpef"] = irpef_sintetica(r["imponibile_irpef"])
@@ -223,10 +231,53 @@ def main() -> None:
     S.loc[i, "ratei_13"] -= 1
     registra(i, "ratei", "un dodicesimo di tredicesima in meno senza assenze che lo spieghino")
 
+    # cessazioni a fine mese: due corrette, tre con un errore ciascuna
+    fine_mese = date(R.primo_del_mese(C.MESE).year, R.primo_del_mese(C.MESE).month,
+                     calendar.monthrange(R.primo_del_mese(C.MESE).year, R.primo_del_mese(C.MESE).month)[1])
+
+    for col in ("data_cessazione", "tipo_cessazione", "preavviso_giorni", "tredicesima", "quattordicesima",
+                "ferie_liquidate"):
+        S[col] = S[col].astype(object)
+
+    def cessa(i, tipo: str, errore: str = "") -> None:
+        r = S.loc[i].to_dict()
+        assunzione = date.fromisoformat(r["data_assunzione"])
+        mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
+        n13 = R.dodicesimi_alla_cessazione(assunzione, fine_mese, R.inizio_13(fine_mese))
+        n14 = R.dodicesimi_alla_cessazione(assunzione, fine_mese, R.inizio_14(fine_mese))
+        minimo = R.preavviso_minimo(tipo, r["livello"], assunzione, fine_mese)
+        r.update({"evento": "cessazione", "data_cessazione": fine_mese.isoformat(), "tipo_cessazione": tipo,
+                  "preavviso_giorni": minimo, "tredicesima": R.mensilita_aggiuntiva(mensile, n13),
+                  "quattordicesima": R.mensilita_aggiuntiva(mensile, n14),
+                  "ferie_liquidate": R.ferie_non_godute(mensile, r["ferie_residuo"])})
+        if errore == "ferie":
+            r["ferie_liquidate"] = R.centesimi(mensile / 30 * r["ferie_residuo"])
+        elif errore == "quattordicesima":
+            r["quattordicesima"] = R.mensilita_aggiuntiva(mensile, n13)
+        elif errore == "preavviso":
+            r["preavviso_giorni"] = minimo // 2
+        S.loc[i] = pd.Series(ricalcola(r))
+
+    pieno = lambda r: libero(r) and r["ferie_residuo"] > 1 and r["ratei_14"] != r["ratei_13"]
+    cessa(prendi(pieno), "dimissioni")
+    cessa(prendi(pieno), "licenziamento")
+    i = prendi(pieno)
+    cessa(i, "dimissioni", "ferie")
+    registra(i, "ferie_liquidate", "ferie non godute pagate a 1/30 della retribuzione invece che a 1/26")
+    i = prendi(pieno)
+    cessa(i, "dimissioni", "quattordicesima")
+    registra(i, "tredicesima", "quattordicesima liquidata con i dodicesimi da gennaio invece che da luglio")
+    i = prendi(pieno)
+    cessa(i, "licenziamento", "preavviso")
+    registra(i, "preavviso", "licenziamento con metà del preavviso minimo del CCNL")
+
     S = pd.concat([S, pd.DataFrame(nuovi)], ignore_index=True)
     ced = pd.concat([pd.DataFrame(ago), S], ignore_index=True)
     for col in ("scatti_n", "ratei_13", "ratei_14"):
         ced[col] = ced[col].astype(int)
+    for col in ("tredicesima", "quattordicesima", "ferie_liquidate"):
+        ced[col] = [f"{float(v):.2f}" if v not in ("", None) else "" for v in ced[col]]
+    ced["preavviso_giorni"] = [str(int(v)) if v not in ("", None) else "" for v in ced["preavviso_giorni"]]
     ced.to_csv(C.CEDOLINI, index=False, float_format="%.4f")
 
     # F24 di settembre: ritenute (codice tributo 1001) e contributi a carico dei dipendenti per cliente.

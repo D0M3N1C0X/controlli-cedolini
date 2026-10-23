@@ -13,7 +13,7 @@ const UI = {
   it: {
     brand: "Controlli cedolini", eyebrow: "CCNL Terziario · prima dell'invio al cliente",
     title: "Controlla i cedolini del mese",
-    lead: "Carica l'export del tuo software paghe: undici controlli ricalcolano ogni voce dalle regole del contratto e ti dicono cosa correggere, prima che il cliente se ne accorga.",
+    lead: "Carica l'export del tuo software paghe: quattordici controlli ricalcolano ogni voce dalle regole del contratto e ti dicono cosa correggere, prima che il cliente se ne accorga.",
     privacy: "I tuoi file restano su questo computer: i controlli girano in questa pagina e niente viene inviato. Puoi verificarlo staccando la rete dopo che la pagina si è aperta.",
     step1: "I tuoi file", step1sub: "File Excel (.xlsx) o CSV, così come escono dal software paghe.",
     dropMese: "Cedolini del mese", dropMeseSub: "Obbligatorio · trascinalo qui o tocca per sceglierlo",
@@ -60,12 +60,15 @@ const UI = {
     f_altre_trattenute: "Altre trattenute", f_netto: "Netto", f_quota_tfr: "Quota TFR del mese",
     f_ferie_maturate: "Ferie maturate", f_ferie_godute: "Ferie godute", f_ferie_residuo: "Residuo ferie",
     f_ratei_13: "Ratei di tredicesima", f_ratei_14: "Ratei di quattordicesima",
+    f_data_cessazione: "Data di cessazione", f_tipo_cessazione: "Tipo di cessazione (dimissioni o licenziamento)",
+    f_preavviso_giorni: "Giorni di preavviso", f_tredicesima: "Tredicesima pagata", f_quattordicesima: "Quattordicesima pagata",
+    f_ferie_liquidate: "Ferie non godute pagate",
     f_ritenute_1001: "Ritenute IRPEF (codice 1001)", f_contributi_dipendente: "Contributi dei dipendenti",
   },
   en: {
     brand: "Payslip checks", eyebrow: "Italian CCNL Terziario · before payslips go to the client",
     title: "Check this month's payslips",
-    lead: "Load the export from your payroll software: eleven checks recompute every item from the collective agreement's rules and tell you what to fix, before the client notices.",
+    lead: "Load the export from your payroll software: fourteen checks recompute every item from the collective agreement's rules and tell you what to fix, before the client notices.",
     privacy: "Your files stay on this computer: the checks run in this page and nothing is sent. You can confirm it by going offline once the page has opened.",
     step1: "Your files", step1sub: "Excel (.xlsx) or CSV files, as they come out of the payroll software.",
     dropMese: "This month's payslips", dropMeseSub: "Required · drop it here or tap to choose it",
@@ -111,6 +114,9 @@ const UI = {
     f_altre_trattenute: "Other deductions", f_netto: "Net pay", f_quota_tfr: "Monthly TFR accrual",
     f_ferie_maturate: "Holidays accrued", f_ferie_godute: "Holidays taken", f_ferie_residuo: "Holiday balance",
     f_ratei_13: "13th month twelfths", f_ratei_14: "14th month twelfths",
+    f_data_cessazione: "Leaving date", f_tipo_cessazione: "Type of leaving (dimissioni or licenziamento)",
+    f_preavviso_giorni: "Notice days", f_tredicesima: "13th month paid", f_quattordicesima: "14th month paid",
+    f_ferie_liquidate: "Untaken holiday paid",
     f_ritenute_1001: "Income tax withheld (code 1001)", f_contributi_dipendente: "Employee contributions",
   },
 };
@@ -143,6 +149,12 @@ const CAMPI_CEDOLINI = [
   ["ferie_residuo", true, ["residuo ferie", "ferie residue"]],
   ["ratei_13", false, ["ratei tredicesima", "ratei 13a", "dodicesimi tredicesima"]],
   ["ratei_14", false, ["ratei quattordicesima", "ratei 14a", "dodicesimi quattordicesima"]],
+  ["data_cessazione", false, ["data di cessazione", "cessazione", "data licenziamento", "data dimissioni", "leaving date"]],
+  ["tipo_cessazione", false, ["tipo di cessazione", "motivo cessazione", "causale cessazione"]],
+  ["preavviso_giorni", false, ["preavviso", "giorni di preavviso", "giorni preavviso", "notice days"]],
+  ["tredicesima", false, ["tredicesima mensilita", "13a mensilita", "mensilita 13"]],
+  ["quattordicesima", false, ["quattordicesima mensilita", "14a mensilita", "mensilita 14"]],
+  ["ferie_liquidate", false, ["indennita ferie non godute", "ferie liquidate", "ferie non godute liquidate"]],
 ].map(([key, required, aliases]) => ({ key, required, aliases }));
 const CAMPI_F24 = [
   ["cliente", true, ["azienda", "ditta", "client"]],
@@ -321,7 +333,9 @@ $("esegui").addEventListener("click", controlla);
 const formato = (a, v) => {
   if (v == null || v === "") return "–";
   if (typeof v !== "number") return v === "valido" ? t("valido") : esc(v);
-  return a.controllo === "C05" ? t("giorni", { n: i18n.number(v, 2) }) : i18n.money(v);
+  const giorni = (d) => t("giorni", { n: i18n.number(v, d).replace(/^-/, "−") });
+  if (a.controllo === "C05") return giorni(2);
+  return a.controllo === "C14" ? giorni(0) : i18n.money(v);
 };
 const priorita = (p) => (i18n.lang === "en" ? { alta: "high", media: "medium" }[p] : p);
 const pill = (p) => `<span class="s-pill ${p === "alta" ? "is-high" : "is-medium"}">${esc(priorita(p))}</span>`;

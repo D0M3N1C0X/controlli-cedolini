@@ -23,7 +23,7 @@ A001,A,C06,Quadratura,1310.0,1347.5,37.50,alta
 C093,C,C06,Quadratura,1528.2,1628.2,100.00,alta
 B090,B,C07,Variazione del netto,1752.08,2374.82,622.74,media
 C099,C,C07,Variazione del netto,1467.12,2045.04,577.92,media
-,C,C08,Riconciliazione F24,6345.71,6133.31,-212.40,alta
+,C,C08,Riconciliazione F24,7214.66,7002.26,-212.40,alta
 B058,B,C09,Codice fiscale,valido,GFZPLG92P01Z321A,,alta
 C107,C,C09,Codice fiscale,valido,ZCCGMF94M55Z282A,,alta
 B070,B,C10,Anagrafica,superminimo 150,superminimo 0,,alta
@@ -31,3 +31,6 @@ C100,C,C10,Anagrafica,livello 4,livello 5,,alta
 B034,B,C11,Ratei 13ª e 14ª,13ª 7; 14ª 3,13ª 8; 14ª 3,,media
 B040,B,C11,Ratei 13ª e 14ª,13ª 9; 14ª 3,13ª 9; 14ª 9,,media
 B079,B,C11,Ratei 13ª e 14ª,13ª 9; 14ª 3,13ª 8; 14ª 3,,media
+B092,B,C12,Tredicesima e quattordicesima pagate,452.38,1357.13,904.75,alta
+A011,A,C13,Ferie non godute,2148.97,1862.44,-286.53,alta
+B045,B,C14,Preavviso,20.0,10.0,-10.00,alta

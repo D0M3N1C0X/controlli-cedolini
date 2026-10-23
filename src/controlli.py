@@ -32,14 +32,26 @@ CONTROLLI = {
             "Livello, part-time, superminimo o data di assunzione diversi dal mese prima, senza un evento", "alta"),
     "C11": ("Ratei 13ª e 14ª",
             "Dodicesimi maturati diversi dai mesi di servizio nel periodo (frazione di 15 giorni intera)", "media"),
+    "C12": ("Tredicesima e quattordicesima pagate",
+            "Importo diverso dalla retribuzione mensile per i dodicesimi maturati, a dicembre o alla cessazione",
+            "alta"),
+    "C13": ("Ferie non godute",
+            "Alla cessazione, ferie residue pagate diversamente da 1/26 della retribuzione mensile al giorno", "alta"),
+    "C14": ("Preavviso",
+            "Alla cessazione, giorni di preavviso sotto il minimo del CCNL per livello e anni di servizio", "alta"),
 }
 TIPO_CONTROLLO = {"minimo": "C01", "scatto": "C02", "inps": "C03", "tfr": "C04", "ferie": "C05", "netto": "C06",
                   "variazione": "C07", "f24": "C08", "codice_fiscale": "C09",
-                  "anagrafica": "C10", "ratei": "C11"}
+                  "anagrafica": "C10", "ratei": "C11", "tredicesima": "C12", "ferie_liquidate": "C13",
+                  "preavviso": "C14"}
+
+CESSAZIONE = ["data_cessazione", "tipo_cessazione", "preavviso_giorni", "tredicesima", "quattordicesima",
+              "ferie_liquidate"]
 
 
 def carica() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    ced = pd.read_csv(C.CEDOLINI, dtype={"livello": str, "evento": str}, keep_default_na=False)
+    ced = pd.read_csv(C.CEDOLINI, dtype={"livello": str, "evento": str, **{c: str for c in CESSAZIONE}},
+                      keep_default_na=False)
     return (ced[ced["mese"] == C.MESE].reset_index(drop=True), ced[ced["mese"] == C.MESE_PRECEDENTE],
             pd.read_csv(C.F24))
 
@@ -58,7 +70,9 @@ def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
     a["quota_tfr"] = ordinaria.map(R.quota_tfr)
     residuo_prec = m["matricola"].map(prec.set_index("matricola")["ferie_residuo"]).fillna(0.0)
     a["ferie_residuo"] = (residuo_prec + R.ferie_mese() - m["ferie_godute"]).round(4)
-    a["lordo"] = (ordinaria + m["straordinari"]).map(R.centesimi)
+    extra = sum(pd.to_numeric(m[c], errors="coerce").fillna(0.0) if c in m else 0.0
+                for c in ("tredicesima", "quattordicesima", "ferie_liquidate"))
+    a["lordo"] = (ordinaria + m["straordinari"] + extra).map(R.centesimi)
     a["netto"] = (m["lordo"] - m["contributi_inps"] - m["irpef"] - m["altre_trattenute"]).map(R.centesimi)
     a["netto_prec"] = m["matricola"].map(prec.set_index("matricola")["netto"])
     a["variazione"] = m["netto"] / a["netto_prec"] - 1
@@ -111,6 +125,7 @@ def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.D
         e13, e14 = int(a.loc[i, "ratei_13"]), int(a.loc[i, "ratei_14"])
         if (r13, r14) != (e13, e14):
             segnala(i, "C11", f"13ª {e13}; 14ª {e14}", f"13ª {r13}; 14ª {r14}")
+        _cessazione(m.loc[i], segnala, i)
         p = prev_by.get(m.loc[i, "matricola"])
         if p is not None and m.loc[i, "evento"] == "":
             cambi = [(c, p[c], m.loc[i, c]) for c in ANAGRAFICA if _diverso(p[c], m.loc[i, c])]
@@ -134,6 +149,36 @@ def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.D
     return anomalie.sort_values(["controllo", "cliente", "matricola"]).reset_index(drop=True), rec.reset_index()
 
 
+def _vuoto(v) -> bool:
+    return v is None or (isinstance(v, float) and v != v) or str(v).strip() == ""
+
+
+def _cessazione(r: pd.Series, segnala, i: int) -> None:
+    """C12-C14: le voci pagate a dicembre o alla cessazione, quando il cedolino le riporta."""
+    assunzione = date.fromisoformat(str(r["data_assunzione"]))
+    mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
+    ces = None if _vuoto(r.get("data_cessazione")) else date.fromisoformat(str(r["data_cessazione"]))
+    for voce, inizio, ratei in (("tredicesima", R.inizio_13, R.ratei_13), ("quattordicesima", R.inizio_14, R.ratei_14)):
+        if _vuoto(r.get(voce)):
+            continue
+        n = R.dodicesimi_alla_cessazione(assunzione, ces, inizio(ces)) if ces else ratei(assunzione, C.MESE)
+        atteso, trovato = R.mensilita_aggiuntiva(mensile, n), float(r[voce])
+        if abs(trovato - atteso) > C.TOLLERANZA:
+            segnala(i, "C12", atteso, trovato)
+            break
+    if ces is None:
+        return
+    if not _vuoto(r.get("ferie_liquidate")):
+        atteso, trovato = R.ferie_non_godute(mensile, r["ferie_residuo"]), float(r["ferie_liquidate"])
+        if abs(trovato - atteso) > C.TOLLERANZA:
+            segnala(i, "C13", atteso, trovato)
+    tipo = str(r.get("tipo_cessazione", "")).strip().lower()
+    if tipo in C.PREAVVISO and not _vuoto(r.get("preavviso_giorni")):
+        minimo = R.preavviso_minimo(tipo, str(r["livello"]), assunzione, ces)
+        if int(float(r["preavviso_giorni"])) < minimo:
+            segnala(i, "C14", float(minimo), float(r["preavviso_giorni"]))
+
+
 def valutazione(anomalie: pd.DataFrame) -> pd.DataFrame:
     """Per ogni controllo: errori inseriti, trovati, mancati, falsi allarmi."""
     err = pd.read_csv(C.ERRORI, keep_default_na=False)
@@ -153,6 +198,9 @@ def novembre(m: pd.DataFrame) -> pd.DataFrame:
     """La tranche del 1° novembre 2026: aumento per dipendente, quanto ne assorbe il superminimo
     assorbibile, e quanto resta da pagare. L'assorbibilità va verificata sulla lettera di assunzione."""
     t = R.tabella()
+    if "data_cessazione" in m:          # chi lascia prima della tranche non la riceve
+        resta = [_vuoto(d) or date.fromisoformat(str(d)) >= C.PROSSIMA_TRANCHE for d in m["data_cessazione"]]
+        m = m[resta]
     n = m[["matricola", "cliente", "livello", "part_time", "superminimo", "superminimo_assorbibile"]].copy()
     n["superminimo_assorbibile"] = n["superminimo_assorbibile"].astype(str).str.lower() == "true"
     n["aumento"] = [R.centesimi((t.loc[lv, C.COLONNA_MINIMO_PROSSIMO] - t.loc[lv, C.COLONNA_MINIMO]) * p)
