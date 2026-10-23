@@ -145,7 +145,7 @@ altre_trattenute,1.0,True,C06
 straordinari,0.02,True,C06
 altre_trattenute,10.0,True,C06
 ferie_residuo,1.0,True,C05
-scatti,100.0,True,"C02,C04,C06"
+scatti,100.0,True,"C02,C04,C06,C12,C13"
 lordo,1.0,True,"C03,C06"
 altre_trattenute,0.005,False,
 ferie_residuo,0.005,False,
@@ -183,7 +183,7 @@ contributi_inps,10.0,True,"C03,C06,C08"
 netto,0.02,True,C06
 superminimo,1.0,True,"C04,C06,C10"
 straordinari,1.0,True,C06
-tabellare,10.0,True,"C01,C04,C06"
+tabellare,10.0,True,"C01,C04,C06,C12,C13"
 netto,0.02,True,C06
 contributi_inps,0.005,True,C08
 quota_tfr,1.0,True,C04
@@ -207,7 +207,7 @@ straordinari,10.0,True,C06
 lordo,0.02,True,C06
 straordinari,10.0,True,C06
 irpef,1.0,True,"C06,C08"
-tabellare,1.0,True,"C01,C04,C06"
+tabellare,1.0,True,"C01,C04,C06,C12,C13"
 altre_trattenute,0.02,True,C06
 straordinari,10.0,True,C06
 lordo,0.005,False,
@@ -710,7 +710,7 @@ ferie_residuo,0.02,True,C05
 straordinari,0.005,False,
 contributi_inps,10.0,True,"C03,C06,C08"
 tabellare,1.0,True,"C01,C04,C06"
-scatti,1.0,True,"C02,C04,C06"
+scatti,1.0,True,"C02,C04,C06,C12,C13"
 superminimo,1.0,True,"C04,C06,C10"
 quota_tfr,1.0,True,C04
 netto,0.005,False,
@@ -854,7 +854,7 @@ lordo,0.02,True,C06
 superminimo,10.0,True,"C04,C06,C10"
 irpef,1.0,True,"C06,C08"
 tabellare,100.0,True,"C01,C04,C06"
-ferie_residuo,0.005,False,
+ferie_residuo,0.005,True,C13
 netto,100.0,True,C06
 scatti,0.005,False,
 scatti,0.005,False,
@@ -955,7 +955,7 @@ contributi_inps,0.005,False,
 lordo,10.0,True,"C03,C06"
 altre_trattenute,0.005,False,
 lordo,1.0,True,"C03,C06"
-superminimo,10.0,True,"C04,C06,C10"
+superminimo,10.0,True,"C04,C06,C12,C13"
 quota_tfr,1.0,True,C04
 tabellare,1.0,True,"C01,C04,C06"
 ferie_residuo,1.0,True,C05
@@ -992,7 +992,7 @@ superminimo,0.02,True,"C06,C10"
 ferie_residuo,1.0,True,C05
 altre_trattenute,0.005,False,
 scatti,100.0,True,"C02,C04,C06"
-ferie_residuo,0.005,False,
+ferie_residuo,0.005,True,C13
 scatti,1.0,True,"C02,C04,C06"
 ferie_residuo,10.0,True,C05
 lordo,0.005,False,

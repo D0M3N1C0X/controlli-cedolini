@@ -69,19 +69,19 @@
   "C12": {
    "nome": "Tredicesima e quattordicesima pagate",
    "descrizione": "Importo diverso dalla retribuzione mensile per i dodicesimi maturati, a dicembre o alla cessazione",
-   "cosa_fare": "Ricalcolare la mensilità con i dodicesimi giusti, da gennaio per la tredicesima e da luglio per la quattordicesima, e pagare la differenza",
+   "cosa_fare": "Ricalcolare la mensilità con i dodicesimi giusti, da gennaio per la tredicesima e da luglio per la quattordicesima, e regolare la differenza: pagarla se manca, recuperarla se è stata pagata in più",
    "priorita": "alta"
   },
   "C13": {
    "nome": "Ferie non godute",
    "descrizione": "Alla cessazione, ferie residue pagate diversamente da 1/26 della retribuzione mensile al giorno",
-   "cosa_fare": "Ricalcolare le ferie non godute a 1/26 della retribuzione mensile per giorno e pagare la differenza",
+   "cosa_fare": "Ricalcolare le ferie non godute a 1/26 della retribuzione mensile per giorno e regolare la differenza: pagarla se manca, recuperarla se è in più",
    "priorita": "alta"
   },
   "C14": {
    "nome": "Preavviso",
    "descrizione": "Alla cessazione, giorni di preavviso sotto il minimo del CCNL per livello e anni di servizio",
-   "cosa_fare": "Verificare la data della lettera: se il preavviso non è stato lavorato tutto, va pagata l'indennità sostitutiva per i giorni mancanti",
+   "cosa_fare": "Verificare la data della lettera. Licenziamento: i giorni di preavviso non lavorati si pagano come indennità sostitutiva. Dimissioni: il preavviso non dato si può trattenere come indennità a carico del dipendente",
    "priorita": "alta"
   }
  },
@@ -155,19 +155,19 @@
   "C12": {
    "nome": "13th and 14th month paid",
    "descrizione": "Amount different from monthly pay × twelfths earned, in December or when employment ends",
-   "cosa_fare": "Recompute with the right twelfths (from January for the 13th, from July for the 14th) and pay the difference",
+   "cosa_fare": "Recompute with the right twelfths (from January for the 13th, from July for the 14th) and settle the difference: pay it if short, recover it if overpaid",
    "priorita": "high"
   },
   "C13": {
    "nome": "Untaken holiday",
    "descrizione": "Untaken holiday paid at leaving different from monthly pay / 26 × days left",
-   "cosa_fare": "Recompute untaken holiday at 1/26 of monthly pay per day and pay the difference",
+   "cosa_fare": "Recompute untaken holiday at 1/26 of monthly pay per day and settle the difference: pay it if short, recover it if overpaid",
    "priorita": "high"
   },
   "C14": {
    "nome": "Notice period",
    "descrizione": "Notice shorter than the CCNL minimum for grade, years of service and who ends the contract",
-   "cosa_fare": "Check the date of the letter: notice not worked in full is paid as an allowance for the missing days",
+   "cosa_fare": "Check the date of the letter. Dismissal: notice days not worked are paid as an allowance. Resignation: notice not given can be withheld as an allowance owed by the employee",
    "priorita": "high"
   }
  }

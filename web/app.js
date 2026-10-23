@@ -47,6 +47,7 @@ const UI = {
     rapporto: "Rapporto", catalogo: "Catalogo dei controlli", codice: "Codice",
     eFile: "Non riesco a leggere {f}: {e}.", eVuoto: "Il file dei cedolini del mese è vuoto.",
     eSenzaMese: "Nessun cedolino del mese prima: il residuo ferie parte da zero e la variazione del netto non si controlla.",
+    eMeseIlleggibile: "{n} riga/e hanno un mese che non riesco a leggere: le ho considerate del mese scelto. Controlla la colonna del mese.",
     eNumero: "C'è un valore non numerico in una colonna di importi: {e}.",
     fileFoglio: "{n} righe · foglio «{s}»", fileRighe: "{n} righe",
     xSegnalazioni: "Segnalazioni", xPerCliente: "Per cliente", xNovembre: "Novembre 2026", xParametri: "Parametri",
@@ -101,6 +102,7 @@ const UI = {
     rapporto: "Report", catalogo: "Catalogue of checks", codice: "Code",
     eFile: "I cannot read {f}: {e}.", eVuoto: "This month's payslip file is empty.",
     eSenzaMese: "No payslips for last month: the holiday balance starts from zero and changes in net pay are not checked.",
+    eMeseIlleggibile: "{n} row(s) have a month I cannot read: I took them as the chosen month. Check the month column.",
     eNumero: "A column of amounts has a value that is not a number: {e}.",
     fileFoglio: "{n} rows · sheet “{s}”", fileRighe: "{n} rows",
     xSegnalazioni: "Flags", xPerCliente: "By client", xNovembre: "November 2026", xParametri: "Settings",
@@ -223,6 +225,8 @@ $("esempio").addEventListener("click", async () => {
   const ced = parseCsv(c);
   files.mese = { name: "cedolini.csv", ...ced };
   files.prima = null;
+  $("nome-prima").textContent = "";                               // a last-month file loaded before no longer applies
+  $("drop-prima").classList.remove("is-done");
   files.f24 = { name: "f24.csv", ...parseCsv(f) };
   $("nome-mese").textContent = `cedolini.csv · ${t("fileRighe", { n: ced.rows.length })}`;
   $("nome-f24").textContent = "f24.csv";
@@ -247,18 +251,34 @@ function colonne() {
   // the month: from the file when it has a month column
   const mesi = files.mese && mapping.mese.mese
     ? [...new Set(files.mese.rows.map((r) => normalizzaMese(r[mapping.mese.mese])).filter(Boolean))].sort() : [];
-  if (mesi.length) $("mese").value = mesi[mesi.length - 1];
+  if (mesi.length && !meseAMano) $("mese").value = mesi[mesi.length - 1];       // a month chosen by hand stays
   $("passo-colonne").style.display = files.mese ? "block" : "none";
   disegnaMappa(mancanti.length > 0);
   $("esegui").disabled = !files.mese || mancanti.length > 0;
 }
 
+// The month as payroll exports write it: 2026-09, 2026-09-01, 09/2026, 01/09/2026, 202609, "settembre 2026".
+const MESI = ["gen", "feb", "mar", "apr", "mag", "giu", "lug", "ago", "set", "ott", "nov", "dic"];
+const MONTHS = ["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"];
+let meseAMano = false, illeggibili = 0;
+$("mese").addEventListener("change", () => { meseAMano = true; });
 function normalizzaMese(v) {
-  const s = String(v ?? "").trim();
-  let m = s.match(/^(\d{4})-(\d{1,2})/);
-  if (m) return `${m[1]}-${m[2].padStart(2, "0")}`;
+  const s = String(v ?? "").trim().toLowerCase();
+  const ok = (y, m) => (m >= 1 && m <= 12 ? `${y}-${String(m).padStart(2, "0")}` : "");
+  let m = s.match(/^(\d{4})[-/.](\d{1,2})(?:[-/.]\d{1,2})?/);
+  if (m) return ok(m[1], Number(m[2]));
+  m = s.match(/^\d{1,2}[/.-](\d{1,2})[/.-](\d{4})$/);
+  if (m) return ok(m[2], Number(m[1]));
   m = s.match(/^(\d{1,2})[/.-](\d{4})$/);
-  return m ? `${m[2]}-${m[1].padStart(2, "0")}` : "";
+  if (m) return ok(m[2], Number(m[1]));
+  m = s.match(/^(\d{4})(\d{2})$/);
+  if (m) return ok(m[1], Number(m[2]));
+  m = s.match(/^([a-zà-ù]+)\.?\s+(\d{4})$/);
+  if (m) {
+    const k = m[1].slice(0, 3), i = Math.max(MESI.indexOf(k), MONTHS.indexOf(k));
+    return i >= 0 ? ok(m[2], i + 1) : "";
+  }
+  return "";
 }
 
 function disegnaMappa(apri) {
@@ -301,7 +321,11 @@ function precedente(m) {
 function righe(slot, meseFisso) {
   const f = files[slot];
   const rows = applyMapping(f.rows, mapping[slot]).map((r) => {
-    if (slot !== "f24") r.mese = normalizzaMese(r.mese) || meseFisso;
+    if (slot !== "f24") {
+      const n = normalizzaMese(r.mese);
+      if (String(r.mese ?? "").trim() && !n) illeggibili++;          // counted, then taken as the chosen month
+      r.mese = n || meseFisso;
+    }
     for (const k of ["evento", "superminimo_assorbibile"]) if (!(k in r) && slot !== "f24") r[k] = "";
     return r;
   });
@@ -311,17 +335,23 @@ function righe(slot, meseFisso) {
 function controlla() {
   try {
     messaggio("");
+    illeggibili = 0;
     const mese = $("mese").value;
     const cfg = { ...CFG, mese, aliquota: +$("aliquota").value, soglia: +$("soglia").value };
     const tutti = [...righe("mese", mese), ...(files.prima ? righe("prima", precedente(mese)) : [])];
     if (!tutti.length) throw new Error(t("eVuoto"));
     const corr = tutti.filter((r) => r.mese === mese);
     const prec = tutti.filter((r) => r.mese === precedente(mese));
-    const f24 = files.f24 ? righe("f24").filter((r) => !r.mese || normalizzaMese(r.mese) === mese) : [];
+    const f24 = files.f24 ? righe("f24").filter((r) => {
+      const n = normalizzaMese(r.mese);
+      if (String(r.mese ?? "").trim() && !n) illeggibili++;
+      return !n || n === mese;
+    }) : [];
     const { anomalie, riconciliazione } = esegui(corr, prec, f24, CCNL, cfg);
     risultato = { anomalie, riconciliazione, nov: novembre(corr, CCNL, cfg), corr, prec, cfg };
     mostra();
-    if (!prec.length) messaggio(t("eSenzaMese"), "info");
+    const avvisi = [...(illeggibili ? [t("eMeseIlleggibile", { n: illeggibili })] : []), ...(!prec.length ? [t("eSenzaMese")] : [])];
+    if (avvisi.length) messaggio(avvisi.join(" "), "info");
     $("risultati").scrollIntoView({ behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   } catch (e) {
     messaggio(/numero non valido/.test(e.message) ? t("eNumero", { e: e.message.split(": ").pop() }) : e.message);
@@ -349,7 +379,6 @@ function mostra() {
   $("kpis").innerHTML = [[t("kCedolini"), i18n.number(corr.length), ""], [t("kSegnalazioni"), anomalie.length, anomalie.length ? "" : "is-good"],
     [t("kAlta"), alta, alta ? "is-bad" : "is-good"], [t("kGuardare"), daGuardare, ""]]
     .map(([k, v, c]) => `<div class="s-kpi ${c}"><div class="k">${esc(k)}</div><div class="v">${v}</div></div>`).join("");
-  $("stampa-meta").textContent = t("stampaMeta", { mese: risultato.cfg.mese, oggi: new Date().toLocaleDateString(i18n.lang === "it" ? "it-IT" : "en-GB"), n: anomalie.length });
   const clienti = [...new Set(corr.map((r) => r.cliente))].sort();
   const fc = $("f-cliente").value, fk = $("f-controllo").value;
   $("f-cliente").innerHTML = `<option value="">${esc(t("tuttiClienti"))}</option>` + clienti.map((c) => `<option value="${esc(c)}" ${c === fc ? "selected" : ""}>${esc(t("clienteN", { c }))}</option>`).join("");
@@ -377,6 +406,7 @@ function filtrate() {
 
 function tabella() {
   const rows = filtrate();
+  $("stampa-meta").textContent = t("stampaMeta", { mese: risultato.cfg.mese, oggi: new Date().toLocaleDateString(i18n.lang === "it" ? "it-IT" : "en-GB"), n: rows.length });
   $("anomalie").innerHTML = rows.length
     ? `<tr><th class="l">${esc(t("hMatricola"))}</th><th class="l">${esc(t("hControllo"))}</th><th class="l">${esc(t("hPriorita"))}</th><th>${esc(t("hAtteso"))}</th><th>${esc(t("hTrovato"))}</th><th>${esc(t("hDifferenza"))}</th></tr>` +
       rows.map((a) => `<tr><td class="l">${esc(a.matricola || "F24")}<div class="s-why">${esc(t("clienteN", { c: a.cliente }))}</div></td>
@@ -395,7 +425,7 @@ $("scarica-xlsx").addEventListener("click", () => {
   const segnalazioni = [[t("hMatricola"), t("hCliente"), t("hControllo"), t("hDescrizione"), t("hPriorita"), t("hAtteso"),
     t("hTrovato"), t("hDifferenza"), t("hCosa"), t("hAssegnato"), t("hCorretto"), t("hNote")],
     ...anomalie.map((a) => [a.matricola || "F24", a.cliente, `${a.controllo} · ${testo(a.controllo).nome}`,
-      testo(a.controllo).descrizione, priorita(a.priorita), valore(a.atteso), valore(a.trovato), a.differenza ?? "",
+      testo(a.controllo).descrizione, priorita(a.priorita), valore(a.atteso), valore(a.trovato), a.differenza == null ? "" : Math.round(a.differenza * 10000) / 10000,
       testo(a.controllo).cosa_fare, "", "", ""])];
   const clienti = [...new Set(corr.map((r) => r.cliente))].sort();
   const perCliente = [[t("hControllo"), ...clienti.map((c) => t("clienteN", { c })), t("hTotale")],

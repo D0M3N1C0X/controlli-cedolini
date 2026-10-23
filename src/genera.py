@@ -239,14 +239,15 @@ def main() -> None:
                 "ferie_liquidate"):
         S[col] = S[col].astype(object)
 
-    def cessa(i, tipo: str, errore: str = "") -> None:
+    def cessa(i, tipo: str, errore: str = "", giorno: date | None = None) -> None:
         r = S.loc[i].to_dict()
         assunzione = date.fromisoformat(r["data_assunzione"])
         mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
-        n13 = R.dodicesimi_alla_cessazione(assunzione, fine_mese, R.inizio_13(fine_mese))
-        n14 = R.dodicesimi_alla_cessazione(assunzione, fine_mese, R.inizio_14(fine_mese))
-        minimo = R.preavviso_minimo(tipo, r["livello"], assunzione, fine_mese)
-        r.update({"evento": "cessazione", "data_cessazione": fine_mese.isoformat(), "tipo_cessazione": tipo,
+        uscita = giorno or fine_mese
+        n13, n14 = R.ratei_al(assunzione, C.MESE, uscita)
+        minimo = R.preavviso_minimo(tipo, r["livello"], assunzione, uscita)
+        r.update({"evento": "cessazione", "data_cessazione": uscita.isoformat(), "tipo_cessazione": tipo,
+                  "ratei_13": n13, "ratei_14": n14,
                   "preavviso_giorni": minimo, "tredicesima": R.mensilita_aggiuntiva(mensile, n13),
                   "quattordicesima": R.mensilita_aggiuntiva(mensile, n14),
                   "ferie_liquidate": R.ferie_non_godute(mensile, r["ferie_residuo"])})
@@ -270,6 +271,8 @@ def main() -> None:
     i = prendi(pieno)
     cessa(i, "licenziamento", "preavviso")
     registra(i, "preavviso", "licenziamento con metà del preavviso minimo del CCNL")
+    # un'uscita corretta a metà mese, prima del 15: l'ultimo mese non matura né tredicesima né quattordicesima
+    cessa(prendi(pieno), "licenziamento", giorno=date(fine_mese.year, fine_mese.month, 10))
 
     S = pd.concat([S, pd.DataFrame(nuovi)], ignore_index=True)
     ced = pd.concat([pd.DataFrame(ago), S], ignore_index=True)

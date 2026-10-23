@@ -27,8 +27,8 @@ con lui.
 
 | Verifica | Dove | Cosa garantisce |
 |---|---|---|
-| Foglio contro Python | foglio Riconciliazione, `src/check_workbook.py` | 563 valori del foglio uguali a quelli di Python, con le formule calcolate due volte: in Python con [excel-twin](https://github.com/D0M3N1C0X/excel-twin) nei test, con LibreOffice nella CI |
-| Browser contro Python | `tests/js/check_controlli.mjs` | 2.184 valori uguali su nove casi alterati a caso, sui casi limite di ratei e cessazioni e sul CSV in formato italiano |
+| Foglio contro Python | foglio Riconciliazione, `src/check_workbook.py` | 580 valori del foglio uguali a quelli di Python, con le formule calcolate due volte: in Python con [excel-twin](https://github.com/D0M3N1C0X/excel-twin) nei test, con LibreOffice nella CI |
+| Browser contro Python | `tests/js/check_controlli.mjs` | 2.219 valori uguali su nove casi alterati a caso, sui casi limite di ratei e cessazioni e sul CSV in formato italiano |
 | Errori inseriti | `tests/test_controlli.py` | Ogni errore registrato in `data/errori_inseriti.csv` è trovato, e nessun altro cedolino è segnalato |
 | Cifre del README | `tests/test_readme.py` | Ogni numero citato nel README è quello che il codice produce oggi |
 | Documenti | `tests/test_docs.py` | Dizionario dei dati e catalogo completi e aggiornati |

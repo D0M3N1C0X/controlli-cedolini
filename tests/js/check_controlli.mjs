@@ -1,6 +1,7 @@
 // Rifà con web/controlli.js ogni caso calcolato in Python. Esce con 1 alla prima differenza.
 import { readFileSync } from "node:fs";
-import { esegui, novembre, leggiCsv, normalizza, ratei, dodicesimiAllaCessazione, inizio13, inizio14, preavvisoMinimo }
+import { esegui, novembre, leggiCsv, normalizza, ratei, dodicesimiAllaCessazione, inizio13, inizio14, preavvisoMinimo,
+  dodicesimi14Pagata, data }
   from "../../web/controlli.js";
 
 const V = JSON.parse(readFileSync(new URL("../fixtures/js_vectors.json", import.meta.url)));
@@ -54,6 +55,24 @@ for (const [tipo, livello, assunzione, cessazione, giorni] of [["dimissioni", "4
   ["licenziamento", "Quadri", "2016-10-01", "2026-09-30", 90], ["licenziamento", "7", "2000-01-01", "2026-09-30", 20]]) {
   const g = preavvisoMinimo(tipo, livello, assunzione, cessazione, V.cfg);
   expect(g === giorni, `preavviso ${tipo} ${livello} ${assunzione}-${cessazione}: ${g} contro ${giorni}`);
+}
+// Quattordicesima pagata a chi resta: da luglio è quella del periodo chiuso il 30 giugno
+for (const [ass, mese, n] of [["2015-05-04", "2026-06", 12], ["2015-05-04", "2026-07", 12], ["2015-05-04", "2026-08", 12],
+  ["2015-05-04", "2026-05", 11], ["2026-02-01", "2026-07", 5]]) {
+  const a = dodicesimi14Pagata(ass, mese, V.cfg);
+  expect(a === n, `quattordicesima pagata ${ass} a ${mese}: ${a} contro ${n}`);
+}
+// I file come escono dagli export: matricole numero o testo, part-time in percentuale, date impossibili
+{
+  const r = normalizza([{ matricola: 1001, cliente: " A ", part_time: "50%", data_assunzione: "01/09/2020" },
+    { matricola: "1002", part_time: "100", data_assunzione: "2020-09-01" }], true);
+  expect(r[0].matricola === "1001" && r[0].cliente === "A" && r[0].part_time === 0.5 && r[1].part_time === 1, "normalizza: matricola, part-time");
+  for (const d of ["31/02/2026", "2026-13-45", "00/01/2026"]) {
+    let rotto = false;
+    try { data(d); } catch { rotto = true; }
+    expect(rotto, `data impossibile accettata: ${d}`);
+  }
+  expect(data("1.9.2020") === "2020-09-01", "data con i punti");
 }
 // Lo stesso file esportato da un Excel in italiano: punto e virgola, virgola decimale, date gg/mm/aaaa.
 const csv = readFileSync(new URL("../../data/cedolini.csv", import.meta.url), "utf8").trim().split("\n");

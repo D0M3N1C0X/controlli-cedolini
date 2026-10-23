@@ -48,6 +48,14 @@ Ogni regola che i controlli applicano, da dove viene e quanto è stata verificat
 
 ## Correzioni
 
+- **23 ottobre 2026, revisione indipendente.** Una revisione a più mani ha trovato e fatto correggere:
+  il foglio non contava C01, C02 e C14 se il livello era incollato come numero (ora lo cerca come testo e,
+  se manca dal CCNL, segna ERRORE come Python); C11 e C12 contavano in modo diverso i dodicesimi di chi lascia
+  prima del 15 (ora entrambi fino alla data di uscita); C12 segnalava una quattordicesima giusta pagata a luglio
+  (ora è quella del periodo chiuso il 30 giugno); lo strumento nel browser leggeva male i CSV con punto e virgola
+  e decimali col punto, le matricole numeriche, il part-time in percentuale e alcuni formati del mese. Aggiunta
+  un'uscita corretta a metà mese nei dati di esempio, per tenere provati questi casi.
+
 - **23 ottobre 2026, cessazioni.** Aggiunti C12 (F11), C13 (F12) e C14 (F13): tredicesima e quattordicesima
   pagate, ferie non godute e preavviso. Cinque cessazioni nei dati di esempio, tre con un errore inserito.
 

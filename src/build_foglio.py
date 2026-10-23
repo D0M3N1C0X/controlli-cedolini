@@ -275,11 +275,12 @@ class Foglio:
         # le righe vuote restano vuote
         for i in range(first, last + 1):
             g = lambda expr, i=i: f'=IF($A{i}="","",{expr})'
-            lookup = lambda rng, i=i: f"INDEX({rng},MATCH(D{i},{R_['lv']},0))"
-            put(ws, f"X{i}", g(f"ROUND({lookup(R_['min'])}*F{i},2)"), fmt=NUM2)
+            # il livello si cerca come testo: incollato da un export, "4" diventa spesso il numero 4
+            lookup = lambda rng, i=i: f"INDEX({rng},MATCH(D{i}&\"\",{R_['lv']},0))"
+            put(ws, f"X{i}", g(f'IFERROR(ROUND({lookup(R_["min"])}*F{i},2),"")'), fmt=NUM2)
             put(ws, f"Y{i}", g(f"(YEAR({R_['mese']})*12+MONTH({R_['mese']}))-(YEAR(E{i})*12+MONTH(E{i}))"))
             put(ws, f"Z{i}", g(f"MIN({R_['scatti_max']},MAX(0,INT((Y{i}-1)/36)))"))
-            put(ws, f"AA{i}", g(f"ROUND({lookup(R_['scatto'])}*Z{i}*F{i},2)"), fmt=NUM2)
+            put(ws, f"AA{i}", g(f'IFERROR(ROUND({lookup(R_["scatto"])}*Z{i}*F{i},2),"")'), fmt=NUM2)
             put(ws, f"AB{i}", g(f"ROUND(ROUND(N{i},0)*{R_['aliquota']},2)"), fmt=NUM2)
             put(ws, f"AC{i}", g(f"ROUND((I{i}+K{i}+L{i})*{R_['mensilita']}/{R_['divisore_tfr']}/12,2)"), fmt=NUM2)
             put(ws, f"AD{i}", g(f'IFERROR(INDEX({R_["ag_f"]},MATCH(A{i},{R_["ag_m"]},0)),0)'), color=GREEN, fmt=NUM4)
@@ -293,8 +294,9 @@ class Foglio:
             put(ws, f"AJ{i}", g(f"CHAR(65+MOD(SUMPRODUCT(SUMIF({R_['cf_c']},MID(C{i},{odd},1),{R_['cf_d']}))"
                                 f"+SUMPRODUCT(SUMIF({R_['cf_c']},MID(C{i},{even},1),{R_['cf_p']})),26))"))
             tol, tolf = R_["tolleranza"], R_["tolleranza_ferie"]
-            put(ws, f"AK{i}", g(f'IF(ABS(I{i}-X{i})>{tol},"ERRORE","OK")'))
-            put(ws, f"AL{i}", g(f'IF(ABS(K{i}-AA{i})>{tol},"ERRORE","OK")'))
+            # un livello che non è nel CCNL è un errore di C01 (come in Python); C02 allora tace
+            put(ws, f"AK{i}", g(f'IF(ISNUMBER(X{i}),IF(ABS(I{i}-X{i})>{tol},"ERRORE","OK"),"ERRORE")'))
+            put(ws, f"AL{i}", g(f'IF(ISNUMBER(AA{i}),IF(ABS(K{i}-AA{i})>{tol},"ERRORE","OK"),"OK")'))
             put(ws, f"AM{i}", g(f'IF(ABS(O{i}-AB{i})>{tol},"ERRORE","OK")'))
             put(ws, f"AN{i}", g(f'IF(ABS(T{i}-AC{i})>{tol},"ERRORE","OK")'))
             put(ws, f"AO{i}", g(f'IF(ABS(W{i}-AE{i})>{tolf},"ERRORE","OK")'))
@@ -313,22 +315,30 @@ class Foglio:
             dopo = (f"(YEAR({mese})*12+MONTH({mese}))-(YEAR(E{i})*12+MONTH(E{i}))"
                     f"+IF(DAY(EOMONTH(E{i},0))-DAY(E{i})+1>={gm},1,0)")
             inizio14 = f"DATE(YEAR({mese})-IF(MONTH({mese})<7,1,0),7,1)"
-            put(ws, f"AW{i}", g(f"IF(E{i}<=DATE(YEAR({mese}),1,1),MONTH({mese}),{dopo})"))
-            put(ws, f"AX{i}", g(f"IF(E{i}<={inizio14},(YEAR({mese})*12+MONTH({mese}))-(YEAR({inizio14})*12"
-                                f"+MONTH({inizio14}))+1,{dopo})"))
-            put(ws, f"AY{i}", g(f'IF(AND(AU{i}="",AV{i}=""),"OK",IF(OR(AU{i}<>AW{i},AV{i}<>AX{i}),"ERRORE","OK"))'))
-            # C12-C14: dodicesimi fino alla cessazione, con la regola dei 15 giorni al primo e all'ultimo mese
-            tol, dg = R_["tolleranza"], R_["divisore_giornaliero"]
 
-            def fino_a_cessazione(inizio: str, i=i, gm=gm) -> str:
+            # dodicesimi da `inizio` fino al giorno `fine`, con la regola dei 15 giorni al primo e all'ultimo mese
+            def fino_a(fine: str, inizio: str, i=i, gm=gm) -> str:
                 da = f"MAX(E{i},{inizio})"
-                stesso = f"(YEAR(AZ{i})*12+MONTH(AZ{i}))=(YEAR({da})*12+MONTH({da}))"
-                return (f"IF(AZ{i}<{da},0,IF({stesso},IF(AZ{i}-{da}+1>={gm},1,0),"
-                        f"(YEAR(AZ{i})*12+MONTH(AZ{i}))-(YEAR({da})*12+MONTH({da}))-1"
-                        f"+IF(DAY(EOMONTH({da},0))-DAY({da})+1>={gm},1,0)+IF(DAY(AZ{i})>={gm},1,0)))")
+                stesso = f"(YEAR({fine})*12+MONTH({fine}))=(YEAR({da})*12+MONTH({da}))"
+                return (f"IF({fine}<{da},0,IF({stesso},IF({fine}-{da}+1>={gm},1,0),"
+                        f"(YEAR({fine})*12+MONTH({fine}))-(YEAR({da})*12+MONTH({da}))-1"
+                        f"+IF(DAY(EOMONTH({da},0))-DAY({da})+1>={gm},1,0)+IF(DAY({fine})>={gm},1,0)))")
+            uscita13, uscita14 = f"DATE(YEAR(AZ{i}),1,1)", f"DATE(YEAR(AZ{i})-IF(MONTH(AZ{i})<7,1,0),7,1)"
+            # C11: per chi lascia nel mese, i dodicesimi si contano fino alla data di uscita
+            put(ws, f"AW{i}", g(f'IF(AZ{i}<>"",{fino_a(f"AZ{i}", uscita13)},'
+                                f"IF(E{i}<=DATE(YEAR({mese}),1,1),MONTH({mese}),{dopo}))"))
+            put(ws, f"AX{i}", g(f'IF(AZ{i}<>"",{fino_a(f"AZ{i}", uscita14)},'
+                                f"IF(E{i}<={inizio14},(YEAR({mese})*12+MONTH({mese}))-(YEAR({inizio14})*12"
+                                f"+MONTH({inizio14}))+1,{dopo}))"))
+            put(ws, f"AY{i}", g(f'IF(OR(AU{i}="",AV{i}=""),"OK",IF(OR(AU{i}<>AW{i},AV{i}<>AX{i}),"ERRORE","OK"))'))
+            # C12-C14
+            tol, dg = R_["tolleranza"], R_["divisore_giornaliero"]
+            giugno = f"DATE(YEAR({mese}),6,30)"
             put(ws, f"BF{i}", g(f"ROUND(I{i}+K{i}+L{i},2)"), fmt=NUM2)
-            put(ws, f"BG{i}", g(f'IF(AZ{i}="",AW{i},{fino_a_cessazione(f"DATE(YEAR(AZ{i}),1,1)")})'))
-            put(ws, f"BH{i}", g(f'IF(AZ{i}="",AX{i},{fino_a_cessazione(f"DATE(YEAR(AZ{i})-IF(MONTH(AZ{i})<7,1,0),7,1)")})'))
+            put(ws, f"BG{i}", g(f"AW{i}"))
+            # una quattordicesima pagata da luglio in poi a chi resta è quella del periodo chiuso il 30 giugno
+            put(ws, f"BH{i}", g(f'IF(AND(AZ{i}="",MONTH({mese})>=7),'
+                                f'{fino_a(giugno, f"DATE(YEAR({mese})-1,7,1)")},AX{i})'))
             put(ws, f"BI{i}", g(f"ROUND(BF{i}*BG{i}/12,2)"), fmt=NUM2)
             put(ws, f"BJ{i}", g(f"ROUND(BF{i}*BH{i}/12,2)"), fmt=NUM2)
             put(ws, f"BK{i}", g(f'IF(IF(BC{i}="",FALSE,ABS(BC{i}-BI{i})>{tol}),"ERRORE",'
@@ -337,14 +347,18 @@ class Foglio:
             put(ws, f"BM{i}", g(f'IF(OR(AZ{i}="",BE{i}=""),"OK",IF(ABS(BE{i}-BL{i})>{tol},"ERRORE","OK"))'))
             put(ws, f"BN{i}", g(f'IF(AZ{i}="","",YEAR(AZ{i})-YEAR(E{i})-IF(OR(MONTH(AZ{i})<MONTH(E{i}),'
                                 f'AND(MONTH(AZ{i})=MONTH(E{i}),DAY(AZ{i})<DAY(E{i}))),1,0))'))
-            put(ws, f"BO{i}", g(f'IF(OR(AZ{i}="",AND(BA{i}<>"dimissioni",BA{i}<>"licenziamento")),"",INDEX({R_["preavviso"]},MATCH(D{i},{R_["lv"]},0),'
-                                f'IF(BA{i}="licenziamento",3,0)+IF(BN{i}<5,1,IF(BN{i}<10,2,3))))'))
+            put(ws, f"BO{i}", g(f'IF(OR(AZ{i}="",AND(TRIM(BA{i})<>"dimissioni",TRIM(BA{i})<>"licenziamento")),"",'
+                                f'IFERROR(INDEX({R_["preavviso"]},MATCH(D{i}&"",{R_["lv"]},0),'
+                                f'IF(TRIM(BA{i})="licenziamento",3,0)+IF(BN{i}<5,1,IF(BN{i}<10,2,3))),""))'))
             put(ws, f"BP{i}", g(f'IF(OR(BO{i}="",BB{i}=""),"OK",IF(BB{i}<BO{i},"ERRORE","OK"))'))
         for i, t in enumerate(m.itertuples(index=False), start=first):
             k = i - first
             if str(t.data_cessazione).strip():
                 ces, mensile = date.fromisoformat(t.data_cessazione), round(t.tabellare + t.scatti + t.superminimo, 2)
                 assunto = date.fromisoformat(t.data_assunzione)
+                n13, n14 = R.ratei_al(assunto, C.MESE, ces)
+                self.check("Mese", f"{t.matricola} ratei 13ª alla cessazione", float(n13), f"Mese!AW{i}")
+                self.check("Mese", f"{t.matricola} ratei 14ª alla cessazione", float(n14), f"Mese!AX{i}")
                 self.check("Mese", f"{t.matricola} tredicesima attesa", R.mensilita_aggiuntiva(
                     mensile, R.dodicesimi_alla_cessazione(assunto, ces, R.inizio_13(ces))), f"Mese!BI{i}")
                 self.check("Mese", f"{t.matricola} quattordicesima attesa", R.mensilita_aggiuntiva(
@@ -536,7 +550,7 @@ class Foglio:
         purpose = {
             "Riepilogo": "Errori per controllo e cliente; costo della tranche di novembre.",
             "Mese": "I cedolini del mese con valori attesi ed esiti, riga per riga.",
-            "Mese precedente": "Netto e residuo ferie del mese prima.",
+            "Mese precedente": "Netto, residuo ferie e anagrafica del mese prima (C05, C07, C10).",
             "F24": "Deleghe contro somma dei cedolini, per cliente.",
             "Novembre 2026": "Aumento dei minimi dal 1° novembre per dipendente, con l'assorbimento del superminimo.",
             "CCNL": "Minimi e scatti del CCNL Terziario.",

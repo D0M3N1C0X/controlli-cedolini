@@ -31,9 +31,9 @@ Una scheda per controllo: cosa controlla, da quale regola, dove sta nel foglio, 
 
 ```
 X  Tabellare atteso
-    =IF($A5="","",ROUND(INDEX(CCNL!$F$5:$F$12,MATCH(D5,CCNL!$A$5:$A$12,0))*F5,2))
+    =IF($A5="","",IFERROR(ROUND(INDEX(CCNL!$F$5:$F$12,MATCH(D5&"",CCNL!$A$5:$A$12,0))*F5,2),""))
 AK  C01 Minimo
-    =IF($A5="","",IF(ABS(I5-X5)>Parametri!$C$11,"ERRORE","OK"))
+    =IF($A5="","",IF(ISNUMBER(X5),IF(ABS(I5-X5)>Parametri!$C$11,"ERRORE","OK"),"ERRORE"))
 ```
 
 **Un esempio dal mese di settembre 2026.** Dipendente B031, cliente B: atteso 890,84 €, sul cedolino 873,34 €, differenza −17,50 €.
@@ -67,9 +67,9 @@ Y  Mesi di servizio
 Z  Scatti attesi
     =IF($A5="","",MIN(Parametri!$C$13,MAX(0,INT((Y5-1)/36))))
 AA  Importo scatti atteso
-    =IF($A5="","",ROUND(INDEX(CCNL!$I$5:$I$12,MATCH(D5,CCNL!$A$5:$A$12,0))*Z5*F5,2))
+    =IF($A5="","",IFERROR(ROUND(INDEX(CCNL!$I$5:$I$12,MATCH(D5&"",CCNL!$A$5:$A$12,0))*Z5*F5,2),""))
 AL  C02 Scatti
-    =IF($A5="","",IF(ABS(K5-AA5)>Parametri!$C$11,"ERRORE","OK"))
+    =IF($A5="","",IF(ISNUMBER(AA5),IF(ABS(K5-AA5)>Parametri!$C$11,"ERRORE","OK"),"OK"))
 ```
 
 **Un esempio dal mese di settembre 2026.** Dipendente A007, cliente A: atteso 49,68 €, sul cedolino 24,84 €, differenza −24,84 €.
@@ -356,11 +356,11 @@ AS  C10 Anagrafica
 
 ```
 AW  Ratei 13ª attesi
-    =IF($A5="","",IF(E5<=DATE(YEAR(Parametri!$C$5),1,1),MONTH(Parametri!$C$5),(YEAR(Parametri!$C$5)*12+MONTH(Parametri!$C$5))-(YEAR(E5)*12+MONTH(E5))+IF(DAY(EOMONTH(E5,0))-DAY(E5)+1>=Parametri!$C$14,1,0)))
+    =IF($A5="","",IF(AZ5<>"",IF(AZ5<MAX(E5,DATE(YEAR(AZ5),1,1)),0,IF((YEAR(AZ5)*12+MONTH(AZ5))=(YEAR(MAX(E5,DATE(YEAR(AZ5),1,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5),1,1)))),IF(AZ5-MAX(E5,DATE(YEAR(AZ5),1,1))+1>=Parametri!$C$14,1,0),(YEAR(AZ5)*12+MONTH(AZ5))-(YEAR(MAX(E5,DATE(YEAR(AZ5),1,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5),1,1))))-1+IF(DAY(EOMONTH(MAX(E5,DATE(YEAR(AZ5),1,1)),0))-DAY(MAX(E5,DATE(YEAR(AZ5),1,1)))+1>=Parametri!$C$14,1,0)+IF(DAY(AZ5)>=Parametri!$C$14,1,0))),IF(E5<=DATE(YEAR(Parametri!$C$5),1,1),MONTH(Parametri!$C$5),(YEAR(Parametri!$C$5)*12+MONTH(Parametri!$C$5))-(YEAR(E5)*12+MONTH(E5))+IF(DAY(EOMONTH(E5,0))-DAY(E5)+1>=Parametri!$C$14,1,0))))
 AX  Ratei 14ª attesi
-    =IF($A5="","",IF(E5<=DATE(YEAR(Parametri!$C$5)-IF(MONTH(Parametri!$C$5)<7,1,0),7,1),(YEAR(Parametri!$C$5)*12+MONTH(Parametri!$C$5))-(YEAR(DATE(YEAR(Parametri!$C$5)-IF(MONTH(Parametri!$C$5)<7,1,0),7,1))*12+MONTH(DATE(YEAR(Parametri!$C$5)-IF(MONTH(Parametri!$C$5)<7,1,0),7,1)))+1,(YEAR(Parametri!$C$5)*12+MONTH(Parametri!$C$5))-(YEAR(E5)*12+MONTH(E5))+IF(DAY(EOMONTH(E5,0))-DAY(E5)+1>=Parametri!$C$14,1,0)))
+    =IF($A5="","",IF(AZ5<>"",IF(AZ5<MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)),0,IF((YEAR(AZ5)*12+MONTH(AZ5))=(YEAR(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))),IF(AZ5-MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1))+1>=Parametri!$C$14,1,0),(YEAR(AZ5)*12+MONTH(AZ5))-(YEAR(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1))))-1+IF(DAY(EOMONTH(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)),0))-DAY(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))+1>=Parametri!$C$14,1,0)+IF(DAY(AZ5)>=Parametri!$C$14,1,0))),IF(E5<=DATE(YEAR(Parametri!$C$5)-IF(MONTH(Parametri!$C$5)<7,1,0),7,1),(YEAR(Parametri!$C$5)*12+MONTH(Parametri!$C$5))-(YEAR(DATE(YEAR(Parametri!$C$5)-IF(MONTH(Parametri!$C$5)<7,1,0),7,1))*12+MONTH(DATE(YEAR(Parametri!$C$5)-IF(MONTH(Parametri!$C$5)<7,1,0),7,1)))+1,(YEAR(Parametri!$C$5)*12+MONTH(Parametri!$C$5))-(YEAR(E5)*12+MONTH(E5))+IF(DAY(EOMONTH(E5,0))-DAY(E5)+1>=Parametri!$C$14,1,0))))
 AY  C11 Ratei
-    =IF($A5="","",IF(AND(AU5="",AV5=""),"OK",IF(OR(AU5<>AW5,AV5<>AX5),"ERRORE","OK")))
+    =IF($A5="","",IF(OR(AU5="",AV5=""),"OK",IF(OR(AU5<>AW5,AV5<>AX5),"ERRORE","OK")))
 ```
 
 **Un esempio dal mese di settembre 2026.** Dipendente B034, cliente B: atteso «13ª 7; 14ª 3», sul cedolino «13ª 8; 14ª 3».
@@ -393,9 +393,9 @@ AY  C11 Ratei
 BF  Retribuzione mensile
     =IF($A5="","",ROUND(I5+K5+L5,2))
 BG  Dodicesimi 13ª
-    =IF($A5="","",IF(AZ5="",AW5,IF(AZ5<MAX(E5,DATE(YEAR(AZ5),1,1)),0,IF((YEAR(AZ5)*12+MONTH(AZ5))=(YEAR(MAX(E5,DATE(YEAR(AZ5),1,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5),1,1)))),IF(AZ5-MAX(E5,DATE(YEAR(AZ5),1,1))+1>=Parametri!$C$14,1,0),(YEAR(AZ5)*12+MONTH(AZ5))-(YEAR(MAX(E5,DATE(YEAR(AZ5),1,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5),1,1))))-1+IF(DAY(EOMONTH(MAX(E5,DATE(YEAR(AZ5),1,1)),0))-DAY(MAX(E5,DATE(YEAR(AZ5),1,1)))+1>=Parametri!$C$14,1,0)+IF(DAY(AZ5)>=Parametri!$C$14,1,0)))))
+    =IF($A5="","",AW5)
 BH  Dodicesimi 14ª
-    =IF($A5="","",IF(AZ5="",AX5,IF(AZ5<MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)),0,IF((YEAR(AZ5)*12+MONTH(AZ5))=(YEAR(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))),IF(AZ5-MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1))+1>=Parametri!$C$14,1,0),(YEAR(AZ5)*12+MONTH(AZ5))-(YEAR(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))*12+MONTH(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1))))-1+IF(DAY(EOMONTH(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)),0))-DAY(MAX(E5,DATE(YEAR(AZ5)-IF(MONTH(AZ5)<7,1,0),7,1)))+1>=Parametri!$C$14,1,0)+IF(DAY(AZ5)>=Parametri!$C$14,1,0)))))
+    =IF($A5="","",IF(AND(AZ5="",MONTH(Parametri!$C$5)>=7),IF(DATE(YEAR(Parametri!$C$5),6,30)<MAX(E5,DATE(YEAR(Parametri!$C$5)-1,7,1)),0,IF((YEAR(DATE(YEAR(Parametri!$C$5),6,30))*12+MONTH(DATE(YEAR(Parametri!$C$5),6,30)))=(YEAR(MAX(E5,DATE(YEAR(Parametri!$C$5)-1,7,1)))*12+MONTH(MAX(E5,DATE(YEAR(Parametri!$C$5)-1,7,1)))),IF(DATE(YEAR(Parametri!$C$5),6,30)-MAX(E5,DATE(YEAR(Parametri!$C$5)-1,7,1))+1>=Parametri!$C$14,1,0),(YEAR(DATE(YEAR(Parametri!$C$5),6,30))*12+MONTH(DATE(YEAR(Parametri!$C$5),6,30)))-(YEAR(MAX(E5,DATE(YEAR(Parametri!$C$5)-1,7,1)))*12+MONTH(MAX(E5,DATE(YEAR(Parametri!$C$5)-1,7,1))))-1+IF(DAY(EOMONTH(MAX(E5,DATE(YEAR(Parametri!$C$5)-1,7,1)),0))-DAY(MAX(E5,DATE(YEAR(Parametri!$C$5)-1,7,1)))+1>=Parametri!$C$14,1,0)+IF(DAY(DATE(YEAR(Parametri!$C$5),6,30))>=Parametri!$C$14,1,0))),AX5))
 BI  Tredicesima attesa
     =IF($A5="","",ROUND(BF5*BG5/12,2))
 BJ  Quattordicesima attesa
@@ -412,12 +412,13 @@ BK  C12 Mensilità
 - Ultimo mese contato intero con meno di 15 giorni di servizio.
 - Mensilità calcolata sulla retribuzione senza scatti o superminimo.
 
-**Cosa fare.** Ricalcolare la mensilità con i dodicesimi giusti, da gennaio per la tredicesima e da luglio per la quattordicesima, e pagare la differenza.
+**Cosa fare.** Ricalcolare la mensilità con i dodicesimi giusti, da gennaio per la tredicesima e da luglio per la quattordicesima, e regolare la differenza: pagarla se manca, recuperarla se è stata pagata in più.
 
 **Limiti.**
 
 - Non considera i periodi non retribuiti che riducono i dodicesimi, come l'aspettativa.
 - Le colonne sono facoltative: se il cedolino non riporta l'importo, C12 non si applica (D16).
+- Una quattordicesima pagata a luglio a chi resta è quella del periodo chiuso il 30 giugno (D19). Per chi lascia nei primi giorni di luglio, quella del periodo precedente, se non ancora pagata, va controllata a mano.
 
 ## C13 · Ferie non godute
 
@@ -443,11 +444,11 @@ BM  C13 Ferie
 - Quota giornaliera calcolata dividendo per 30 invece che per 26.
 - Residuo ferie di fine rapporto non aggiornato con la maturazione dell'ultimo mese.
 
-**Cosa fare.** Ricalcolare le ferie non godute a 1/26 della retribuzione mensile per giorno e pagare la differenza.
+**Cosa fare.** Ricalcolare le ferie non godute a 1/26 della retribuzione mensile per giorno e regolare la differenza: pagarla se manca, recuperarla se è in più.
 
 **Limiti.**
 
-- Usa il residuo ferie del cedolino, che C05 controlla a parte.
+- Usa il residuo ferie del cedolino, che C05 controlla a parte. C05 conta la maturazione dell'intero mese anche per chi lascia a metà: in quel caso il residuo va ricontrollato a mano.
 - Non considera i permessi (ROL ed ex festività), che hanno un loro divisore orario (D17).
 
 ## C14 · Preavviso
@@ -464,7 +465,7 @@ BM  C13 Ferie
 BN  Anni di servizio
     =IF($A5="","",IF(AZ5="","",YEAR(AZ5)-YEAR(E5)-IF(OR(MONTH(AZ5)<MONTH(E5),AND(MONTH(AZ5)=MONTH(E5),DAY(AZ5)<DAY(E5))),1,0)))
 BO  Preavviso minimo
-    =IF($A5="","",IF(OR(AZ5="",AND(BA5<>"dimissioni",BA5<>"licenziamento")),"",INDEX(CCNL!$K$5:$P$12,MATCH(D5,CCNL!$A$5:$A$12,0),IF(BA5="licenziamento",3,0)+IF(BN5<5,1,IF(BN5<10,2,3)))))
+    =IF($A5="","",IF(OR(AZ5="",AND(TRIM(BA5)<>"dimissioni",TRIM(BA5)<>"licenziamento")),"",IFERROR(INDEX(CCNL!$K$5:$P$12,MATCH(D5&"",CCNL!$A$5:$A$12,0),IF(TRIM(BA5)="licenziamento",3,0)+IF(BN5<5,1,IF(BN5<10,2,3))),"")))
 BP  C14 Preavviso
     =IF($A5="","",IF(OR(BO5="",BB5=""),"OK",IF(BB5<BO5,"ERRORE","OK")))
 ```
@@ -476,7 +477,7 @@ BP  C14 Preavviso
 - Tabella delle dimissioni usata per un licenziamento.
 - Anni di servizio contati male, sulla soglia dei 5 o dei 10 anni.
 
-**Cosa fare.** Verificare la data della lettera: se il preavviso non è stato lavorato tutto, va pagata l'indennità sostitutiva per i giorni mancanti.
+**Cosa fare.** Verificare la data della lettera. Licenziamento: i giorni di preavviso non lavorati si pagano come indennità sostitutiva. Dimissioni: il preavviso non dato si può trattenere come indennità a carico del dipendente.
 
 **Limiti.**
 

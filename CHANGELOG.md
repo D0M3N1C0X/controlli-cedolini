@@ -5,6 +5,20 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
 
 ## [Non rilasciato]
 
+## [1.3.1] - 2026-10-23
+
+### Corretto
+
+- **Foglio:** il livello si cerca come testo, così un livello incollato come numero non spegne più C01, C02 e C14;
+  un livello che non è nel CCNL è un ERRORE di C01, come in Python.
+- **C11 e C12** contano allo stesso modo i dodicesimi di chi lascia prima del 15 (D20); **C12** non segnala più la
+  quattordicesima pagata a luglio (D19). Le indicazioni su cosa fare dicono se pagare o recuperare, e per il
+  preavviso distinguono dimissioni e licenziamento.
+- **Strumento nel browser:** i decimali si riconoscono dai numeri, non dal separatore del CSV; matricole lette
+  come numero e come testo coincidono; part-time in percentuale ("100", "50%"); mesi scritti come 01/09/2026,
+  202609 o «settembre 2026»; date impossibili rifiutate; un avviso per le righe con il mese illeggibile.
+- Un'uscita corretta a metà mese nei dati di esempio: 580 valori riconciliati nel foglio, 2.219 nel browser.
+
 ## [1.3.0] - 2026-10-23
 
 ### Aggiunto
@@ -60,7 +74,8 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
 Prima versione completa: dieci controlli (C01-C10), la tranche di novembre 2026, il foglio con formule vive e lo
 strumento nel browser.
 
-[Non rilasciato]: https://github.com/D0M3N1C0X/controlli-cedolini/compare/v1.3.0...HEAD
+[Non rilasciato]: https://github.com/D0M3N1C0X/controlli-cedolini/compare/v1.3.1...HEAD
+[1.3.1]: https://github.com/D0M3N1C0X/controlli-cedolini/releases/tag/v1.3.1
 [1.3.0]: https://github.com/D0M3N1C0X/controlli-cedolini/releases/tag/v1.3.0
 [1.2.0]: https://github.com/D0M3N1C0X/controlli-cedolini/releases/tag/v1.2.0
 [1.1.0]: https://github.com/D0M3N1C0X/controlli-cedolini/releases/tag/v1.1.0

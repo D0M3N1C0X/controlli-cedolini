@@ -98,6 +98,13 @@ export function dodicesimiAllaCessazione(assunzione, cessazione, inizio, cfg) {
   const ultimo = d1 >= cfg.giorni_mese_intero;
   return (y1 - y0) * 12 + m1 - m0 - 1 + (primo ? 1 : 0) + (ultimo ? 1 : 0);
 }
+// I dodicesimi di una quattordicesima pagata a chi resta: da luglio in poi, quelli del periodo chiuso il 30 giugno
+// (come regole.dodicesimi_14_pagata in Python).
+export function dodicesimi14Pagata(assunzione, mese, cfg) {
+  const [y, m] = mese.split("-").map(Number);
+  if (m < 7) return ratei(assunzione, mese, cfg)[1];
+  return dodicesimiAllaCessazione(assunzione, `${y}-06-30`, `${y - 1}-07-01`, cfg);
+}
 export const inizio13 = (iso) => `${iso.slice(0, 4)}-01-01`;
 export const inizio14 = (iso) => { const y = Number(iso.slice(0, 4)); return `${Number(iso.slice(5, 7)) >= 7 ? y : y - 1}-07-01`; };
 
@@ -129,7 +136,8 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
     const ces = vuoto(r.data_cessazione) ? null : String(r.data_cessazione);
     for (const [voce, inizio, k] of [["tredicesima", inizio13, 0], ["quattordicesima", inizio14, 1]]) {
       if (vuoto(r[voce])) continue;
-      const n = ces ? dodicesimiAllaCessazione(r.data_assunzione, ces, inizio(ces), cfg) : ratei(r.data_assunzione, cfg.mese, cfg)[k];
+      const n = ces ? dodicesimiAllaCessazione(r.data_assunzione, ces, inizio(ces), cfg)
+        : k === 0 ? ratei(r.data_assunzione, cfg.mese, cfg)[0] : dodicesimi14Pagata(r.data_assunzione, cfg.mese, cfg);
       const atteso = centesimi(mensile * n / 12), trovato = Number(r[voce]);
       if (Math.abs(trovato - atteso) > cfg.tolleranza) { segnala(r, "C12", atteso, trovato); break; }
     }
@@ -139,7 +147,7 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
       if (Math.abs(trovato - atteso) > cfg.tolleranza) segnala(r, "C13", atteso, trovato);
     }
     const tipo = String(r.tipo_cessazione ?? "").trim().toLowerCase();
-    if (tipo in cfg.preavviso && !vuoto(r.preavviso_giorni)) {
+    if (Object.hasOwn(cfg.preavviso, tipo) && !vuoto(r.preavviso_giorni)) {
       const minimo = preavvisoMinimo(tipo, String(r.livello), r.data_assunzione, ces, cfg);
       if (Math.trunc(Number(r.preavviso_giorni)) < minimo) segnala(r, "C14", minimo, Number(r.preavviso_giorni));
     }
@@ -172,7 +180,10 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
     }
     if (!cfValido(r.codice_fiscale)) segnala(r, "C09", "valido", r.codice_fiscale);
     if (r.ratei_13 != null && r.ratei_14 != null) {        // colonne facoltative: senza, C11 non si applica
-      const [e13, e14] = ratei(r.data_assunzione, cfg.mese, cfg);
+      // per chi lascia nel mese, i dodicesimi si contano fino alla data di uscita
+      const [e13, e14] = vuoto(r.data_cessazione) ? ratei(r.data_assunzione, cfg.mese, cfg)
+        : [dodicesimiAllaCessazione(r.data_assunzione, r.data_cessazione, inizio13(r.data_cessazione), cfg),
+          dodicesimiAllaCessazione(r.data_assunzione, r.data_cessazione, inizio14(r.data_cessazione), cfg)];
       if (r.ratei_13 !== e13 || r.ratei_14 !== e14) segnala(r, "C11", `13ª ${e13}; 14ª ${e14}`, `13ª ${r.ratei_13}; 14ª ${r.ratei_14}`);
     }
     cessazione(r);
@@ -251,17 +262,29 @@ export function numero(s, decimaleVirgola) {
 
 export function data(s) {
   const t = String(s).trim();
+  let iso = null;
   let m = t.match(/^(\d{4})-(\d{2})-(\d{2})/);
-  if (m) return `${m[1]}-${m[2]}-${m[3]}`;
-  m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (m) return `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
-  throw new Error(`data non valida: "${s}"`);
+  if (m) iso = `${m[1]}-${m[2]}-${m[3]}`;
+  m = t.match(/^(\d{1,2})[/.-](\d{1,2})[/.-](\d{4})$/);
+  if (m) iso = `${m[3]}-${m[2].padStart(2, "0")}-${m[1].padStart(2, "0")}`;
+  // una data che esiste davvero: niente 31 febbraio o mese 13
+  const [y, mo, d] = (iso || "").split("-").map(Number);
+  const dt = iso && new Date(Date.UTC(y, mo - 1, d));
+  if (!dt || dt.getUTCFullYear() !== y || dt.getUTCMonth() !== mo - 1 || dt.getUTCDate() !== d) throw new Error(`data non valida: "${s}"`);
+  return iso;
 }
 
 export function normalizza(righe, decimaleVirgola) {
   return righe.map((r) => {
     const o = { ...r };
-    for (const k of NUMERI) if (k in o) o[k] = numero(o[k], decimaleVirgola);
+    // la quota di part-time si scrive spesso in percentuale: "100", "50%"
+    if ("part_time" in o) {
+      const s = String(o.part_time ?? "").trim();
+      o.part_time = s.endsWith("%") ? numero(s.slice(0, -1), decimaleVirgola) / 100 : numero(s, decimaleVirgola);
+      if (o.part_time > 1.5) o.part_time /= 100;
+    }
+    for (const k of NUMERI) if (k in o && k !== "part_time") o[k] = numero(o[k], decimaleVirgola);
+    for (const k of ["matricola", "cliente"]) if (k in o) o[k] = String(o[k] ?? "").trim();   // 1001 e "1001" sono lo stesso
     for (const k of FACOLTATIVI) {                        // facoltative: vuote vuol dire "non indicate", non zero
       o[k] = k in o && String(o[k]).trim() !== "" ? numero(o[k], decimaleVirgola) : null;
     }

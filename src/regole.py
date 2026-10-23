@@ -77,6 +77,25 @@ def inizio_14(giorno: date) -> date:
     return date(giorno.year if giorno.month >= 7 else giorno.year - 1, 7, 1)
 
 
+def ratei_al(assunzione: date, mese: str, cessazione: date | None = None) -> tuple[int, int]:
+    """Dodicesimi di tredicesima e quattordicesima maturati nel cedolino del mese: fino al mese compreso, o fino
+    alla data di cessazione se il dipendente lascia (l'ultimo mese conta con almeno 15 giorni)."""
+    if cessazione is None:
+        return ratei_13(assunzione, mese), ratei_14(assunzione, mese)
+    return (dodicesimi_alla_cessazione(assunzione, cessazione, inizio_13(cessazione)),
+            dodicesimi_alla_cessazione(assunzione, cessazione, inizio_14(cessazione)))
+
+
+def dodicesimi_14_pagata(assunzione: date, mese: str) -> int:
+    """I dodicesimi di una quattordicesima pagata nel mese a chi resta. Si paga a giugno o a luglio per il periodo
+    luglio-giugno: da luglio in poi il periodo è quello chiuso il 30 giugno, non quello appena cominciato."""
+    m = primo_del_mese(mese)
+    if m.month < 7:
+        return ratei_14(assunzione, mese)
+    fine = date(m.year, 6, 30)
+    return dodicesimi_alla_cessazione(assunzione, fine, inizio_14(fine))
+
+
 def anni_di_servizio(assunzione: date, al: date) -> int:
     """Anni interi di servizio compiuti alla data."""
     return al.year - assunzione.year - ((al.month, al.day) < (assunzione.month, assunzione.day))

@@ -133,14 +133,18 @@ SCHEDE = {
                   "Ultimo mese contato intero con meno di 15 giorni di servizio.",
                   "Mensilità calcolata sulla retribuzione senza scatti o superminimo."],
         "limiti": ["Non considera i periodi non retribuiti che riducono i dodicesimi, come l'aspettativa.",
-                   "Le colonne sono facoltative: se il cedolino non riporta l'importo, C12 non si applica (D16)."],
+                   "Le colonne sono facoltative: se il cedolino non riporta l'importo, C12 non si applica (D16).",
+                   "Una quattordicesima pagata a luglio a chi resta è quella del periodo chiuso il 30 giugno (D19). "
+                   "Per chi lascia nei primi giorni di luglio, quella del periodo precedente, se non ancora pagata, "
+                   "va controllata a mano."],
     },
     "C13": {
         "regola": "Alla cessazione le ferie maturate e non godute si pagano a 1/26 della retribuzione mensile per "
                   "ogni giorno di residuo.",
         "cause": ["Quota giornaliera calcolata dividendo per 30 invece che per 26.",
                   "Residuo ferie di fine rapporto non aggiornato con la maturazione dell'ultimo mese."],
-        "limiti": ["Usa il residuo ferie del cedolino, che C05 controlla a parte.",
+        "limiti": ["Usa il residuo ferie del cedolino, che C05 controlla a parte. C05 conta la maturazione dell'intero "
+                   "mese anche per chi lascia a metà: in quel caso il residuo va ricontrollato a mano.",
                    "Non considera i permessi (ROL ed ex festività), che hanno un loro divisore orario (D17)."],
     },
     "C14": {

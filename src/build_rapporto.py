@@ -22,10 +22,12 @@ COSA_FARE = {
     "C10": "Verificare il cambio con il cliente e con i documenti: se non c'è stato, correggere l'anagrafica",
     "C11": "Ricontare i dodicesimi dalla data di assunzione e correggere i ratei prima della tredicesima di dicembre",
     "C12": "Ricalcolare la mensilità con i dodicesimi giusti, da gennaio per la tredicesima e da luglio per la "
-           "quattordicesima, e pagare la differenza",
-    "C13": "Ricalcolare le ferie non godute a 1/26 della retribuzione mensile per giorno e pagare la differenza",
-    "C14": "Verificare la data della lettera: se il preavviso non è stato lavorato tutto, va pagata l'indennità "
-           "sostitutiva per i giorni mancanti",
+           "quattordicesima, e regolare la differenza: pagarla se manca, recuperarla se è stata pagata in più",
+    "C13": "Ricalcolare le ferie non godute a 1/26 della retribuzione mensile per giorno e regolare la differenza: "
+           "pagarla se manca, recuperarla se è in più",
+    "C14": "Verificare la data della lettera. Licenziamento: i giorni di preavviso non lavorati si pagano come "
+           "indennità sostitutiva. Dimissioni: il preavviso non dato si può trattenere come indennità a carico "
+           "del dipendente",
 }
 
 
@@ -35,7 +37,8 @@ def euro(x, d=2) -> str:
 
 
 def num(x, d=2) -> str:
-    return f"{x:,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    s = f"{abs(x):,.{d}f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    return f"{'−' if x < 0 and s.strip('0,.') else ''}{s}"
 
 
 def pct(x, d=0) -> str:

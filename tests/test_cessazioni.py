@@ -81,7 +81,32 @@ def test_tredicesima_di_dicembre_con_i_ratei(monkeypatch):
     assert _segnalazioni(r.copy().set_axis(r.index).replace({"1900.00": "1583.33"})) == [("C12", 1900.0, 1583.33)]
 
 
+def test_ratei_del_mese_per_chi_lascia_prima_del_15():
+    """C11 e C12 contano gli stessi dodicesimi: per chi lascia il 10 l'ultimo mese non matura."""
+    assunto = date(2015, 5, 4)
+    assert R.ratei_al(assunto, "2026-09") == (9, 3)
+    assert R.ratei_al(assunto, "2026-09", date(2026, 9, 10)) == (8, 2)
+    assert R.ratei_al(assunto, "2026-09", date(2026, 9, 15)) == (9, 3)
+
+
+@pytest.mark.parametrize("mese, attesi", [("2026-06", 12), ("2026-07", 12), ("2026-08", 12), ("2026-05", 11)])
+def test_quattordicesima_pagata_a_chi_resta(mese, attesi):
+    """Pagata a giugno o a luglio, è quella del periodo luglio-giugno appena chiuso, non di quello che comincia."""
+    assert R.dodicesimi_14_pagata(date(2015, 5, 4), mese) == attesi
+    assert R.dodicesimi_14_pagata(date(2026, 2, 1), "2026-07") == 5          # da febbraio a giugno
+
+
+def test_quattordicesima_di_luglio_non_segnalata(monkeypatch):
+    monkeypatch.setattr(C, "MESE", "2026-07")
+    r = _riga(data_cessazione="", tipo_cessazione="", preavviso_giorni="", quattordicesima="1900.00")
+    assert _segnalazioni(r) == []
+
+
+def test_tipo_di_uscita_con_spazi_o_maiuscole():
+    assert _segnalazioni(_riga(tipo_cessazione=" Dimissioni ", preavviso_giorni="15")) == [("C14", 30.0, 15.0)]
+
+
 def test_chi_lascia_prima_di_novembre_non_riceve_la_tranche(out):
     usciti = set(out["mese"].loc[out["mese"]["data_cessazione"] != "", "matricola"])
-    assert len(usciti) == 5
+    assert len(usciti) == 6
     assert usciti.isdisjoint(out["novembre"]["matricola"])

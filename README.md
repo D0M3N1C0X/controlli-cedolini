@@ -22,8 +22,8 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 > holiday balances, payslip arithmetic, unexplained swings, tax-payment reconciliation, tax-code validity,
 > undeclared master-data changes, 13th/14th-month accruals and, for leavers, 13th/14th-month pay, untaken
 > holiday and notice period, plus the cost of the November 2026 pay increase per client. Built three times,
-> all giving the same results: in Python, as a live-formula spreadsheet (reconciled on 563 values) and
-> as a browser tool where payslip files never leave the computer (checked on 2,184 values). On synthetic data
+> all giving the same results: in Python, as a live-formula spreadsheet (reconciled on 580 values) and
+> as a browser tool where payslip files never leave the computer (checked on 2,219 values). On synthetic data
 > it finds all 35 planted errors with no false alarms. Pay tables are rebuilt to the cent from the employers'
 > association's official note; every rule has its source in [docs/fonti.md](docs/fonti.md). The rest of the
 > repository is in Italian, the language of Italian payroll.
@@ -37,8 +37,8 @@ che si apre anche in Google Sheets, per chi elabora le paghe senza scrivere codi
 | | |
 |---|---|
 | **35 segnalazioni su 122 cedolini e 3 F24**, 24 ad alta priorità. Ognuna con valore atteso, valore trovato e cosa fare. | **6 dipendenti sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Sono 175,44 € al mese, più gli arretrati da novembre 2025. |
-| **Un F24 con 212,40 € di ritenute in meno** della somma dei cedolini del cliente. | **Novembre 2026:** 3.792,05 € al mese di aumenti dei minimi per chi resta; i superminimi assorbibili ne coprono 1.385,82 €, restano **2.406,23 € al mese**. |
-| **Cinque cessazioni a fine settembre**, tre con un errore: quattordicesima contata da gennaio, ferie non godute a 1/30, licenziamento con metà del preavviso. | |
+| **Un F24 con 212,40 € di ritenute in meno** della somma dei cedolini del cliente. | **Novembre 2026:** 3.765,80 € al mese di aumenti dei minimi per chi resta; i superminimi assorbibili ne coprono 1.385,82 €, restano **2.379,98 € al mese**. |
+| **Sei cessazioni a settembre**, tre con un errore: quattordicesima contata da gennaio, ferie non godute a 1/30, licenziamento con metà del preavviso. | |
 
 ## I controlli
 
@@ -73,8 +73,8 @@ l'F24: non serve sapere come l'ha calcolata il software paghe.
   controlli fanno quello che dicono, non che troverebbero errori reali: gli errori li ho scelti io.
 - **Su 1.100 alterazioni casuali:** una voce qualsiasi di un cedolino corretto, cambiata di un importo
   a caso. Sopra il centesimo di tolleranza le trovano tutte.
-- **Regole contro statistica:** un rilevatore di anomalie che non conosce il contratto trova 12 cedolini sbagliati
-  su 34, con 6 falsi allarmi; le regole 34 su 34, con nessuno. Vede solo gli errori che spostano un rapporto
+- **Regole contro statistica:** un rilevatore di anomalie che non conosce il contratto trova 11 cedolini sbagliati
+  su 34, con 7 falsi allarmi; le regole 34 su 34, con nessuno. Vede solo gli errori che spostano un rapporto
   (contributi, TFR, variazione del netto), non minimi, scatti, anagrafica o ratei. I cedolini di uscita li
   segnala tutti, giusti o sbagliati, perché il netto salta.
 - **Il limite, ristretto da C10:** un errore *coerente* passa i controlli aritmetici. Un dipendente di
@@ -82,8 +82,8 @@ l'F24: non serve sapere come l'ha calcolata il software paghe.
   netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima lo trova C10; resta
   invisibile solo se è sbagliato fin dall'assunzione, e lì serve il confronto con i documenti del
   cliente. Il test `test_limite_dichiarato_errore_coerente` tiene vero il limite.
-- **Tre motori, una risposta:** il foglio di calcolo è confrontato con Python su 563 valori e ricalcolato
-  con LibreOffice nella CI; lo strumento nel browser è confrontato con Python su 2.184 valori. La verifica del
+- **Tre motori, una risposta:** il foglio di calcolo è confrontato con Python su 580 valori e ricalcolato
+  con LibreOffice nella CI; lo strumento nel browser è confrontato con Python su 2.219 valori. La verifica del
   foglio usa [excel-twin](https://github.com/D0M3N1C0X/excel-twin), una piccola libreria condivisa dal portfolio.
 
 ## Cosa c'è
@@ -116,7 +116,7 @@ software paghe: i cedolini del mese, se vuoi quelli del mese prima e le deleghe 
 
 Con "Prova con i dati di esempio" si vede subito il risultato.
 
-Il JavaScript dello strumento è verificato contro Python a ogni modifica: 2.184 confronti su nove casi e sui casi limite di ratei e cessazioni, comprese le
+Il JavaScript dello strumento è verificato contro Python a ogni modifica: 2.219 confronti su nove casi e sui casi limite di ratei e cessazioni, comprese le
 alterazioni di mezzo centesimo e il formato italiano.
 
 ## Usare il foglio, senza Python

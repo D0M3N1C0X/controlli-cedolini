@@ -77,8 +77,11 @@ def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
     a["netto_prec"] = m["matricola"].map(prec.set_index("matricola")["netto"])
     a["variazione"] = m["netto"] / a["netto_prec"] - 1
     assunti = [date.fromisoformat(d) for d in m["data_assunzione"]]
-    a["ratei_13"] = [R.ratei_13(d, C.MESE) for d in assunti]
-    a["ratei_14"] = [R.ratei_14(d, C.MESE) for d in assunti]
+    uscite = (m["data_cessazione"] if "data_cessazione" in m else pd.Series([""] * len(m), index=m.index))
+    ratei = [R.ratei_al(d, C.MESE, None if _vuoto(c) else date.fromisoformat(str(c)))
+             for d, c in zip(assunti, uscite, strict=True)]
+    a["ratei_13"] = [r[0] for r in ratei]
+    a["ratei_14"] = [r[1] for r in ratei]
     return a
 
 
@@ -121,10 +124,11 @@ def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.D
             segnala(i, "C07", float(a.loc[i, "netto_prec"]), float(m.loc[i, "netto"]))
         if not codice_fiscale.valido(m.loc[i, "codice_fiscale"]):
             segnala(i, "C09", "valido", m.loc[i, "codice_fiscale"])
-        r13, r14 = int(m.loc[i, "ratei_13"]), int(m.loc[i, "ratei_14"])
-        e13, e14 = int(a.loc[i, "ratei_13"]), int(a.loc[i, "ratei_14"])
-        if (r13, r14) != (e13, e14):
-            segnala(i, "C11", f"13ª {e13}; 14ª {e14}", f"13ª {r13}; 14ª {r14}")
+        if not (_vuoto(m.loc[i, "ratei_13"]) or _vuoto(m.loc[i, "ratei_14"])):      # facoltative: tutte e due
+            r13, r14 = int(float(m.loc[i, "ratei_13"])), int(float(m.loc[i, "ratei_14"]))
+            e13, e14 = int(a.loc[i, "ratei_13"]), int(a.loc[i, "ratei_14"])
+            if (r13, r14) != (e13, e14):
+                segnala(i, "C11", f"13ª {e13}; 14ª {e14}", f"13ª {r13}; 14ª {r14}")
         _cessazione(m.loc[i], segnala, i)
         p = prev_by.get(m.loc[i, "matricola"])
         if p is not None and m.loc[i, "evento"] == "":
@@ -135,6 +139,7 @@ def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.D
 
     somme = m.groupby("cliente")[["irpef", "contributi_inps"]].sum().map(R.centesimi)
     rec = f24.set_index("cliente").join(somme)
+    rec[["irpef", "contributi_inps"]] = rec[["irpef", "contributi_inps"]].fillna(0.0)   # un F24 senza cedolini
     rec["diff_ritenute"] = (rec["ritenute_1001"] - rec["irpef"]).map(R.centesimi)
     rec["diff_contributi"] = (rec["contributi_dipendente"] - rec["contributi_inps"]).map(R.centesimi)
     for cliente, r in rec.iterrows():
@@ -158,7 +163,8 @@ def _cessazione(r: pd.Series, segnala, i: int) -> None:
     assunzione = date.fromisoformat(str(r["data_assunzione"]))
     mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
     ces = None if _vuoto(r.get("data_cessazione")) else date.fromisoformat(str(r["data_cessazione"]))
-    for voce, inizio, ratei in (("tredicesima", R.inizio_13, R.ratei_13), ("quattordicesima", R.inizio_14, R.ratei_14)):
+    for voce, inizio, ratei in (("tredicesima", R.inizio_13, R.ratei_13),
+                                ("quattordicesima", R.inizio_14, R.dodicesimi_14_pagata)):
         if _vuoto(r.get(voce)):
             continue
         n = R.dodicesimi_alla_cessazione(assunzione, ces, inizio(ces)) if ces else ratei(assunzione, C.MESE)
