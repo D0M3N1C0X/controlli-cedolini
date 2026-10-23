@@ -42,9 +42,28 @@ def write_templates(rows: int = 2) -> None:
         (WEB / name).write_text(text, encoding="utf-8")
 
 
+def texts() -> dict:
+    """Name, description, what to do and priority of every check, in Italian and in English."""
+    import build_rapporto
+    from testi_en import CONTROLLI_EN, PRIORITA_EN
+    out = {"it": {}, "en": {}}
+    for codice, (nome, descrizione, priorita) in controlli.CONTROLLI.items():
+        out["it"][codice] = {"nome": nome, "descrizione": descrizione, "cosa_fare": build_rapporto.COSA_FARE[codice],
+                             "priorita": priorita}
+        nome_en, descrizione_en, cosa_fare_en = CONTROLLI_EN[codice]
+        out["en"][codice] = {"nome": nome_en, "descrizione": descrizione_en, "cosa_fare": cosa_fare_en,
+                             "priorita": PRIORITA_EN[priorita]}
+    return out
+
+
+def write_texts() -> None:
+    (WEB / "testi.json").write_text(json.dumps(texts(), indent=1, ensure_ascii=False) + "\n", encoding="utf-8")
+
+
 def write_inputs() -> None:
     WEB.mkdir(exist_ok=True)
     write_templates()
+    write_texts()
     (WEB / "inputs.json").write_text(json.dumps({"cfg": cfg(), "ccnl": ccnl()}, indent=1, sort_keys=True,
                                                 ensure_ascii=False) + "\n", encoding="utf-8")
 

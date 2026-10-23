@@ -38,7 +38,8 @@ jobs:
           cp report/anomalie.csv site/
           cp deliverables/foglio_controllo_cedolini.xlsx site/
           mkdir -p site/strumento
-          cp web/index.html web/controlli.js web/inputs.json web/modello_cedolini.csv web/modello_f24.csv site/strumento/
+          cp web/index.html web/app.js web/controlli.js web/inputs.json web/testi.json web/modello_cedolini.csv web/modello_f24.csv site/strumento/
+          cp -R web/design site/strumento/design
           cp data/cedolini.csv data/f24.csv site/strumento/
 
       - name: Add the link preview

@@ -1,0 +1,138 @@
+{
+ "it": {
+  "C01": {
+   "nome": "Minimo tabellare",
+   "descrizione": "Tabellare diverso dal minimo del livello (paga base, altri elementi, contingenza), part-time compreso",
+   "cosa_fare": "Aggiornare il tabellare al minimo in vigore e pagare la differenza dei mesi arretrati",
+   "priorita": "alta"
+  },
+  "C02": {
+   "nome": "Scatti di anzianità",
+   "descrizione": "Importo degli scatti diverso da quelli maturati dalla data di assunzione",
+   "cosa_fare": "Inserire lo scatto maturato e verificare la data di decorrenza",
+   "priorita": "alta"
+  },
+  "C03": {
+   "nome": "Contributi INPS",
+   "descrizione": "Contributo a carico del dipendente diverso da imponibile arrotondato all'euro × aliquota",
+   "cosa_fare": "Correggere l'aliquota nella posizione del dipendente",
+   "priorita": "alta"
+  },
+  "C04": {
+   "nome": "Quota TFR",
+   "descrizione": "Rateo TFR diverso da retribuzione ordinaria × 14 / 13,5 / 12",
+   "cosa_fare": "Ricalcolare il rateo includendo scatti e superminimo",
+   "priorita": "media"
+  },
+  "C05": {
+   "nome": "Residuo ferie",
+   "descrizione": "Residuo diverso da residuo del mese prima + maturate - godute",
+   "cosa_fare": "Riallineare il residuo: maturazione del mese non registrata",
+   "priorita": "media"
+  },
+  "C06": {
+   "nome": "Quadratura",
+   "descrizione": "Lordo diverso dalla somma delle voci, o netto diverso da lordo meno trattenute",
+   "cosa_fare": "Ricontrollare le voci: il cedolino non quadra",
+   "priorita": "alta"
+  },
+  "C07": {
+   "nome": "Variazione del netto",
+   "descrizione": "Netto oltre il 20% sopra o sotto il mese prima, senza un evento che lo spieghi",
+   "cosa_fare": "Chiedere al cliente l'evento che giustifica la variazione",
+   "priorita": "media"
+  },
+  "C08": {
+   "nome": "Riconciliazione F24",
+   "descrizione": "Ritenute o contributi in F24 diversi dalla somma dei cedolini del cliente",
+   "cosa_fare": "Integrare la delega prima della scadenza del versamento",
+   "priorita": "alta"
+  },
+  "C09": {
+   "nome": "Codice fiscale",
+   "descrizione": "Carattere di controllo non valido",
+   "cosa_fare": "Correggere il codice fiscale in anagrafica",
+   "priorita": "alta"
+  },
+  "C10": {
+   "nome": "Anagrafica",
+   "descrizione": "Livello, part-time, superminimo o data di assunzione diversi dal mese prima, senza un evento",
+   "cosa_fare": "Verificare il cambio con il cliente e con i documenti: se non c'è stato, correggere l'anagrafica",
+   "priorita": "alta"
+  },
+  "C11": {
+   "nome": "Ratei 13ª e 14ª",
+   "descrizione": "Dodicesimi maturati diversi dai mesi di servizio nel periodo (frazione di 15 giorni intera)",
+   "cosa_fare": "Ricontare i dodicesimi dalla data di assunzione e correggere i ratei prima della tredicesima di dicembre",
+   "priorita": "media"
+  }
+ },
+ "en": {
+  "C01": {
+   "nome": "Minimum basic pay",
+   "descrizione": "Basic pay different from the grade minimum (base pay, other elements, cost-of-living allowance), part-time included",
+   "cosa_fare": "Bring basic pay up to the current minimum and pay the arrears",
+   "priorita": "high"
+  },
+  "C02": {
+   "nome": "Seniority increments",
+   "descrizione": "Seniority increments different from those earned since the hiring date",
+   "cosa_fare": "Add the increment earned and check the date it starts from",
+   "priorita": "high"
+  },
+  "C03": {
+   "nome": "Social security (INPS)",
+   "descrizione": "Employee contribution different from the contribution base rounded to the euro × rate",
+   "cosa_fare": "Correct the rate in the employee's INPS position",
+   "priorita": "high"
+  },
+  "C04": {
+   "nome": "Severance accrual (TFR)",
+   "descrizione": "Monthly TFR accrual different from ordinary pay × 14 / 13.5 / 12",
+   "cosa_fare": "Recompute the accrual including increments and the individual supplement",
+   "priorita": "medium"
+  },
+  "C05": {
+   "nome": "Holiday balance",
+   "descrizione": "Balance different from last month's balance + days accrued − days taken",
+   "cosa_fare": "Realign the balance: this month's accrual was not recorded",
+   "priorita": "medium"
+  },
+  "C06": {
+   "nome": "Payslip arithmetic",
+   "descrizione": "Gross different from the sum of its items, or net different from gross minus deductions",
+   "cosa_fare": "Recheck the items: the payslip does not add up",
+   "priorita": "high"
+  },
+  "C07": {
+   "nome": "Change in net pay",
+   "descrizione": "Net pay more than 20% above or below last month, with no event to explain it",
+   "cosa_fare": "Ask the client for the event behind the change",
+   "priorita": "medium"
+  },
+  "C08": {
+   "nome": "F24 reconciliation",
+   "descrizione": "Taxes or contributions in the F24 different from the sum of the client's payslips",
+   "cosa_fare": "Complete the F24 before the payment deadline",
+   "priorita": "high"
+  },
+  "C09": {
+   "nome": "Tax code",
+   "descrizione": "The tax code's check character is not valid",
+   "cosa_fare": "Correct the tax code in the personnel records",
+   "priorita": "high"
+  },
+  "C10": {
+   "nome": "Personnel records",
+   "descrizione": "Grade, part-time, individual supplement or hiring date changed since last month, with no event",
+   "cosa_fare": "Check the change with the client and the documents; if it did not happen, correct the records",
+   "priorita": "high"
+  },
+  "C11": {
+   "nome": "13th and 14th month accruals",
+   "descrizione": "Twelfths earned different from the months of service in the period (15 days count as a month)",
+   "cosa_fare": "Recount the twelfths from the hiring date and correct the accruals before December's 13th month",
+   "priorita": "medium"
+  }
+ }
+}

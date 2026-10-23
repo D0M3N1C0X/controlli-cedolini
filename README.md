@@ -93,12 +93,18 @@ l'F24: non serve sapere come l'ha calcolata il software paghe.
 
 ## Usare lo strumento nel browser
 
-[Apri lo strumento](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/), carica il CSV dei cedolini (mese da
-controllare e mese prima) e, se vuoi, quello degli F24. I controlli girano nella pagina: **i file non lasciano il
-computer**. Accetta l'esportazione di Excel in italiano (punto e virgola, virgola decimale, date gg/mm/aaaa); i
-modelli delle colonne sono nella pagina. Con "Usa i dati di esempio" si vede subito il risultato.
-La pagina dello strumento non carica script esterni; il rapporto online conta le visite con GoatCounter,
-senza cookie né dati personali.
+[Apri lo strumento](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) e trascina i file così come escono dal
+software paghe: i cedolini del mese, se vuoi quelli del mese prima e le deleghe F24, in **Excel (.xlsx) o CSV**.
+
+- **Le colonne si abbinano da sole** quando hanno nomi comuni ("Codice dipendente", "Totale competenze", "Residuo
+  ferie"...); se manca qualcosa, lo strumento chiede quale colonna usare e ricorda la scelta su quel computer.
+- **L'esito si scarica in Excel**, con le colonne per chi corregge e quando, e si stampa per il cliente.
+- **In italiano e in inglese**, con un interruttore in alto.
+- **I file non lasciano il computer**: i controlli girano nella pagina, che non carica script esterni. I file Excel
+  si aprono senza librerie, con la decompressione che il browser ha già. Il rapporto online conta le visite con
+  GoatCounter, senza cookie; lo strumento no.
+
+Con "Prova con i dati di esempio" si vede subito il risultato.
 
 Il JavaScript dello strumento è verificato contro Python a ogni modifica: 1.952 confronti su nove casi e sui casi limite dei ratei, comprese le
 alterazioni di mezzo centesimo e il formato italiano.
