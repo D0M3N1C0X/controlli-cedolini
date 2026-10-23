@@ -10,19 +10,20 @@ import robustezza
 def test_readme_aggiornato(out):
     f = B.fatti(out, pd.read_csv(C.REPORT / "robustezza.csv"), robustezza.errore_coerente())
     readme = (C.ROOT / "README.md").read_text(encoding="utf-8")
+    eur = lambda x: f"€{x:,.2f}"
     attese = [
-        f"**{f['segnalazioni']} segnalazioni su {f['cedolini']} cedolini e {len(C.CLIENTI)} F24**",
-        f"{f['alta']} ad alta priorità", f"**{f['sotto_minimo']} dipendenti sotto il minimo:**",
-        B.euro(f["arretrati_minimo"]), B.euro(-f["f24_c"]), B.euro(f["nov_aumento"]), B.euro(f["nov_assorbito"]),
-        f"**{B.euro(f['nov_da_pagare'])} al mese**", f"{f['trovati']} trovati su {f['inseriti']}",
-        B.euro(f["coerente"]["netto_giusto"] - f["coerente"]["netto_pagato"]),
-        f"Su {B.num(f['prove'], 0)} alterazioni casuali",
+        f"**{f['segnalazioni']} flags on {f['cedolini']} payslips and {len(C.CLIENTI)} F24 payments**",
+        f"{f['alta']} high priority", f"**{f['sotto_minimo']} employees below the minimum:**",
+        eur(f["arretrati_minimo"]), eur(-f["f24_c"]), eur(f["nov_aumento"]), eur(f["nov_assorbito"]),
+        f"**{eur(f['nov_da_pagare'])} a month**", f"{f['trovati']} found out of {f['inseriti']}",
+        eur(f["coerente"]["netto_giusto"] - f["coerente"]["netto_pagato"]),
+        f"On {f['prove']:,} random alterations",
     ]
     import statistica
     v = statistica.valutazione().set_index("metodo")
     s35, rg = v.loc["Statistico, z oltre 3,5"], v.loc["Regole (C01-C14)"]
     n = lambda r, k: int(r[k])          # una riga di DataFrame misto torna in float: 9.0
-    attese.append(f"trova {n(s35, 'trovati')} cedolini sbagliati\n  su {n(s35, 'errori')}, "
-                  f"con {n(s35, 'falsi_allarmi')} "
-                  f"falsi allarmi; le regole {n(rg, 'trovati')} su {n(rg, 'errori')}")
+    attese.append(f"finds {n(s35, 'trovati')} wrong payslips out of {n(s35, 'errori')}, "
+                  f"with {n(s35, 'falsi_allarmi')} false alarms; "
+                  f"the rules find {n(rg, 'trovati')} of {n(rg, 'errori')}")
     assert not [a for a in attese if a not in readme]
