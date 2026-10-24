@@ -102,8 +102,8 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add(f"- **Dal 1° novembre 2026 i minimi salgono:** {euro(f['nov_aumento'])} al mese per {f['nov_dipendenti']} "
         f"dipendenti. Il superminimo assorbibile ne copre {euro(f['nov_assorbito'])} in {f['nov_assorbimenti']} casi; "
         f"restano {euro(f['nov_da_pagare'])} al mese, {euro(f['nov_annuo'], 0)} l'anno su 14 mensilità.")
-    add(f"- **I controlli trovano ogni alterazione sopra il centesimo** in {num(f['prove_sopra'], 0)} prove casuali "
-        f"(sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).")
+    add(f"- **I controlli trovano ogni alterazione sopra il centesimo:** tutte le {num(f['prove_sopra'], 0)} delle "
+        f"{num(f['prove'], 0)} prove casuali che superano il centesimo (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).")
     add("")
 
     add("## 1. Le segnalazioni, cedolino per cedolino")
@@ -230,7 +230,8 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
         "contributo aggiuntivo dell'1%: in uso reale l'aliquota viene dalla posizione INPS del cliente.")
     add("- **Scatti al livello attuale.** Il CCNL non rivaluta gli scatti già maturati con il passaggio di livello: chi "
         "ha cambiato livello va controllato a mano.")
-    add("- **Un CCNL, un mese.** Tredicesima, quattordicesima, malattia, cessazioni e conguagli non sono controllati.")
+    add("- **Un CCNL, un mese.** Malattia, permessi, conguagli e il TFR pagato all'uscita non sono controllati; "
+        "di chi esce si controllano ratei, mensilità aggiuntive, ferie non godute e preavviso (C11–C14).")
     add("")
     C.REPORT.mkdir(exist_ok=True)
     (C.REPORT / "rapporto.md").write_text("\n".join(L) + "\n", encoding="utf-8")

@@ -12,7 +12,7 @@
 - **6 dipendenti sono pagati sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Mancano 175,44 € al mese in tutto, più gli arretrati da novembre 2025.
 - **L'F24 del cliente C ha 212,40 € di ritenute in meno** della somma dei cedolini: va integrato prima della scadenza del versamento.
 - **Dal 1° novembre 2026 i minimi salgono:** 3.765,80 € al mese per 116 dipendenti. Il superminimo assorbibile ne copre 1.385,82 € in 42 casi; restano 2.379,98 € al mese, 33.320 € l'anno su 14 mensilità.
-- **I controlli trovano ogni alterazione sopra il centesimo** in 885 prove casuali (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).
+- **I controlli trovano ogni alterazione sopra il centesimo:** tutte le 885 delle 1.100 prove casuali che superano il centesimo (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).
 
 ## 1. Le segnalazioni, cedolino per cedolino
 
@@ -161,5 +161,5 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 - **Due motori, una risposta.** Gli stessi controlli sono in Python e in formule nel foglio; il foglio Riconciliazione confronta ogni formula con Python, e la CI ricalcola il foglio con LibreOffice.
 - **Contributi semplificati.** Un'aliquota a carico del dipendente (9,19%) per tutti, senza FIS, CIGS e contributo aggiuntivo dell'1%: in uso reale l'aliquota viene dalla posizione INPS del cliente.
 - **Scatti al livello attuale.** Il CCNL non rivaluta gli scatti già maturati con il passaggio di livello: chi ha cambiato livello va controllato a mano.
-- **Un CCNL, un mese.** Tredicesima, quattordicesima, malattia, cessazioni e conguagli non sono controllati.
+- **Un CCNL, un mese.** Malattia, permessi, conguagli e il TFR pagato all'uscita non sono controllati; di chi esce si controllano ratei, mensilità aggiuntive, ferie non godute e preavviso (C11–C14).
 
