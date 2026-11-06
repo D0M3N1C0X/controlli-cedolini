@@ -1,4 +1,4 @@
-// I quattordici controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
+// I diciannove controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
 // tests/js/check_controlli.mjs li fa girare sui dati di casi preparati in Python
 // (tests/fixtures/js_vectors.json) e la CI fallisce alla prima differenza.
 
@@ -8,6 +8,9 @@ export const CONTROLLI = {
   C07: ["Variazione del netto", "media"], C08: ["Riconciliazione F24", "alta"], C09: ["Codice fiscale", "alta"],
   C10: ["Anagrafica", "alta"], C11: ["Ratei 13ª e 14ª", "media"],
   C12: ["Tredicesima e quattordicesima pagate", "alta"], C13: ["Ferie non godute", "alta"], C14: ["Preavviso", "alta"],
+  C15: ["Indennità di malattia INPS", "alta"], C16: ["Carenza di malattia", "media"],
+  C17: ["Indennità di maternità INPS", "alta"], C18: ["Permessi ROL ed ex festività", "media"],
+  C19: ["TFR liquidato", "alta"],
 };
 
 const ANAGRAFICA = ["livello", "part_time", "superminimo", "data_assunzione"];
@@ -31,6 +34,18 @@ export function centesimi(x) {
   let cents = BigInt(int + f.slice(0, 2));
   if (Number(f[2]) >= 5) cents += 1n;
   const v = Number(cents) / 100;
+  return neg ? -v : v;
+}
+// ROUND di Excel con `cifre` decimali (come regole.arrotonda in Python)
+export function arrotonda(x, cifre) {
+  const s = Number(x).toPrecision(15);
+  if (s.includes("e")) return Math.round(Number(x) * 10 ** cifre) / 10 ** cifre;
+  const neg = s.startsWith("-");
+  const [int, frac = ""] = (neg ? s.slice(1) : s).split(".");
+  const f = (frac + "0".repeat(cifre + 1)).slice(0, cifre + 1);
+  let n = BigInt(int + f.slice(0, cifre));
+  if (Number(f[cifre]) >= 5) n += 1n;
+  const v = Number(n) / 10 ** cifre;
   return neg ? -v : v;
 }
 // round di pandas/numpy: metà al pari, sul valore binario moltiplicato
@@ -114,6 +129,70 @@ export function anniDiServizio(assunzione, al) {
   return y - ya - (m < ma || (m === ma && d < da) ? 1 : 0);
 }
 
+// ---- Contributi, assenze, permessi e TFR (F14-F23) ------------------------------------------------------
+// La posizione INPS di un cliente: dai parametri dell'esempio, o i valori scritti nella pagina.
+export const posizione = (cliente, cfg) => cfg.posizioni[cliente]
+  ?? { media_semestre: cfg.media_default, dipendenti: cfg.dipendenti_default };
+export function aliquotaDipendente(media, cfg) {
+  const cigs = media > cfg.cigs_soglia ? cfg.cigs : 0;
+  const fis = media <= cfg.fis_soglia ? cfg.fis_fino_a_5 : cfg.fis_oltre_5;
+  return cfg.aliquota + cigs + fis / cfg.fis_quota;
+}
+export function contributi(lordo, media, cfg) {
+  const imponibile = euro(lordo);
+  return centesimi(imponibile * aliquotaDipendente(media, cfg) + Math.max(0, imponibile - cfg.prima_fascia) * cfg.aggiuntiva);
+}
+const DAY = 86400000;
+const iso = (ms) => new Date(ms).toISOString().slice(0, 10);
+const piuGiorni = (d, n) => iso(giorno(d) + n * DAY);
+const primoDelMese = (mese) => `${mese}-01`;
+const ultimoDelMese = (mese) => { const [y, m] = mese.split("-").map(Number); return iso(Date.UTC(y, m, 0)); };
+const sovrapposti = (da, a, inizio, fine) => {
+  const x = da > inizio ? da : inizio, y = a < fine ? a : fine;
+  return Math.max(0, (giorno(y) - giorno(x)) / DAY + 1);
+};
+export const rmgg = (base, cfg) => centesimi(base * cfg.mensilita / 12 / cfg.divisore_rmgg);
+export function giorniMalattia(dal, al, mese, cfg) {
+  const inizio = dal > primoDelMese(mese) ? dal : primoDelMese(mese);
+  const fine = al < ultimoDelMese(mese) ? al : ultimoDelMese(mese);
+  const k = (n) => piuGiorni(dal, n - 1);
+  return [sovrapposti(dal, k(cfg.carenza), inizio, fine), sovrapposti(k(cfg.carenza + 1), k(cfg.f1), inizio, fine),
+    sovrapposti(k(cfg.f1 + 1), k(cfg.f2), inizio, fine)];
+}
+export function indennitaMalattia(base, dal, al, mese, cfg) {
+  const [, n50, n66] = giorniMalattia(dal, al, mese, cfg);
+  const g = rmgg(base, cfg);
+  return centesimi(g * cfg.p1 * n50 + g * cfg.p2 * n66);
+}
+export const carenzaPercentuale = (n, esente, cfg) => (esente ? 1
+  : n >= 1 && n <= cfg.carenza_percentuali.length ? cfg.carenza_percentuali[n - 1] : 0);
+export const indennitaMaternita = (base, dal, al, mese, cfg) =>
+  centesimi(rmgg(base, cfg) * cfg.maternita * sovrapposti(dal, al, primoDelMese(mese), ultimoDelMese(mese)));
+export function permessiMese(assunzione, mese, dipendenti, partTime, cfg) {
+  const rol = dipendenti > cfg.rol_soglia ? cfg.rol_oltre_15 : cfg.rol_fino_a_15;
+  let quota = 1;
+  if (assunzione > cfg.rol_nuovi_assunti) {
+    const anni = anniDiServizio(assunzione, ultimoDelMese(mese));
+    quota = anni < 2 ? 0 : anni < 4 ? 0.5 : 1;
+  }
+  return round4((rol * quota + cfg.ex_festivita) / 12 * partTime);
+}
+export function coefficienteTfr(cessazione, cfg) {
+  const [y, mo, d] = cessazione.split("-").map(Number);
+  const m = d >= 15 ? mo : mo - 1;
+  if (m === 0) return 0;
+  const foi = cfg.foi_mesi[`${y}-${String(m).padStart(2, "0")}`];
+  if (foi == null) return null;
+  const variazione = (foi * cfg.foi_raccordo / cfg.foi_dicembre - 1) * 100;
+  return arrotonda(cfg.tfr_fisso * m / 12 + cfg.tfr_quota * variazione, 6);
+}
+export function tfrLiquidato(fondo, quote, imponibile, cessazione, cfg) {
+  const c = coefficienteTfr(cessazione, cfg);
+  if (c == null) return null;
+  const riv = centesimi(fondo * c / 100);
+  return centesimi(fondo + riv - centesimi(riv * cfg.imposta_tfr) + quote - centesimi(imponibile * cfg.contributo_tfr));
+}
+
 // Giorni di preavviso del CCNL: fino a 5 anni di servizio, dal 6° al 10°, oltre il 10° (F13).
 export function preavvisoMinimo(tipo, livello, assunzione, cessazione, cfg) {
   const anni = anniDiServizio(assunzione, cessazione);
@@ -151,6 +230,34 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
       const minimo = preavvisoMinimo(tipo, String(r.livello), r.data_assunzione, ces, cfg);
       if (Math.trunc(Number(r.preavviso_giorni)) < minimo) segnala(r, "C14", minimo, Number(r.preavviso_giorni));
     }
+    if (["fondo_tfr_prec", "tfr_quote_anno", "imponibile_anno", "tfr_liquidato"].every((k) => !vuoto(r[k]))) {
+      const atteso = tfrLiquidato(Number(r.fondo_tfr_prec), Number(r.tfr_quote_anno), Number(r.imponibile_anno), ces, cfg);
+      if (atteso != null && Math.abs(Number(r.tfr_liquidato) - atteso) > cfg.tolleranza) segnala(r, "C19", atteso, Number(r.tfr_liquidato));
+    }
+  }
+  // C15-C17: le indennità anticipate per l'INPS e la carenza, sulla retribuzione del mese prima (come _assenze)
+  const si = (v) => /^(true|vero|1|si|sì|yes|x)$/i.test(String(v ?? "").trim());
+  function assenze(r, p) {
+    const inizio = primoDelMese(cfg.mese);
+    const base = p ? centesimi(p.tabellare + p.scatti + p.superminimo) : null;
+    if (!vuoto(r.malattia_dal)) {
+      const dal = String(r.malattia_dal), al = String(r.malattia_al);
+      if (base != null && dal >= inizio && !vuoto(r.malattia_inps)) {
+        const atteso = indennitaMalattia(base, dal, al, cfg.mese, cfg);
+        if (Math.abs(Number(r.malattia_inps) - atteso) > cfg.tolleranza) segnala(r, "C15", atteso, Number(r.malattia_inps));
+      }
+      const [carenza] = giorniMalattia(dal, al, cfg.mese, cfg);
+      if (carenza && !vuoto(r.malattia_evento_n)) {
+        const quota = carenzaPercentuale(Math.trunc(Number(r.malattia_evento_n)), si(r.malattia_esente), cfg);
+        const pagata = vuoto(r.malattia_carenza) ? 0 : Number(r.malattia_carenza);
+        if ((quota === 0 && pagata > cfg.tolleranza) || (quota > 0 && pagata <= cfg.tolleranza))
+          segnala(r, "C16", quota ? `${Math.round(quota * 100)}%` : "non dovuta", pagata);
+      }
+    }
+    if (!vuoto(r.maternita_dal) && !vuoto(r.maternita_inps) && base != null && String(r.maternita_dal) >= inizio) {
+      const atteso = indennitaMaternita(base, String(r.maternita_dal), String(r.maternita_al), cfg.mese, cfg);
+      if (Math.abs(Number(r.maternita_inps) - atteso) > cfg.tolleranza) segnala(r, "C17", atteso, Number(r.maternita_inps));
+    }
   }
   for (const r of mese) {
     const t = ccnl[r.livello];
@@ -159,7 +266,7 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
     a.tabellare = centesimi(t[cfg.colonna_minimo] * r.part_time);
     a.scatti_n = scattiMaturati(r.data_assunzione, cfg.mese, cfg);
     a.scatti = centesimi(t.scatto * a.scatti_n * r.part_time);
-    a.contributi_inps = centesimi(euro(r.lordo) * cfg.aliquota);
+    a.contributi_inps = contributi(r.lordo, posizione(r.cliente, cfg).media_semestre, cfg);
     const ordinaria = r.tabellare + r.scatti + r.superminimo;
     a.quota_tfr = centesimi(ordinaria * cfg.mensilita / cfg.divisore_tfr / 12);
     const p = prevBy.get(r.matricola);
@@ -187,6 +294,13 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
       if (r.ratei_13 !== e13 || r.ratei_14 !== e14) segnala(r, "C11", `13ª ${e13}; 14ª ${e14}`, `13ª ${r.ratei_13}; 14ª ${r.ratei_14}`);
     }
     cessazione(r);
+    assenze(r, p);
+    if (r.permessi_residuo != null && !vuoto(r.permessi_residuo)) {
+      const maturati = permessiMese(r.data_assunzione, cfg.mese, posizione(r.cliente, cfg).dipendenti, r.part_time, cfg);
+      const atteso = round4((p && !vuoto(p.permessi_residuo) ? Number(p.permessi_residuo) : 0) + maturati
+        - (vuoto(r.permessi_goduti) ? 0 : Number(r.permessi_goduti)));
+      if (Math.abs(Number(r.permessi_residuo) - atteso) > cfg.tolleranza_ore) segnala(r, "C18", atteso, Number(r.permessi_residuo));
+    }
     if (p && !r.evento) {
       const cambi = ANAGRAFICA.filter((c) => (typeof p[c] === "number" && typeof r[c] === "number"
         ? Math.abs(p[c] - r[c]) > cfg.tolleranza : String(p[c]) !== String(r[c])));
@@ -249,7 +363,10 @@ const NUMERI = ["part_time", "tabellare", "scatti_n", "scatti", "superminimo", "
   "imponibile_irpef", "irpef", "altre_trattenute", "netto", "quota_tfr", "ferie_maturate", "ferie_godute", "ferie_residuo",
   "ritenute_1001", "contributi_dipendente"];
 
-const FACOLTATIVI = ["ratei_13", "ratei_14", "preavviso_giorni", "tredicesima", "quattordicesima", "ferie_liquidate"];
+const FACOLTATIVI = ["ratei_13", "ratei_14", "preavviso_giorni", "tredicesima", "quattordicesima", "ferie_liquidate",
+  "malattia_evento_n", "malattia_inps", "malattia_carenza", "maternita_inps", "permessi_maturati", "permessi_goduti",
+  "permessi_residuo", "fondo_tfr_prec", "tfr_quote_anno", "imponibile_anno", "tfr_liquidato"];
+const DATE_FACOLTATIVE = ["malattia_dal", "malattia_al", "maternita_dal", "maternita_al"];
 
 export function numero(s, decimaleVirgola) {
   if (s === "" || s == null) return 0;
@@ -290,6 +407,7 @@ export function normalizza(righe, decimaleVirgola) {
     }
     if ("data_assunzione" in o) o.data_assunzione = data(o.data_assunzione);
     o.data_cessazione = vuoto(o.data_cessazione) ? null : data(o.data_cessazione);
+    for (const k of DATE_FACOLTATIVE) o[k] = vuoto(o[k]) ? null : data(o[k]);
     o.tipo_cessazione = String(o.tipo_cessazione ?? "").trim().toLowerCase();
     if ("superminimo_assorbibile" in o) o.superminimo_assorbibile = /^(true|1|s[iì]|vero|x)$/i.test(String(o.superminimo_assorbibile));
     if ("livello" in o) o.livello = String(o.livello).replace(/[°º]/g, "").trim();

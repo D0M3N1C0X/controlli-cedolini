@@ -27,10 +27,13 @@ def caratteristiche(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
     })
 
 
-def punteggi(x: pd.DataFrame) -> pd.DataFrame:
+def punteggi(x: pd.DataFrame, gruppi: pd.Series | None = None) -> pd.DataFrame:
     """z robusto: (valore - mediana) / (1,4826 x deviazione assoluta mediana). Se più di metà dei valori
     coincide con la mediana la deviazione mediana è zero: si usa allora 1,2533 x deviazione media assoluta
-    (Iglewicz e Hoaglin), altrimenti la colonna non segnalerebbe mai nulla."""
+    (Iglewicz e Hoaglin), altrimenti la colonna non segnalerebbe mai nulla. Con `gruppi`, ogni cedolino si
+    confronta con quelli dello stesso cliente: posizioni INPS diverse non sono anomalie."""
+    if gruppi is not None:
+        return pd.concat([punteggi(g) for _, g in x.groupby(gruppi.values, sort=False)]).loc[x.index]
     med = x.median()
     dev = (x - med).abs()
     scala = dev.median() * 1.4826
@@ -40,7 +43,7 @@ def punteggi(x: pd.DataFrame) -> pd.DataFrame:
 
 def valutazione(soglie=SOGLIE) -> pd.DataFrame:
     m, prec, _ = controlli.carica()
-    z = punteggi(caratteristiche(m, prec)).abs()
+    z = punteggi(caratteristiche(m, prec), m["cliente"]).abs()
     err = pd.read_csv(C.ERRORI, keep_default_na=False)
     sbagliati = set(err.loc[err["matricola"] != "", "matricola"])
     rows = []
@@ -50,8 +53,8 @@ def valutazione(soglie=SOGLIE) -> pd.DataFrame:
                      "trovati": len(segnalati & sbagliati), "falsi_allarmi": len(segnalati - sbagliati)})
     an, _ = controlli.esegui(m, prec, controlli.carica()[2])
     regole = set(an.loc[an["matricola"] != "", "matricola"])
-    rows.append({"metodo": "Regole (C01-C14)", "errori": len(sbagliati), "trovati": len(regole & sbagliati),
-                 "falsi_allarmi": len(regole - sbagliati)})
+    rows.append({"metodo": f"Regole (C01-C{len(controlli.CONTROLLI)})", "errori": len(sbagliati),
+                 "trovati": len(regole & sbagliati), "falsi_allarmi": len(regole - sbagliati)})
     t = pd.DataFrame(rows)
     t[["errori", "trovati", "falsi_allarmi"]] = t[["errori", "trovati", "falsi_allarmi"]].astype(int)
     t["richiamo"] = t["trovati"] / t["errori"]
@@ -62,7 +65,7 @@ def valutazione(soglie=SOGLIE) -> pd.DataFrame:
 def per_tipo(k: float = 3.5) -> pd.DataFrame:
     """Quali tipi di errore vede il rilevatore statistico, e quali no."""
     m, prec, _ = controlli.carica()
-    z = punteggi(caratteristiche(m, prec)).abs()
+    z = punteggi(caratteristiche(m, prec), m["cliente"]).abs()
     segnalati = set(m.loc[(z > k).any(axis=1), "matricola"])
     err = pd.read_csv(C.ERRORI, keep_default_na=False)
     err = err[err["matricola"] != ""]

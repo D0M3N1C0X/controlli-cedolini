@@ -44,16 +44,23 @@ segnalano: è il loro mestiere.
 ritenute 1001 e contributi per cliente. I ratei di tredicesima e quattordicesima sono facoltativi: senza, C11 non
 si applica. Per chi lascia, l'evento `cessazione` con data, tipo (dimissioni o licenziamento), giorni di preavviso,
 mensilità aggiuntive e ferie non godute pagate: senza queste colonne, C12-C14 non si applicano e il cedolino di
-uscita non quadra in C06, perché il lordo comprende importi che il file non riporta.
+uscita non quadra in C06, perché il lordo comprende importi che il file non riporta. Assenze, permessi e TFR
+liquidato sono colonne facoltative anche loro: malattia (date, numero dell'evento nell'anno, esenzione, indennità
+INPS, carenza pagata), maternità (date e indennità INPS), ore di permesso maturate, godute e residue, e per chi lascia
+fondo TFR al 31 dicembre, quote e imponibile dell'anno, TFR liquidato. Senza, C15-C19 non si applicano.
+
+**Prima del primo mese, per ogni cliente:** la media dei dipendenti nel semestre di riferimento, dalla posizione
+INPS, e i dipendenti in forza. La prima decide CIGS e FIS (C03), i secondi le ore di riduzione d'orario (C18).
 
 **3. I controlli.** Nello strumento: caricare i due file e premere "Esegui i controlli". Nel foglio: incollare i
-cedolini nel foglio Mese (colonne A-W, ratei in AU-AV, voci di chi lascia in AZ-BE), quelli del mese prima nel foglio Mese precedente,
-l'F24 nel foglio F24.
+cedolini nel foglio Mese (colonne A-W, ratei in AU-AV, voci di chi lascia in AZ-BE, assenze, permessi e TFR in BQ-CF),
+quelli del mese prima nel foglio Mese precedente, l'F24 nel foglio F24; la posizione di ogni cliente nella tabella
+Clienti del foglio Parametri, e l'indice FOI del mese di ogni cessazione.
 
 **4. Lo smistamento.** Ogni segnalazione ha valore atteso, valore trovato e cosa fare.
 
-- **Priorità alta** (C01, C02, C03, C06, C08, C09, C10): si risolvono tutte prima dell'invio.
-- **Priorità media** (C04, C05, C07, C11): si risolvono, oppure si scrive perché restano aperte e il revisore
+- **Priorità alta** (C01, C02, C03, C06, C08, C09, C10, C12-C15, C17, C19): si risolvono tutte prima dell'invio.
+- **Priorità media** (C04, C05, C07, C11, C16, C18): si risolvono, oppure si scrive perché restano aperte e il revisore
   decide.
 - **Un falso allarme si annota**, con il motivo: è il dato che serve per tarare soglie e regole.
 

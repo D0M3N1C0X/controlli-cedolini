@@ -20,11 +20,13 @@ MESE_PRECEDENTE = "2026-08"
 MESE = "2026-09"                 # il mese elaborato e controllato
 PROSSIMA_TRANCHE = date(2026, 11, 1)
 
-# Clienti sintetici, tutti con il CCNL Terziario Distribuzione e Servizi (Confcommercio).
+# Clienti sintetici, tutti con il CCNL Terziario Distribuzione e Servizi (Confcommercio). "media_semestre" è la media
+# dei dipendenti nel semestre di riferimento, che decide FIS e CIGS (F14): il cliente A è cresciuto da poco e nel
+# semestre era sotto i 15, anche se oggi ne ha 18.
 CLIENTI = {
-    "A": {"nome": "Cliente A · negozio al dettaglio", "dipendenti": 18},
-    "B": {"nome": "Cliente B · commercio all'ingrosso", "dipendenti": 74},
-    "C": {"nome": "Cliente C · servizi alle imprese", "dipendenti": 27},
+    "A": {"nome": "Cliente A · negozio al dettaglio", "dipendenti": 18, "media_semestre": 14.5},
+    "B": {"nome": "Cliente B · commercio all'ingrosso", "dipendenti": 74, "media_semestre": 74.0},
+    "C": {"nome": "Cliente C · servizi alle imprese", "dipendenti": 27, "media_semestre": 27.0},
 }
 
 # ---- Regole usate dai controlli ---------------------------------------------------------------
@@ -34,13 +36,49 @@ COLONNA_MINIMO_PROSSIMO = "minimo_2026_11"
 # Scatti: uno ogni triennio, fino a 10, dal primo giorno del mese successivo al triennio (F03).
 SCATTI_MAX = 10
 SCATTI_ANNI = 3
-# Contributo IVS a carico del dipendente. Semplificato: lo stesso per tutti i clienti, senza FIS,
-# CIGS né il contributo aggiuntivo dell'1% sopra la prima fascia pensionabile (F05).
+# Contributi a carico del dipendente (F05, F14, F15). IVS 9,19%; CIGS 0,30% se nel semestre la media supera 15
+# dipendenti; un terzo del contributo FIS (0,50% fino a 5 dipendenti di media, 0,80% oltre); l'1% sulla parte di
+# retribuzione mensile oltre la prima fascia pensionabile mensilizzata, 4.685 € nel 2026 (INPS, circ. 6/2026).
 ALIQUOTA_DIPENDENTE = 0.0919
+CIGS_DIPENDENTE = 0.003
+CIGS_SOGLIA = 15
+FIS_ALIQUOTA = {"fino_a_5": 0.005, "oltre_5": 0.008}
+FIS_SOGLIA = 5
+FIS_QUOTA_DIPENDENTE = 3          # il FIS si divide due terzi al datore di lavoro, un terzo al lavoratore
+ALIQUOTA_AGGIUNTIVA = 0.01
+PRIMA_FASCIA_MENSILE = 4685.00
 # TFR: quota annua = retribuzione annua / 13,5 (art. 2120 c.c.). Rateo mensile sulla retribuzione
 # ordinaria per 14 mensilità, diviso 12 (F06).
 DIVISORE_TFR = 13.5
 MENSILITA = 14
+# TFR alla cessazione (F19-F22). Il fondo al 31 dicembre si rivaluta con 1,5% annuo fisso per mese più il 75%
+# dell'aumento dell'indice FOI rispetto a dicembre; il mese conta se la cessazione cade dal 15 in poi. Dal 2026 il FOI
+# ha base 2025=100: si confronta con dicembre 2025 in base 2015 moltiplicando per il coefficiente di raccordo.
+# Sulla rivalutazione, imposta sostitutiva del 17%; dalle quote dell'anno si toglie lo 0,50% dell'imponibile.
+TFR_TASSO_FISSO = 1.5
+TFR_QUOTA_INFLAZIONE = 0.75
+FOI_DICEMBRE = 121.5              # dicembre 2025, base 2015=100
+FOI_RACCORDO = 1.214              # da base 2025 a base 2015
+FOI_MESI = {"2026-08": 103.7, "2026-09": 104.3}     # base 2025=100, dati definitivi ISTAT
+IMPOSTA_SOSTITUTIVA_TFR = 0.17
+CONTRIBUTO_TFR = 0.005
+# Assenze. Malattia (F16): indennità INPS anticipata dal datore di lavoro, 50% dal 4° al 20° giorno e 66,66% dal 21°
+# al 180°, sulla retribuzione media globale giornaliera = retribuzione del mese prima × mensilità / 12 / 30 (F17).
+# Maternità: 80% della stessa base (F18). Carenza (F16): l'integrazione dei primi 3 giorni si paga per intero ai
+# primi 2 eventi dell'anno, al 66% al 3°, al 50% al 4°, e non più dal 5°, salvo i casi esenti.
+MALATTIA_CARENZA = 3
+MALATTIA_FASCE = ((20, 0.5), (180, 0.6666))
+MATERNITA_PERCENTUALE = 0.8
+DIVISORE_RMGG = 30
+CARENZA_PERCENTUALI = (1.0, 1.0, 0.66, 0.5)
+# Permessi (F23): riduzione d'orario 56 ore l'anno, 72 nelle aziende con più di 15 dipendenti, più 32 ore di ex
+# festività, per dodicesimi. Per chi è entrato dopo il 1° marzo 2011 la riduzione d'orario spetta al 50% dopo 2 anni
+# e al 100% dopo 4; prima dei 2 anni, solo le ex festività. Il part-time matura in proporzione.
+ROL_ORE = {"fino_a_15": 56, "oltre_15": 72}
+ROL_SOGLIA = 15
+EX_FESTIVITA_ORE = 32
+ROL_NUOVI_ASSUNTI = "2011-03-01"
+TOLLERANZA_ORE = 0.01
 # Ferie: 26 giorni lavorativi l'anno, maturati per dodicesimi (F04).
 FERIE_ANNUE = 26
 # Variazione del netto rispetto al mese prima oltre la quale serve una spiegazione.

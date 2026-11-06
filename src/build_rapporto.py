@@ -12,7 +12,8 @@ import statistica
 COSA_FARE = {
     "C01": "Aggiornare il tabellare al minimo in vigore e pagare la differenza dei mesi arretrati",
     "C02": "Inserire lo scatto maturato e verificare la data di decorrenza",
-    "C03": "Correggere l'aliquota nella posizione del dipendente",
+    "C03": "Correggere l'aliquota nella posizione INPS del cliente: CIGS e FIS dipendono dalla media dei dipendenti "
+           "nel semestre; sopra 4.685 € al mese si aggiunge l'1%",
     "C04": "Ricalcolare il rateo includendo scatti e superminimo",
     "C05": "Riallineare il residuo: maturazione del mese non registrata",
     "C06": "Ricontrollare le voci: il cedolino non quadra",
@@ -28,6 +29,16 @@ COSA_FARE = {
     "C14": "Verificare la data della lettera. Licenziamento: i giorni di preavviso non lavorati si pagano come "
            "indennità sostitutiva. Dimissioni: il preavviso non dato si può trattenere come indennità a carico "
            "del dipendente",
+    "C15": "Ricalcolare l'indennità sulla retribuzione del mese prima × 14/12 / 30, al 50% dal 4° al 20° giorno e al "
+           "66,66% dopo, e correggere il conguaglio con l'INPS nel flusso UniEmens",
+    "C16": "Contare gli eventi di malattia dell'anno: dal quinto la carenza non si paga, salvo ricovero, prognosi "
+           "di almeno 12 giorni, terapie salvavita o gravidanza; se è dovuta e manca, pagarla",
+    "C17": "Ricalcolare l'indennità all'80% della retribuzione media giornaliera, ratei compresi, e correggere il "
+           "conguaglio con l'INPS; l'integrazione al 100% resta a carico dell'azienda",
+    "C18": "Rifare la maturazione dei permessi: 72 o 56 ore di riduzione d'orario secondo i dipendenti, più 32 di ex "
+           "festività, in proporzione al part-time e con la regola dei 2 e 4 anni per chi è entrato dopo marzo 2011",
+    "C19": "Rifare il conteggio: coefficiente ISTAT del mese giusto (dal 15 in poi conta il mese), imposta "
+           "sostitutiva del 17% sulla rivalutazione, 0,50% tolto dalle quote dell'anno; regolare la differenza",
 }
 
 
@@ -114,6 +125,10 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
             atteso, trovato, diff = "valido", f"`{t.trovato}`", "-"
         elif t.controllo in ("C10", "C11"):
             atteso, trovato, diff = t.atteso, t.trovato, "-"
+        elif t.controllo == "C16":            # la quota di carenza dovuta, contro l'importo pagato
+            atteso, trovato, diff = f"carenza {t.atteso}", euro(t.trovato), "-"
+        elif t.controllo == "C18":
+            atteso, trovato, diff = f"{num(t.atteso, 2)} ore", f"{num(t.trovato, 2)} ore", f"{num(t.differenza, 2)} ore"
         elif t.controllo == "C14":
             atteso, trovato, diff = f"{num(t.atteso, 0)} gg", f"{num(t.trovato, 0)} gg", f"{num(t.differenza, 0)} gg"
         elif t.controllo == "C05":
@@ -181,7 +196,7 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add("")
     sv = statistica.valutazione()
     add("**Perché regole e non un modello statistico.** Un rilevatore che non sa nulla del contratto confronta ogni "
-        "cedolino con gli altri su quattro rapporti (contributi su lordo, TFR su retribuzione ordinaria, netto su lordo, "
+        "cedolino con gli altri dello stesso cliente su quattro rapporti (contributi su lordo, TFR su retribuzione ordinaria, netto su lordo, "
         "netto sul mese prima) e segnala chi si allontana dalla mediana. Sugli stessi errori:")
     add("")
     add(table(["Metodo", "Cedolini sbagliati", "Trovati", "Falsi allarmi", "Precisione"],
@@ -192,11 +207,14 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     nomi = {"minimo": "minimi", "scatto": "scatti", "inps": "contributi", "tfr": "TFR", "ferie": "ferie", "netto": "netto",
             "variazione": "variazioni del netto", "codice_fiscale": "codice fiscale", "anagrafica": "anagrafica",
             "ratei": "ratei", "tredicesima": "mensilità aggiuntive", "ferie_liquidate": "ferie non godute",
-            "preavviso": "preavviso"}
-    uscita = {"tredicesima", "ferie_liquidate", "preavviso"}
+            "preavviso": "preavviso", "tfr_liquidato": "TFR liquidato", "malattia": "malattia", "carenza": "carenza",
+            "maternita": "maternità", "permessi": "permessi"}
+    uscita = {"tredicesima", "ferie_liquidate", "preavviso", "tfr_liquidato"}
     visti = ", ".join(nomi[t] for t in pt.loc[(pt["trovati_statistico"] > 0) & ~pt["tipo"].isin(uscita), "tipo"])
-    add(f"*Il rilevatore vede solo gli errori che spostano un rapporto ({visti}); minimi, scatti, ferie, codice fiscale "
-        f"e anagrafica richiedono di conoscere il contratto, e lì non trova nulla. I cedolini di uscita li segnala "
+    add(f"*Il rilevatore confronta ogni cedolino con quelli dello stesso cliente, perché posizioni INPS diverse non "
+        f"sono anomalie. Vede solo gli errori che spostano un rapporto ({visti}); minimi, scatti, ferie, codice "
+        f"fiscale, anagrafica, assenze e permessi richiedono di conoscere il contratto e le regole INPS, e lì non trova "
+        f"nulla. I cedolini di uscita li segnala "
         f"tutti, giusti o sbagliati, perché il netto salta rispetto al mese prima: così prende anche gli errori di "
         f"cessazione, ma i cedolini di uscita corretti diventano falsi allarmi. Su un dominio scritto in regole, le "
         f"regole vincono; la statistica serve dove una regola non c'è.*")

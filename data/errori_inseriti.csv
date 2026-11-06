@@ -9,28 +9,37 @@ A007,A,scatto,"triennio compiuto ad agosto 2026, scatto non applicato da settemb
 A016,A,scatto,"triennio compiuto ad agosto 2026, scatto non applicato da settembre"
 B025,B,scatto,"triennio compiuto ad agosto 2026, scatto non applicato da settembre"
 B047,B,scatto,"triennio compiuto ad agosto 2026, scatto non applicato da settembre"
-A012,A,inps,"aliquota 9,49% invece di 9,19%"
-B087,B,inps,"aliquota 9,49% invece di 9,19%"
-C098,C,inps,"aliquota 9,49% invece di 9,19%"
-A003,A,inps,"aliquota 9,49% invece di 9,19%"
-B033,B,tfr,quota TFR calcolata sul solo tabellare
-C101,C,tfr,quota TFR calcolata sul solo tabellare
-B059,B,tfr,quota TFR calcolata sul solo tabellare
-B084,B,ferie,maturazione del mese non sommata al residuo
-B055,B,ferie,maturazione del mese non sommata al residuo
-A009,A,ferie,maturazione del mese non sommata al residuo
-C093,C,netto,netto diverso da imponibile - IRPEF - altre trattenute
-A001,A,netto,netto diverso da imponibile - IRPEF - altre trattenute
-B090,B,variazione,straordinari inseriti senza evento: netto oltre il 20% sopra agosto
-C099,C,variazione,straordinari inseriti senza evento: netto oltre il 20% sopra agosto
-B058,B,codice_fiscale,carattere di controllo errato
-C107,C,codice_fiscale,carattere di controllo errato
-C100,C,anagrafica,"livello passato da 4 a 5 senza evento: il cedolino torna, ma è più basso"
-B070,B,anagrafica,"superminimo azzerato senza evento: il cedolino torna, ma è più basso"
+B087,B,inps,"aliquota 9,19%: CIGS (0,30%) e quota FIS (0,2667%) non trattenute"
+C098,C,inps,"aliquota 9,19%: CIGS (0,30%) e quota FIS (0,2667%) non trattenute"
+B053,B,inps,"aliquota 9,19%: CIGS (0,30%) e quota FIS (0,2667%) non trattenute"
+A009,A,inps,CIGS trattenuta a un cliente con meno di 15 dipendenti di media nel semestre
+C093,C,tfr,quota TFR calcolata sul solo tabellare
+A001,A,tfr,quota TFR calcolata sul solo tabellare
+B090,B,tfr,quota TFR calcolata sul solo tabellare
+A015,A,ferie,maturazione del mese non sommata al residuo
+C099,C,ferie,maturazione del mese non sommata al residuo
+B058,B,ferie,maturazione del mese non sommata al residuo
+C107,C,netto,netto diverso da imponibile - IRPEF - altre trattenute
+A005,A,netto,netto diverso da imponibile - IRPEF - altre trattenute
+B020,B,variazione,straordinari inseriti senza evento: netto oltre il 20% sopra agosto
+A008,A,variazione,straordinari inseriti senza evento: netto oltre il 20% sopra agosto
+B070,B,codice_fiscale,carattere di controllo errato
+B040,B,codice_fiscale,carattere di controllo errato
+B061,B,anagrafica,"livello passato da 4 a 5 senza evento: il cedolino torna, ma è più basso"
+C108,C,anagrafica,"superminimo azzerato senza evento: il cedolino torna, ma è più basso"
 B034,B,ratei,mese di assunzione con meno di 15 giorni di servizio contato nella tredicesima
-B040,B,ratei,quattordicesima contata da gennaio invece che da luglio
-B079,B,ratei,un dodicesimo di tredicesima in meno senza assenze che lo spieghino
-A011,A,ferie_liquidate,ferie non godute pagate a 1/30 della retribuzione invece che a 1/26
-B092,B,tredicesima,quattordicesima liquidata con i dodicesimi da gennaio invece che da luglio
-B045,B,preavviso,licenziamento con metà del preavviso minimo del CCNL
+A011,A,ratei,quattordicesima contata da gennaio invece che da luglio
+B092,B,ratei,un dodicesimo di tredicesima in meno senza assenze che lo spieghino
+B027,B,ferie_liquidate,ferie non godute pagate a 1/30 della retribuzione invece che a 1/26
+B062,B,tredicesima,quattordicesima liquidata con i dodicesimi da gennaio invece che da luglio
+B076,B,preavviso,licenziamento con metà del preavviso minimo del CCNL
+B027,B,tfr_liquidato,rivalutazione liquidata senza togliere l'imposta sostitutiva del 17%
+B038,B,tfr_liquidato,"quote dell'anno senza togliere il contributo dello 0,50% dell'imponibile"
+B051,B,tfr_liquidato,uscita prima del 15 rivalutata con il coefficiente del mese di uscita invece che del mese prima
+B080,B,malattia,indennità INPS calcolata su 1/26 della retribuzione invece che × 14/12 / 30
+B026,B,carenza,"carenza pagata al quinto evento dell'anno, quando non è più dovuta"
+C095,C,maternita,indennità di maternità senza i ratei di tredicesima e quattordicesima nella base
+A017,A,permessi,"assunto da meno di 2 anni: la riduzione d'orario non spetta ancora, maturata per intero"
+C103,C,permessi,part-time che matura i permessi di un tempo pieno
+B191,B,inps,retribuzione oltre 4.685 €: contributo aggiuntivo dell'1% non trattenuto
 ,C,f24,"F24 con 212,40 € di ritenute in meno dei cedolini"

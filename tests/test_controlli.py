@@ -56,8 +56,19 @@ def test_arrotondamento_come_excel():
 def test_contributi_su_imponibile_arrotondato_all_euro():
     # F10: 1.779,00 x 9,19% = 163,49 (esempio ODCEC Torino); 1.549,91 si arrotonda a 1.550
     assert R.euro(1549.5) == 1550 and R.euro(1549.49) == 1549
-    assert R.contributi(1779.0) == 163.49
-    assert R.contributi(1549.91) == 142.45      # sul lordo non arrotondato sarebbe 142,44
+    ivs = lambda lordo: R.centesimi(R.euro(lordo) * C.ALIQUOTA_DIPENDENTE)
+    assert ivs(1779.0) == 163.49
+    assert ivs(1549.91) == 142.45               # sul lordo non arrotondato sarebbe 142,44
+
+
+def test_aliquota_per_posizione_inps():
+    # F14: IVS 9,19%; CIGS 0,30% oltre 15 dipendenti di media; un terzo del FIS (0,50% fino a 5, 0,80% oltre)
+    assert R.aliquota_dipendente(4) == C.ALIQUOTA_DIPENDENTE + 0.005 / 3
+    assert R.aliquota_dipendente(15) == C.ALIQUOTA_DIPENDENTE + 0.008 / 3
+    assert R.aliquota_dipendente(15.5) == C.ALIQUOTA_DIPENDENTE + 0.003 + 0.008 / 3
+    # F15: l'1% solo sulla parte oltre 4.685 € al mese
+    assert R.contributi(4685.0, 74) == R.centesimi(4685 * R.aliquota_dipendente(74))
+    assert R.contributi(5000.0, 74) == R.centesimi(5000 * R.aliquota_dipendente(74) + 315 * 0.01)
 
 
 def test_codice_fiscale():

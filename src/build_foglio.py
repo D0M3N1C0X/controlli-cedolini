@@ -26,6 +26,13 @@ import regole as R
 from deterministic import normalise
 
 OUTPUT = C.DELIVERABLES / "foglio_controllo_cedolini.xlsx"
+# Colonne di dati aggiunte dopo l'ultima (BP), per non spostare le formule che ci sono: lettera, colonna, tipo
+NUOVE = [("BQ", "malattia_dal", "data"), ("BR", "malattia_al", "data"), ("BS", "malattia_evento_n", "intero"),
+         ("BT", "malattia_esente", "sì/no"), ("BU", "malattia_inps", "euro"), ("BV", "malattia_carenza", "euro"),
+         ("BW", "maternita_dal", "data"), ("BX", "maternita_al", "data"), ("BY", "maternita_inps", "euro"),
+         ("BZ", "permessi_maturati", "ore"), ("CA", "permessi_goduti", "ore"), ("CB", "permessi_residuo", "ore"),
+         ("CC", "fondo_tfr_prec", "euro"), ("CD", "tfr_quote_anno", "euro"), ("CE", "imponibile_anno", "euro"),
+         ("CF", "tfr_liquidato", "euro")]
 RIGHE = 250          # righe con le formule già pronte nei fogli Mese, Mese precedente e Novembre 2026
 REPO = "https://github.com/D0M3N1C0X/controlli-cedolini"
 
@@ -136,8 +143,20 @@ class Foglio:
         rows = [
             ("mese", "Mese controllato (primo giorno)", date.fromisoformat(C.MESE + "-01"), "DD/MM/YYYY", None,
              "Il mese dei cedolini incollati nel foglio Mese: conta per gli scatti."),
-            ("aliquota", "Contributo IVS a carico del dipendente", C.ALIQUOTA_DIPENDENTE, PCT, YELLOW,
-             "9,19% generale. Va preso dalla posizione INPS del cliente: FIS, CIGS e l'1% sopra la prima fascia pensionabile non sono modellati."),
+            ("aliquota", "Contributo IVS a carico del dipendente", C.ALIQUOTA_DIPENDENTE, "0.00%", None,
+             "9,19%: Fondo pensioni lavoratori dipendenti. CIGS e FIS si aggiungono per posizione, nella tabella Clienti."),
+            ("cigs", "CIGS a carico del dipendente", C.CIGS_DIPENDENTE, "0.00%", None,
+             "0,30% su 0,90%, se nel semestre la media supera la soglia sotto (INPS, circ. 76/2022)."),
+            ("cigs_soglia", "CIGS: media dei dipendenti oltre cui si paga", C.CIGS_SOGLIA, "0", None, "D.lgs. 148/2015, art. 20, c. 3-bis."),
+            ("fis5", "FIS fino a 5 dipendenti di media", C.FIS_ALIQUOTA["fino_a_5"], "0.00%", None, "INPS, circ. 76/2022."),
+            ("fis_oltre", "FIS oltre 5 dipendenti di media", C.FIS_ALIQUOTA["oltre_5"], "0.00%", None, "INPS, circ. 76/2022."),
+            ("fis_soglia", "FIS: soglia della media", C.FIS_SOGLIA, "0", None, ""),
+            ("fis_quota", "FIS: il dipendente paga una parte su", C.FIS_QUOTA_DIPENDENTE, "0", None,
+             "Due terzi al datore di lavoro, un terzo al lavoratore."),
+            ("aggiuntiva", "Aliquota aggiuntiva sopra la prima fascia", C.ALIQUOTA_AGGIUNTIVA, "0.00%", None,
+             "D.L. 384/1992, art. 3-ter: a carico del lavoratore."),
+            ("prima_fascia", "Prima fascia pensionabile mensilizzata, euro", C.PRIMA_FASCIA_MENSILE, NUM2, YELLOW,
+             "4.685,00 € nel 2026 (INPS, circ. 6/2026): si aggiorna ogni anno."),
             ("divisore_tfr", "Divisore TFR", C.DIVISORE_TFR, "0.0", None, "Art. 2120 c.c.: quota annua = retribuzione annua / 13,5."),
             ("mensilita", "Mensilità", C.MENSILITA, "0", None, "CCNL Terziario: tredicesima e quattordicesima."),
             ("ferie", "Ferie annue, giorni lavorativi", C.FERIE_ANNUE, "0", None, "CCNL Terziario: 26 giorni, maturati per dodicesimi."),
@@ -150,6 +169,29 @@ class Foglio:
              "CCNL Terziario: per tredicesima e quattordicesima, le frazioni di almeno 15 giorni contano come mese intero."),
             ("divisore_giornaliero", "Divisore della quota giornaliera", C.DIVISORE_GIORNALIERO, "0", None,
              "CCNL Terziario: la quota giornaliera è la retribuzione mensile divisa 26; vale per le ferie non godute."),
+            ("divisore_rmgg", "Divisore della retribuzione media giornaliera INPS", C.DIVISORE_RMGG, "0", None,
+             "Impiegati: retribuzione del mese prima × mensilità / 12 / 30 (INPS, circ. 94/2009)."),
+            ("carenza", "Giorni di carenza", C.MALATTIA_CARENZA, "0", None, "Non indennizzati dall'INPS."),
+            ("f1", "Malattia: ultimo giorno al primo tasso", C.MALATTIA_FASCE[0][0], "0", None, ""),
+            ("p1", "Malattia: primo tasso INPS", C.MALATTIA_FASCE[0][1], "0.00%", None, "50% dal 4° al 20° giorno."),
+            ("f2", "Malattia: ultimo giorno indennizzato", C.MALATTIA_FASCE[1][0], "0", None, ""),
+            ("p2", "Malattia: secondo tasso INPS", C.MALATTIA_FASCE[1][1], "0.00%", None, "66,66% dal 21° al 180° giorno."),
+            ("maternita", "Maternità: tasso INPS", C.MATERNITA_PERCENTUALE, "0%", None, "D.lgs. 151/2001, art. 22."),
+            ("rol15", "Riduzione d'orario fino a 15 dipendenti, ore", C.ROL_ORE["fino_a_15"], "0", None, "CCNL Terziario."),
+            ("rol_oltre", "Riduzione d'orario oltre 15 dipendenti, ore", C.ROL_ORE["oltre_15"], "0", None, "CCNL Terziario."),
+            ("rol_soglia", "Riduzione d'orario: soglia dei dipendenti", C.ROL_SOGLIA, "0", None, ""),
+            ("exfest", "Ex festività, ore", C.EX_FESTIVITA_ORE, "0", None, "Quattro giornate da 8 ore."),
+            ("rol_data", "Assunti dopo questa data: riduzione al 50% dopo 2 anni, al 100% dopo 4",
+             date.fromisoformat(C.ROL_NUOVI_ASSUNTI), "DD/MM/YYYY", None, "CCNL Terziario, dal rinnovo del 2011."),
+            ("tolleranza_ore", "Tolleranza, ore di permesso", C.TOLLERANZA_ORE, "0.00", None, ""),
+            ("tfr_fisso", "TFR: tasso fisso annuo, %", C.TFR_TASSO_FISSO, "0.0", None, "Art. 2120 c.c."),
+            ("tfr_quota", "TFR: quota dell'aumento dell'indice FOI", C.TFR_QUOTA_INFLAZIONE, "0%", None, "Art. 2120 c.c."),
+            ("foi_dic", "Indice FOI di dicembre 2025 (base 2015)", C.FOI_DICEMBRE, "0.0", None, "ISTAT, dati definitivi."),
+            ("foi_racc", "Coefficiente di raccordo base 2025 / base 2015", C.FOI_RACCORDO, "0.000", None, "ISTAT."),
+            ("imposta_tfr", "Imposta sostitutiva sulla rivalutazione del TFR", C.IMPOSTA_SOSTITUTIVA_TFR, "0%", None,
+             "17%: D.lgs. 33/2025 (testo unico versamenti e riscossione), già art. 11 D.lgs. 47/2000."),
+            ("contributo_tfr", "Contributo tolto dalle quote di TFR", C.CONTRIBUTO_TFR, "0.00%", None,
+             "0,50% dell'imponibile previdenziale (L. 297/1982, art. 3)."),
         ]
         header(ws, 4, ["", "Parametro", "Valore", "Fonte e note"], height=20)
         for r, (key, label, value, fmt, fill, note) in enumerate(rows, start=5):
@@ -157,6 +199,42 @@ class Foglio:
             put(ws, f"C{r}", value, color=BLUE, fmt=fmt, fill=fill)
             put(ws, f"D{r}", note, color=MUTED, italic=True)
             self.R[key] = f"Parametri!$C${r}"
+        # Le posizioni INPS dei clienti: la media del semestre decide CIGS e FIS, i dipendenti la riduzione d'orario
+        r = 7 + len(rows)
+        put(ws, f"B{r - 1}", "Clienti", bold=True, size=11)
+        header(ws, r, ["", "Cliente", "Media dipendenti nel semestre", "Dipendenti", "Aliquota a carico del dipendente"],
+               height=32)
+        widths(ws, {"E": 16, "F": 18})
+        R_ = self.R
+        for k, (cli, info) in enumerate(C.CLIENTI.items(), start=r + 1):
+            put(ws, f"B{k}", cli, color=BLUE)
+            put(ws, f"C{k}", info["media_semestre"], color=BLUE, fill=YELLOW, fmt="0.0")
+            put(ws, f"D{k}", info["dipendenti"], color=BLUE)
+            put(ws, f"E{k}", (f"={R_['aliquota']}+IF(C{k}>{R_['cigs_soglia']},{R_['cigs']},0)"
+                              f"+IF(C{k}<={R_['fis_soglia']},{R_['fis5']},{R_['fis_oltre']})/{R_['fis_quota']}"),
+                fmt="0.0000%")
+            self.check("Parametri", f"Aliquota del cliente {cli}", R.aliquota_dipendente(info["media_semestre"]),
+                       f"Parametri!E{k}")
+        last_cli = r + len(C.CLIENTI) + 10          # righe libere per altri clienti
+        self.R.update({"cli": f"Parametri!$B${r + 1}:$B${last_cli}", "cli_dip": f"Parametri!$D${r + 1}:$D${last_cli}",
+                       "cli_aliq": f"Parametri!$E${r + 1}:$E${last_cli}"})
+        # Indici FOI per la rivalutazione del TFR
+        r = last_cli + 3
+        put(ws, f"B{r - 1}", "Indice FOI 2026 (base 2025), per la rivalutazione del TFR", bold=True, size=11)
+        header(ws, r, ["", "Mese", "Indice FOI"], height=20)
+        for k, (mese, foi) in enumerate(C.FOI_MESI.items(), start=r + 1):
+            put(ws, f"B{k}", date.fromisoformat(mese + "-01"), color=BLUE, fmt="MM/YYYY")
+            put(ws, f"C{k}", foi, color=BLUE, fmt="0.0")
+        last_foi = r + 12
+        self.R.update({"foi_mese": f"Parametri!$B${r + 1}:$B${last_foi}", "foi_val": f"Parametri!$C${r + 1}:$C${last_foi}"})
+        # Integrazione dei primi 3 giorni per evento dell'anno
+        r = last_foi + 3
+        put(ws, f"B{r - 1}", "Carenza: quota pagata per numero dell'evento nell'anno", bold=True, size=11)
+        header(ws, r, ["", "Evento", "Quota"], height=20)
+        for k, q in enumerate(C.CARENZA_PERCENTUALI, start=r + 1):
+            put(ws, f"B{k}", k - r, color=BLUE)
+            put(ws, f"C{k}", q, color=BLUE, fmt="0%")
+        self.R["carenza_pct"] = f"Parametri!$C${r + 1}:$C${r + len(C.CARENZA_PERCENTUALI)}"
 
     def ccnl(self, ws) -> None:
         t = R.tabella()
@@ -201,7 +279,8 @@ class Foglio:
         title(ws, "Mese precedente: i cedolini del mese prima", "Netto, residuo ferie e anagrafica, per i controlli C05, C07 e C10. Nei dati di esempio: agosto 2026.")
         widths(ws, {"A": 12, "B": 9, "C": 14, "D": 14, "E": 9, "F": 10, "G": 12, "H": 14})
         header(ws, 4, ["Matricola", "Cliente", "Netto", "Residuo ferie", "Livello", "Part-time", "Superminimo",
-                       "Data assunzione"], height=20)
+                       "Data assunzione", "Retribuzione mensile", "Residuo permessi"], height=32)
+        widths(ws, {"I": 14, "J": 12})
         first = 5
         for i, t in enumerate(p.itertuples(index=False), start=first):
             put(ws, f"A{i}", t.matricola, color=BLUE)
@@ -212,11 +291,14 @@ class Foglio:
             put(ws, f"F{i}", float(t.part_time), color=BLUE)
             put(ws, f"G{i}", float(t.superminimo), color=BLUE, fmt=NUM2)
             put(ws, f"H{i}", date.fromisoformat(t.data_assunzione), color=BLUE, fmt="DD/MM/YYYY")
+            put(ws, f"I{i}", R.centesimi(t.tabellare + t.scatti + t.superminimo), color=BLUE, fmt=NUM2)
+            put(ws, f"J{i}", float(t.permessi_residuo), color=BLUE, fmt=NUM4)
         last = first + RIGHE - 1                 # spazio per incollare più righe
         self.R.update({"ag_m": f"'Mese precedente'!$A${first}:$A${last}", "ag_n": f"'Mese precedente'!$C${first}:$C${last}",
                        "ag_f": f"'Mese precedente'!$D${first}:$D${last}",
                        **{k: f"'Mese precedente'!${c}${first}:${c}${last}" for k, c in
-                          (("ag_liv", "E"), ("ag_pt", "F"), ("ag_sup", "G"), ("ag_dat", "H"))}})
+                          (("ag_liv", "E"), ("ag_pt", "F"), ("ag_sup", "G"), ("ag_dat", "H"), ("ag_ret", "I"),
+                           ("ag_perm", "J"))}})
         ws.freeze_panes = "A5"
 
     # ---- The checks ------------------------------------------------------------------------------
@@ -239,7 +321,15 @@ class Foglio:
             "Data cessazione", "Tipo cessazione", "Giorni di preavviso", "Tredicesima pagata", "Quattordicesima pagata",
             "Ferie liquidate", "Retribuzione mensile", "Dodicesimi 13ª", "Dodicesimi 14ª", "Tredicesima attesa",
             "Quattordicesima attesa", "C12 Mensilità", "Ferie liquidate attese", "C13 Ferie", "Anni di servizio",
-            "Preavviso minimo", "C14 Preavviso"]
+            "Preavviso minimo", "C14 Preavviso",
+            "Malattia dal", "Malattia al", "Evento di malattia nell'anno", "Esente dai limiti di carenza",
+            "Indennità malattia INPS", "Carenza pagata", "Maternità dal", "Maternità al", "Indennità maternità INPS",
+            "Permessi maturati", "Permessi goduti", "Residuo permessi", "Fondo TFR al 31/12", "Quote TFR dell'anno",
+            "Imponibile dell'anno", "TFR liquidato",
+            "Retribuzione mese prima", "Retribuzione media giornaliera", "Giorni di carenza", "Giorni al 50%",
+            "Giorni al 66,66%", "Malattia attesa", "C15 Malattia", "Quota di carenza dovuta", "C16 Carenza",
+            "Maternità attesa", "C17 Maternità", "Residuo permessi mese prima", "Permessi maturati attesi",
+            "Residuo permessi atteso", "C18 Permessi", "Coefficiente ISTAT %", "TFR atteso", "C19 TFR"]
         header(ws, 4, heads, height=44)
         widths(ws, {**{col(k): 11 for k in range(1, len(heads) + 1)}, "C": 19, "G": 14})
         first = 5
@@ -271,6 +361,15 @@ class Foglio:
             for letter, name in (("BC", "tredicesima"), ("BD", "quattordicesima"), ("BE", "ferie_liquidate")):
                 if str(getattr(t, name)).strip():
                     put(ws, f"{letter}{i}", float(getattr(t, name)), color=BLUE, fmt=NUM2)
+            # assenze, permessi e TFR alla cessazione: dopo l'ultima colonna, vuoti se non c'è l'evento
+            for letter, name, kind in NUOVE:
+                v = str(getattr(t, name)).strip()
+                if v in ("", "nan"):
+                    continue
+                v = (date.fromisoformat(v) if kind == "data" else v.lower() == "true" if kind == "sì/no"
+                     else int(float(v)) if kind == "intero" else float(v))
+                put(ws, f"{letter}{i}", v, color=BLUE, fmt="DD/MM/YYYY" if kind == "data" else
+                    NUM4 if kind == "ore" else NUM2 if kind == "euro" else None)
         # le formule coprono RIGHE righe, così si possono incollare i cedolini di un cliente più grande;
         # le righe vuote restano vuote
         for i in range(first, last + 1):
@@ -281,7 +380,9 @@ class Foglio:
             put(ws, f"Y{i}", g(f"(YEAR({R_['mese']})*12+MONTH({R_['mese']}))-(YEAR(E{i})*12+MONTH(E{i}))"))
             put(ws, f"Z{i}", g(f"MIN({R_['scatti_max']},MAX(0,INT((Y{i}-1)/36)))"))
             put(ws, f"AA{i}", g(f'IFERROR(ROUND({lookup(R_["scatto"])}*Z{i}*F{i},2),"")'), fmt=NUM2)
-            put(ws, f"AB{i}", g(f"ROUND(ROUND(N{i},0)*{R_['aliquota']},2)"), fmt=NUM2)
+            aliq = f"INDEX({R_['cli_aliq']},MATCH(B{i},{R_['cli']},0))"
+            put(ws, f"AB{i}", g(f"ROUND(ROUND(N{i},0)*{aliq}+MAX(0,ROUND(N{i},0)-{R_['prima_fascia']})"
+                                f"*{R_['aggiuntiva']},2)"), fmt=NUM2)
             put(ws, f"AC{i}", g(f"ROUND((I{i}+K{i}+L{i})*{R_['mensilita']}/{R_['divisore_tfr']}/12,2)"), fmt=NUM2)
             put(ws, f"AD{i}", g(f'IFERROR(INDEX({R_["ag_f"]},MATCH(A{i},{R_["ag_m"]},0)),0)'), color=GREEN, fmt=NUM4)
             put(ws, f"AE{i}", g(f"ROUND(AD{i}+ROUND({R_['ferie']}/12,4)-V{i},4)"), fmt=NUM4)
@@ -308,7 +409,9 @@ class Foglio:
                       f"ABS({ag('ag_sup')}-L{i})>{tol},{ag('ag_dat')}<>E{i})")
             put(ws, f"AS{i}", g(f'IF(ISNA(MATCH(A{i},{R_["ag_m"]},0)),"OK",IF(AND(G{i}="",{cambio}),"ERRORE","OK"))'))
             put(ws, f"AT{i}", g(f'COUNTIF(AK{i}:AS{i},"ERRORE")+COUNTIF(AY{i},"ERRORE")+COUNTIF(BK{i},"ERRORE")'
-                                f'+COUNTIF(BM{i},"ERRORE")+COUNTIF(BP{i},"ERRORE")'), bold=True)
+                                f'+COUNTIF(BM{i},"ERRORE")+COUNTIF(BP{i},"ERRORE")+COUNTIF(CM{i},"ERRORE")'
+                                f'+COUNTIF(CO{i},"ERRORE")+COUNTIF(CQ{i},"ERRORE")+COUNTIF(CU{i},"ERRORE")'
+                                f'+COUNTIF(CX{i},"ERRORE")'), bold=True)
             # C11: dodicesimi dal 1° gennaio (13ª) e dal 1° luglio (14ª); il mese di assunzione conta se ha almeno
             # "giorni_mese" giorni di servizio
             mese, gm = R_["mese"], R_["giorni_mese"]
@@ -351,6 +454,53 @@ class Foglio:
                                 f'IFERROR(INDEX({R_["preavviso"]},MATCH(D{i}&"",{R_["lv"]},0),'
                                 f'IF(TRIM(BA{i})="licenziamento",3,0)+IF(BN{i}<5,1,IF(BN{i}<10,2,3))),""))'))
             put(ws, f"BP{i}", g(f'IF(OR(BO{i}="",BB{i}=""),"OK",IF(BB{i}<BO{i},"ERRORE","OK"))'))
+            # C15-C17: indennità INPS anticipate e carenza, sulla retribuzione del mese prima
+            fine_mese = f"EOMONTH({mese},0)"
+            put(ws, f"CG{i}", g(f'IFERROR(INDEX({R_["ag_ret"]},MATCH(A{i},{R_["ag_m"]},0)),"")'), color=GREEN, fmt=NUM2)
+            put(ws, f"CH{i}", g(f'IF(CG{i}="","",ROUND(CG{i}*{R_["mensilita"]}/12/{R_["divisore_rmgg"]},2))'), fmt=NUM2)
+
+            def giorni(da: str, a: str, i=i, fine_mese=fine_mese, mese=mese) -> str:
+                """Giorni dell'evento di malattia tra il giorno `da` e il giorno `a`, dentro il mese."""
+                return (f"MAX(0,MIN({a},BR{i},{fine_mese})-MAX({da},BQ{i},{mese})+1)")
+            k = lambda n, i=i: f"BQ{i}+{n}-1"          # il giorno n dell'evento
+            put(ws, f"CI{i}", g(f'IF(BQ{i}="","",{giorni(f"BQ{i}", k(R_["carenza"]))})'))
+            put(ws, f"CJ{i}", g(f'IF(BQ{i}="","",{giorni(k(R_["carenza"] + "+1"), k(R_["f1"]))})'))
+            put(ws, f"CK{i}", g(f'IF(BQ{i}="","",{giorni(k(R_["f1"] + "+1"), k(R_["f2"]))})'))
+            put(ws, f"CL{i}", g(f'IF(OR(BQ{i}="",CH{i}=""),"",IF(BQ{i}<{mese},"",'
+                                f'ROUND(CH{i}*{R_["p1"]}*CJ{i}+CH{i}*{R_["p2"]}*CK{i},2)))'), fmt=NUM2)
+            put(ws, f"CM{i}", g(f'IF(OR(CL{i}="",BU{i}=""),"OK",IF(ABS(BU{i}-CL{i})>{tol},"ERRORE","OK"))'))
+            esente = f'ISNUMBER(MATCH(LOWER(TRIM(BT{i}&"")),{{"true","vero","1","si","sì","yes","x"}},0))'
+            put(ws, f"CN{i}", g(f'IF(OR(BQ{i}="",BS{i}=""),"",IF({esente},1,'
+                                f'IF(AND(BS{i}>=1,BS{i}<=ROWS({R_["carenza_pct"]})),INDEX({R_["carenza_pct"]},BS{i}),0)))'),
+                fmt="0%")
+            put(ws, f"CO{i}", g(f'IF(OR(CN{i}="",N(CI{i})=0),"OK",IF(OR(AND(CN{i}=0,N(BV{i})>{tol}),'
+                                f'AND(CN{i}>0,N(BV{i})<={tol})),"ERRORE","OK"))'))
+            put(ws, f"CP{i}", g(f'IF(OR(BW{i}="",CH{i}="",BY{i}=""),"",IF(BW{i}<{mese},"",'
+                                f'ROUND(CH{i}*{R_["maternita"]}*MAX(0,MIN(BX{i},{fine_mese})-MAX(BW{i},{mese})+1),2)))'),
+                fmt=NUM2)
+            put(ws, f"CQ{i}", g(f'IF(OR(CP{i}="",BY{i}=""),"OK",IF(ABS(BY{i}-CP{i})>{tol},"ERRORE","OK"))'))
+            # C18: permessi maturati nel mese, con la regola dei nuovi assunti e il part-time
+            dip = f"INDEX({R_['cli_dip']},MATCH(B{i},{R_['cli']},0))"
+            anni = (f"(YEAR({fine_mese})-YEAR(E{i})-IF(OR(MONTH({fine_mese})<MONTH(E{i}),"
+                    f"AND(MONTH({fine_mese})=MONTH(E{i}),DAY({fine_mese})<DAY(E{i}))),1,0))")
+            quota = f"IF(E{i}>{R_['rol_data']},IF({anni}<2,0,IF({anni}<4,0.5,1)),1)"
+            put(ws, f"CR{i}", g(f'IFERROR(INDEX({R_["ag_perm"]},MATCH(A{i},{R_["ag_m"]},0)),0)'), color=GREEN, fmt=NUM4)
+            put(ws, f"CS{i}", g(f"IFERROR(ROUND((IF({dip}>{R_['rol_soglia']},{R_['rol_oltre']},{R_['rol15']})*{quota}"
+                                f"+{R_['exfest']})/12*F{i},4),\"\")"), fmt=NUM4)
+            put(ws, f"CT{i}", g(f'IF(CS{i}="","",ROUND(CR{i}+CS{i}-N(CA{i}),4))'), fmt=NUM4)
+            put(ws, f"CU{i}", g(f'IF(OR(CB{i}="",CT{i}=""),"OK",IF(ABS(CB{i}-CT{i})>{R_["tolleranza_ore"]},"ERRORE","OK"))'))
+            # C19: TFR alla cessazione, con il coefficiente ISTAT del mese (il mese conta dal 15)
+            mm = f"IF(DAY(AZ{i})>=15,MONTH(AZ{i}),MONTH(AZ{i})-1)"
+            foi = f"INDEX({R_['foi_val']},MATCH(DATE(YEAR(AZ{i}),{mm},1),{R_['foi_mese']},0))"
+            put(ws, f"CV{i}", g(f'IF(AZ{i}="","",IF({mm}=0,0,IFERROR(ROUND({R_["tfr_fisso"]}*{mm}/12+{R_["tfr_quota"]}'
+                                f'*(({foi}*{R_["foi_racc"]}/{R_["foi_dic"]}-1)*100),6),"")))'), fmt="0.000000")
+            riv = f"ROUND(CC{i}*CV{i}/100,2)"
+            put(ws, f"CW{i}", g(f'IF(OR(CV{i}="",CC{i}="",CD{i}="",CE{i}=""),"",ROUND(CC{i}+{riv}'
+                                f'-ROUND({riv}*{R_["imposta_tfr"]},2)+CD{i}-ROUND(CE{i}*{R_["contributo_tfr"]},2),2))'),
+                fmt=NUM2)
+            put(ws, f"CX{i}", g(f'IF(OR(CW{i}="",CF{i}=""),"OK",IF(ABS(CF{i}-CW{i})>{tol},"ERRORE","OK"))'))
+        prec_ret = {p.matricola: R.centesimi(p.tabellare + p.scatti + p.superminimo)
+                    for p in self.o["precedente"].itertuples(index=False)}
         for i, t in enumerate(m.itertuples(index=False), start=first):
             k = i - first
             if str(t.data_cessazione).strip():
@@ -368,24 +518,41 @@ class Foglio:
                 if t.tipo_cessazione in C.PREAVVISO:
                     self.check("Mese", f"{t.matricola} preavviso minimo", float(R.preavviso_minimo(
                         t.tipo_cessazione, str(t.livello), assunto, ces)), f"Mese!BO{i}")
+                self.check("Mese", f"{t.matricola} coefficiente ISTAT", R.coefficiente_tfr(ces), f"Mese!CV{i}")
+                self.check("Mese", f"{t.matricola} TFR atteso", R.tfr_liquidato(
+                    float(t.fondo_tfr_prec), float(t.tfr_quote_anno), float(t.imponibile_anno), ces), f"Mese!CW{i}")
+            base = prec_ret.get(t.matricola)
+            if str(t.malattia_dal).strip() and base is not None:
+                dal, al = date.fromisoformat(t.malattia_dal), date.fromisoformat(t.malattia_al)
+                self.check("Mese", f"{t.matricola} malattia attesa", R.indennita_malattia(base, dal, al, C.MESE),
+                           f"Mese!CL{i}")
+                self.check("Mese", f"{t.matricola} quota di carenza", R.carenza_percentuale(
+                    int(t.malattia_evento_n), str(t.malattia_esente).lower() == "true"), f"Mese!CN{i}")
+            if str(t.maternita_dal).strip() and base is not None:
+                self.check("Mese", f"{t.matricola} maternità attesa", R.indennita_maternita(
+                    base, date.fromisoformat(t.maternita_dal), date.fromisoformat(t.maternita_al), C.MESE),
+                    f"Mese!CP{i}")
             if k % 6 == 0:
                 for letter, name in (("X", "tabellare"), ("Z", "scatti_n"), ("AA", "scatti"), ("AB", "contributi_inps"),
                                      ("AC", "quota_tfr"), ("AE", "ferie_residuo"), ("AG", "netto"), ("AW", "ratei_13"),
-                                     ("AX", "ratei_14")):
+                                     ("AX", "ratei_14"), ("CS", "permessi_maturati"), ("CT", "permessi_residuo")):
                     self.check("Mese", f"{t.matricola} {name} atteso", a.loc[k, name], f"Mese!{letter}{i}")
         esito_rule(ws, f"AK{first}:AS{last}")
         esito_rule(ws, f"AY{first}:AY{last}")
-        for letter in ("BK", "BM", "BP"):
+        for letter in ("BK", "BM", "BP", "CM", "CO", "CQ", "CU", "CX"):
             esito_rule(ws, f"{letter}{first}:{letter}{last}")
         E = lambda letter: f"Mese!${letter}${first}:${letter}${last}"
         self.R.update({"s_cli": E("B"), "s_m": E("A"), "s_irpef": E("Q"), "s_inps": E("O"), "s_err": E("AT"),
                        **{f"s_{c}": E(letter) for c, letter in zip(
-                           ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C09", "C10", "C11", "C12", "C13", "C14"],
-                           ["AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AY", "BK", "BM", "BP"], strict=True)}})
+                           ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C09", "C10", "C11", "C12", "C13", "C14",
+                            "C15", "C16", "C17", "C18", "C19"],
+                           ["AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AY", "BK", "BM", "BP",
+                            "CM", "CO", "CQ", "CU", "CX"], strict=True)}})
         # each Python finding must be an ERRORE in the sheet, and every other row OK
         an = self.o["anomalie"]
         colonna = {"C01": "AK", "C02": "AL", "C03": "AM", "C04": "AN", "C05": "AO", "C06": "AP", "C07": "AQ", "C09": "AR",
-                   "C10": "AS", "C11": "AY", "C12": "BK", "C13": "BM", "C14": "BP"}
+                   "C10": "AS", "C11": "AY", "C12": "BK", "C13": "BM", "C14": "BP", "C15": "CM", "C16": "CO",
+                   "C17": "CQ", "C18": "CU", "C19": "CX"}
         trovate = set(zip(an["controllo"], an["matricola"], strict=True))
         for k, t in enumerate(m.itertuples(index=False)):
             for codice, letter in colonna.items():
@@ -393,7 +560,7 @@ class Foglio:
                     esito = "ERRORE" if (codice, t.matricola) in trovate else "OK"
                     self.check("Mese", f"{t.matricola} {codice}", esito, f"Mese!{letter}{first + k}")
         ws.freeze_panes = "D5"
-        ws.auto_filter.ref = f"A4:BP{last}"
+        ws.auto_filter.ref = f"A4:CX{last}"
 
     def f24(self, ws) -> None:
         R_, rec = self.R, self.o["riconciliazione_f24"]
@@ -531,13 +698,13 @@ class Foglio:
     def leggimi(self, ws, names) -> None:
         widths(ws, {"A": 3, "B": 22, "C": 100})
         put(ws, "B2", "Controlli cedolini", bold=True, size=18)
-        put(ws, "B3", "Quattordici controlli sui cedolini del mese, prima dell'invio al cliente: CCNL Terziario Confcommercio",
+        put(ws, "B3", "Diciannove controlli sui cedolini del mese, prima dell'invio al cliente: CCNL Terziario Confcommercio",
             color=MUTED, size=12)
         put(ws, "B5", "Come si usa", bold=True, size=11)
         for i, text in enumerate([
-            f"1. Imposta il mese nei Parametri. Incolla i cedolini del mese nel foglio Mese (colonne A-W, più i ratei di tredicesima e quattordicesima in AU-AV e le voci di chi cessa in AZ-BE, fino a {RIGHE} righe) e quelli del mese prima nel foglio Mese precedente.",
+            f"1. Imposta il mese nei Parametri. Incolla i cedolini del mese nel foglio Mese (colonne A-W, più i ratei di tredicesima e quattordicesima in AU-AV, le voci di chi cessa in AZ-BE e assenze, permessi e TFR liquidato in BQ-CF, fino a {RIGHE} righe) e quelli del mese prima nel foglio Mese precedente.",
             "2. Incolla gli importi delle deleghe F24 nel foglio F24 (colonne B ed E).",
-            "3. Controlla i parametri gialli nel foglio Parametri: l'aliquota INPS va presa dal cliente.",
+            "3. Controlla i parametri gialli nel foglio Parametri: la media dei dipendenti di ogni cliente nel semestre decide CIGS e FIS; la prima fascia pensionabile cambia ogni anno.",
             "4. Leggi il Riepilogo e filtra il foglio Mese sulla colonna Errori maggiore di zero.",
         ], start=6):
             put(ws, f"C{i}", text)
@@ -550,11 +717,11 @@ class Foglio:
         purpose = {
             "Riepilogo": "Errori per controllo e cliente; costo della tranche di novembre.",
             "Mese": "I cedolini del mese con valori attesi ed esiti, riga per riga.",
-            "Mese precedente": "Netto, residuo ferie e anagrafica del mese prima (C05, C07, C10).",
+            "Mese precedente": "Netto, residui di ferie e permessi, retribuzione e anagrafica del mese prima (C05, C07, C10, C15-C18).",
             "F24": "Deleghe contro somma dei cedolini, per cliente.",
             "Novembre 2026": "Aumento dei minimi dal 1° novembre per dipendente, con l'assorbimento del superminimo.",
             "CCNL": "Minimi e scatti del CCNL Terziario.",
-            "Parametri": "Aliquota, divisore TFR, ferie, soglie.",
+            "Parametri": "Aliquote INPS e posizioni dei clienti, divisori, ferie e permessi, malattia e maternità, indici ISTAT per il TFR, soglie.",
             "Codice fiscale": "Valori per il carattere di controllo.",
             "Riconciliazione": "Ogni formula confrontata con Python.",
         }
@@ -566,8 +733,9 @@ class Foglio:
         put(ws, f"B{r}", "Verifica", bold=True, size=11)
         put(ws, f"C{r}", f"={self.recon}", color=GREEN, bold=True)
         put(ws, f"B{r + 2}", "Dati", bold=True, size=11)
-        put(ws, f"C{r + 2}", "Sintetici: tre clienti e 122 dipendenti inventati, con errori inseriti apposta. I minimi "
-                             "del CCNL sono reali (fonti in docs/fonti.md). IRPEF non calcolata: serve solo a riconciliare l'F24.",
+        put(ws, f"C{r + 2}", f"Sintetici: tre clienti e {len(self.o['mese'])} dipendenti inventati, con errori inseriti apposta. "
+                             "Minimi, aliquote, tassi e indici sono reali (fonti in docs/fonti.md). IRPEF non calcolata: "
+                             "serve solo a riconciliare l'F24.",
             wrap=True)
         ws.row_dimensions[r + 2].height = 28
         put(ws, f"B{r + 3}", "Limiti", bold=True, size=11)

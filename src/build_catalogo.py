@@ -24,12 +24,15 @@ FOGLIO_COLONNE = {
     "C07": ("Mese", ["AH", "AI"], "AQ"), "C08": ("F24", ["C", "D", "F", "G"], "H"), "C09": ("Mese", ["AJ"], "AR"),
     "C10": ("Mese", [], "AS"), "C11": ("Mese", ["AW", "AX"], "AY"),
     "C12": ("Mese", ["BF", "BG", "BH", "BI", "BJ"], "BK"), "C13": ("Mese", ["BL"], "BM"),
-    "C14": ("Mese", ["BN", "BO"], "BP"),
+    "C14": ("Mese", ["BN", "BO"], "BP"), "C15": ("Mese", ["CG", "CH", "CI", "CJ", "CK", "CL"], "CM"),
+    "C16": ("Mese", ["CI", "CN"], "CO"), "C17": ("Mese", ["CH", "CP"], "CQ"), "C18": ("Mese", ["CR", "CS", "CT"], "CU"),
+    "C19": ("Mese", ["CV", "CW"], "CX"),
 }
 FONTI = {
-    "C01": ["F01", "F02"], "C02": ["F03", "S04"], "C03": ["F05", "F10"], "C04": ["F06", "S03"], "C05": ["F04"],
+    "C01": ["F01", "F02"], "C02": ["F03", "S04"], "C03": ["F05", "F10", "F14", "F15"], "C04": ["F06", "S03"], "C05": ["F04"],
     "C06": ["S01"], "C07": ["S02"], "C08": ["F09"], "C09": ["F08"], "C10": ["S06"], "C11": ["F11"],
-    "C12": ["F11"], "C13": ["F12", "F04"], "C14": ["F13"],
+    "C12": ["F11"], "C13": ["F12", "F04"], "C14": ["F13"], "C15": ["F16", "F17"], "C16": ["F16"],
+    "C17": ["F17", "F18"], "C18": ["F23", "S07"], "C19": ["F19", "F20", "F21", "F22"],
 }
 
 SCHEDE = {
@@ -52,11 +55,16 @@ SCHEDE = {
                    "Non considera anzianità convenzionali o periodi non utili alla maturazione."],
     },
     "C03": {
-        "regola": "Il contributo IVS a carico del dipendente è l'imponibile arrotondato all'euro per l'aliquota "
-                  "(9,19% se il cliente non ne indica un'altra), arrotondato al centesimo.",
-        "cause": ["Aliquota della posizione INPS sbagliata, per esempio 9,49% dove non c'è CIGS.",
+        "regola": "Il contributo a carico del dipendente è l'imponibile arrotondato all'euro per l'aliquota della "
+                  "posizione INPS del cliente: IVS 9,19%, più la CIGS (0,30%) se nel semestre la media supera 15 "
+                  "dipendenti, più un terzo del FIS (0,50% fino a 5 dipendenti, 0,80% oltre); più l'1% sulla parte "
+                  "oltre la prima fascia pensionabile mensilizzata (4.685 € nel 2026). Al centesimo.",
+        "cause": ["Posizione INPS impostata senza CIGS o FIS, o con la CIGS quando la media del semestre è sotto 15.",
+                  "Contributo aggiuntivo dell'1% dimenticato sulle retribuzioni alte.",
                   "Imponibile non arrotondato all'euro, o arrotondato due volte."],
-        "limiti": ["Un'aliquota per tutto il cliente: FIS, CIGS e il contributo aggiuntivo dell'1% non sono modellati.",
+        "limiti": ["La media del semestre va presa dalla posizione INPS del cliente: il controllo usa quella indicata.",
+                   "Non considera la riduzione del FIS per chi non ha chiesto integrazioni da 24 mesi, né fondi "
+                   "bilaterali diversi dal FIS.",
                    "L'imponibile è il lordo: voci escluse dall'imponibile non sono gestite."],
     },
     "C04": {
@@ -72,7 +80,7 @@ SCHEDE = {
                   "godute nel mese, a quattro decimali.",
         "cause": ["Maturazione del mese non registrata.",
                   "Ferie godute non scaricate dal residuo."],
-        "limiti": ["Ferie in giorni, non in ore; ROL ed ex festività non sono gestiti.",
+        "limiti": ["Ferie in giorni, non in ore; ROL ed ex festività sono in C18.",
                    "Per chi è assunto nel mese il residuo di partenza è zero."],
     },
     "C06": {
@@ -157,6 +165,63 @@ SCHEDE = {
                    "degli operatori di vendita.",
                    "Si applica solo a dimissioni e licenziamento: per giusta causa o altri tipi di cessazione il "
                    "preavviso non è dovuto e il controllo tace."],
+    },
+    "C15": {
+        "regola": "L'indennità di malattia anticipata per conto dell'INPS è il 50% della retribuzione media globale "
+                  "giornaliera per i giorni dal 4° al 20° dell'evento e il 66,66% dal 21° al 180°, domeniche comprese; "
+                  "la retribuzione media è quella del mese prima per 14/12, divisa per 30.",
+        "cause": ["Base giornaliera calcolata dividendo per 26 invece che per 30, o senza i ratei di tredicesima e "
+                  "quattordicesima.",
+                  "Giorni contati dall'inizio del mese invece che dall'inizio dell'evento.",
+                  "Carenza indennizzata dall'INPS, o 66,66% applicato prima del 21° giorno."],
+        "limiti": ["Controlla l'indennità INPS, non l'integrazione dell'azienda: il CCNL la fissa sulla retribuzione "
+                   "netta, che richiede il calcolo fiscale (D21).",
+                   "Gli eventi iniziati prima del mese non sono controllati: la base sarebbe un cedolino che il "
+                   "controllo non ha.",
+                   "Vale per gli impiegati del terziario; operai, pubblici esercizi e ricoveri hanno altre misure."],
+    },
+    "C16": {
+        "regola": "L'integrazione dei primi 3 giorni è dovuta per intero ai primi 2 eventi di malattia dell'anno, al "
+                  "66% al 3°, al 50% al 4°, e non più dal 5°; senza limiti per ricovero, prognosi iniziale di almeno "
+                  "12 giorni, terapie salvavita e malattie in gravidanza.",
+        "cause": ["Eventi dell'anno non contati: carenza pagata anche dal quinto.",
+                  "Esenzione non registrata, e carenza negata a chi ne ha diritto."],
+        "limiti": ["Controlla se la carenza è pagata quando serve, non l'importo: anche quello è sul netto.",
+                   "Il numero dell'evento e l'esenzione vengono dal cedolino: una ricaduta conta come lo stesso evento, "
+                   "e va registrata così."],
+    },
+    "C17": {
+        "regola": "L'indennità di maternità anticipata per conto dell'INPS è l'80% della retribuzione media globale "
+                  "giornaliera del mese prima dell'inizio del congedo, per ogni giorno del mese.",
+        "cause": ["Base senza i ratei di tredicesima e quattordicesima.",
+                  "Integrazione dell'azienda al 100% registrata come indennità INPS."],
+        "limiti": ["Controlla la quota INPS: l'integrazione al 100% del netto per i primi cinque mesi è dell'azienda.",
+                   "I congedi iniziati prima del mese non sono controllati, per la stessa ragione di C15."],
+    },
+    "C18": {
+        "regola": "Il residuo dei permessi è il residuo del mese prima più un dodicesimo delle ore annue, meno le "
+                  "ore godute: 72 ore di riduzione d'orario (56 fino a 15 dipendenti) e 32 di ex festività, in "
+                  "proporzione al part-time; per chi è entrato dopo il 1° marzo 2011 la riduzione d'orario spetta al "
+                  "50% dopo 2 anni e al 100% dopo 4.",
+        "cause": ["Riduzione d'orario maturata per intero da un neoassunto.",
+                  "Part-time che matura le ore di un tempo pieno.",
+                  "Soglia dei 15 dipendenti sbagliata nella configurazione del cliente."],
+        "limiti": ["Non riduce la maturazione per assenze non retribuite, né per le articolazioni d'orario che "
+                   "assorbono i permessi (39 o 38 ore settimanali).",
+                   "Gli anni di anzianità si contano all'ultimo giorno del mese (S07)."],
+    },
+    "C19": {
+        "regola": "Il TFR liquidato è il fondo al 31 dicembre, più la rivalutazione (1,5% annuo fisso per i mesi "
+                  "interi e il 75% dell'aumento dell'indice ISTAT FOI su dicembre; il mese conta se si esce dal 15) "
+                  "meno l'imposta sostitutiva del 17% sulla rivalutazione, più le quote dell'anno meno lo 0,50% "
+                  "dell'imponibile previdenziale.",
+        "cause": ["Coefficiente del mese di uscita usato per chi esce prima del 15.",
+                  "Imposta sostitutiva non tolta dalla rivalutazione.",
+                  "Contributo dello 0,50% non tolto dalle quote dell'anno."],
+        "limiti": ["Controlla il lordo: la tassazione separata e le quote versate a fondi pensione o al Fondo di "
+                   "Tesoreria dell'INPS restano fuori.",
+                   "Fondo al 31 dicembre, quote e imponibile dell'anno vengono dal cedolino, non sono ricalcolati.",
+                   "Serve l'indice FOI del mese nei Parametri: per i mesi che mancano il controllo tace."],
     },
 }
 

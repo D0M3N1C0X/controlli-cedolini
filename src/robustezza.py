@@ -72,7 +72,9 @@ def errore_coerente() -> dict:
     d = m.loc[i].copy()
     d["livello"] = "5"                         # assunto come 4° livello, inserito come 5°
     giusto = m.loc[i, "ferie_residuo"] + m.loc[i, "ferie_godute"] - m.loc[i, "ferie_maturate"]
-    r = genera.cedolino(d, C.MESE, random.Random(0), giusto, ferie_godute=m.loc[i, "ferie_godute"])
+    permessi = m.loc[i, "permessi_residuo"] + m.loc[i, "permessi_goduti"] - m.loc[i, "permessi_maturati"]
+    r = genera.cedolino(d, C.MESE, random.Random(0), giusto, ferie_godute=m.loc[i, "ferie_godute"],
+                        permessi_prec=permessi, permessi_goduti=m.loc[i, "permessi_goduti"])
     r["evento"] = ""
     x = m.copy()
     for k, v in r.items():
