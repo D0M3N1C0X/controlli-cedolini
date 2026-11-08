@@ -1,6 +1,6 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site-assets/cover-dark.png">
-  <img alt="Catch payroll errors before the client does: 35 of 35 planted errors found with no false alarms, 14 checks with their source in the agreement, three engines in agreement." src="site-assets/cover-light.png">
+  <img alt="Catch payroll errors before the client does: 44 of 44 planted errors found with no false alarms, 19 checks with their source in the agreement or INPS, three engines in agreement." src="site-assets/cover-light.png">
 </picture>
 
 <p align="center">
