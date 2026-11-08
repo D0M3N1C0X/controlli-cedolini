@@ -36,10 +36,15 @@ B076,B,preavviso,licenziamento con metà del preavviso minimo del CCNL
 B027,B,tfr_liquidato,rivalutazione liquidata senza togliere l'imposta sostitutiva del 17%
 B038,B,tfr_liquidato,"quote dell'anno senza togliere il contributo dello 0,50% dell'imponibile"
 B051,B,tfr_liquidato,uscita prima del 15 rivalutata con il coefficiente del mese di uscita invece che del mese prima
+B027,B,conguaglio,conguaglio con le detrazioni dell'anno intero invece che rapportate ai giorni di lavoro
+B038,B,conguaglio,conguaglio non fatto alla cessazione: ritenuta calcolata come in un mese qualsiasi
 B080,B,malattia,indennità INPS calcolata su 1/26 della retribuzione invece che × 14/12 / 30
 B026,B,carenza,"carenza pagata al quinto evento dell'anno, quando non è più dovuta"
 C095,C,maternita,indennità di maternità senza i ratei di tredicesima e quattordicesima nella base
 A017,A,permessi,"assunto da meno di 2 anni: la riduzione d'orario non spetta ancora, maturata per intero"
 C103,C,permessi,part-time che matura i permessi di un tempo pieno
 B191,B,inps,retribuzione oltre 4.685 €: contributo aggiuntivo dell'1% non trattenuto
+B041,B,irpef,ritenuta con lo scaglione del 35% del 2025 invece che del 33% del 2026
+C097,C,irpef,ulteriore detrazione del cuneo fiscale (1.000 € l'anno) non applicata
+B030,B,irpef,somma del cuneo fiscale non erogata a un reddito sotto i 20.000 €
 ,C,f24,"F24 con 212,40 € di ritenute in meno dei cedolini"

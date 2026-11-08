@@ -73,6 +73,16 @@ CONTROLLI_EN = {
             "accruals less 0.50%",
             "Redo the sum: ISTAT coefficient of the right month (from the 15th the month counts), 17% substitute tax "
             "on the revaluation, 0.50% off the year's accruals; settle the difference"),
+    "C20": ("Income tax of the month (IRPEF)",
+            "Tax withheld, tax-wedge payment or supplementary allowance different from the 2026 rules: annual "
+            "brackets scaled to the month, credits for a twelfth of the year's expected income",
+            "Check the payroll software's tax table (33% in the second bracket from 2026), the extra credit and the "
+            "tax-wedge payment, the supplementary allowance; redo the withholding and correct it next month"),
+    "C21": ("Income tax adjustment at leaving",
+            "The year's tax, with credits and supplementary allowance in proportion to the days worked, less what "
+            "was withheld or paid: the leaver's payslip carries a different difference",
+            "Redo the adjustment: the year's tax on taxable pay since January, credits and allowance for the days "
+            "worked, less what was already withheld or paid; hand the workings over with the CU"),
 }
 
 PRIORITA_EN = {"alta": "high", "media": "medium"}

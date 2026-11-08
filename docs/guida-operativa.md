@@ -47,7 +47,7 @@ mensilità aggiuntive e ferie non godute pagate: senza queste colonne, C12-C14 n
 uscita non quadra in C06, perché il lordo comprende importi che il file non riporta. Assenze, permessi e TFR
 liquidato sono colonne facoltative anche loro: malattia (date, numero dell'evento nell'anno, esenzione, indennità
 INPS, carenza pagata), maternità (date e indennità INPS), ore di permesso maturate, godute e residue, e per chi lascia
-fondo TFR al 31 dicembre, quote e imponibile dell'anno, TFR liquidato. Senza, C15-C19 non si applicano.
+fondo TFR al 31 dicembre, quote e imponibile dell'anno, TFR liquidato; per l'IRPEF somma del cuneo e trattamento integrativo, e all'uscita i dati del conguaglio. Senza, C15-C21 non si applicano.
 
 **Prima del primo mese, per ogni cliente:** la media dei dipendenti nel semestre di riferimento, dalla posizione
 INPS, e i dipendenti in forza. La prima decide CIGS e FIS (C03), i secondi le ore di riduzione d'orario (C18).

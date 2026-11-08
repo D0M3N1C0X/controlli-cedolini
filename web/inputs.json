@@ -96,6 +96,46 @@
   "colonna_minimo": "minimo_2025_11",
   "colonna_minimo_prossimo": "minimo_2026_11",
   "contributo_tfr": 0.005,
+  "cuneo_detrazione": {
+   "importo": 1000.0,
+   "soglie": [
+    20000.0,
+    32000.0,
+    40000.0
+   ]
+  },
+  "cuneo_somma_fasce": [
+   [
+    8500.0,
+    0.071
+   ],
+   [
+    15000.0,
+    0.053
+   ],
+   [
+    null,
+    0.048
+   ]
+  ],
+  "cuneo_somma_soglia": 20000.0,
+  "decimali_rapporto": 4,
+  "detrazione_lavoro": {
+   "base": 1955.0,
+   "bonus_65": 65.0,
+   "bonus_65_soglie": [
+    25000.0,
+    35000.0
+   ],
+   "fascia2": 1910.0,
+   "fascia2_extra": 1190.0,
+   "minimo": 690.0,
+   "soglie": [
+    15000.0,
+    28000.0,
+    50000.0
+   ]
+  },
   "dipendenti_default": 20,
   "divisore_giornaliero": 26,
   "divisore_rmgg": 30,
@@ -114,6 +154,7 @@
    "2026-09": 104.3
   },
   "foi_raccordo": 1.214,
+  "giorni_anno": 365,
   "giorni_mese_intero": 15,
   "imposta_tfr": 0.17,
   "maternita": 0.8,
@@ -229,6 +270,20 @@
   "rol_nuovi_assunti": "2011-03-01",
   "rol_oltre_15": 72,
   "rol_soglia": 15,
+  "scaglioni_irpef": [
+   [
+    28000.0,
+    0.23
+   ],
+   [
+    50000.0,
+    0.33
+   ],
+   [
+    null,
+    0.43
+   ]
+  ],
   "scatti_anni": 3,
   "scatti_max": 10,
   "soglia": 0.2,
@@ -236,6 +291,12 @@
   "tfr_quota": 0.75,
   "tolleranza": 0.01,
   "tolleranza_ferie": 0.01,
-  "tolleranza_ore": 0.01
+  "tolleranza_ore": 0.01,
+  "trattamento_integrativo": {
+   "importo": 1200.0,
+   "riduzione_capienza": 75.0,
+   "soglia": 15000.0,
+   "soglia_alta": 28000.0
+  }
  }
 }

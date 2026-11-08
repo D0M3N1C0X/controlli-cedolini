@@ -13,7 +13,7 @@ const UI = {
   it: {
     brand: "Controlli cedolini", eyebrow: "CCNL Terziario · prima dell'invio al cliente",
     title: "Controlla i cedolini del mese",
-    lead: "Carica l'export del tuo software paghe: diciannove controlli ricalcolano ogni voce dalle regole del contratto e ti dicono cosa correggere, prima che il cliente se ne accorga.",
+    lead: "Carica l'export del tuo software paghe: ventuno controlli ricalcolano ogni voce dalle regole del contratto e ti dicono cosa correggere, prima che il cliente se ne accorga.",
     privacy: "I tuoi file restano su questo computer: i controlli girano in questa pagina e niente viene inviato. Puoi verificarlo staccando la rete dopo che la pagina si è aperta.",
     step1: "I tuoi file", step1sub: "File Excel (.xlsx) o CSV, così come escono dal software paghe.",
     dropMese: "Cedolini del mese", dropMeseSub: "Obbligatorio · trascinalo qui o tocca per sceglierlo",
@@ -77,7 +77,7 @@ const UI = {
   en: {
     brand: "Payslip checks", eyebrow: "Italian CCNL Terziario · before payslips go to the client",
     title: "Check this month's payslips",
-    lead: "Load the export from your payroll software: nineteen checks recompute every item from the collective agreement's rules and tell you what to fix, before the client notices.",
+    lead: "Load the export from your payroll software: twenty-one checks recompute every item from the collective agreement's rules and tell you what to fix, before the client notices.",
     privacy: "Your files stay on this computer: the checks run in this page and nothing is sent. You can confirm it by going offline once the page has opened.",
     step1: "Your files", step1sub: "Excel (.xlsx) or CSV files, as they come out of the payroll software.",
     dropMese: "This month's payslips", dropMeseSub: "Required · drop it here or tap to choose it",

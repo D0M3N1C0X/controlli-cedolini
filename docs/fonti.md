@@ -2,7 +2,7 @@
 
 Ogni regola che i controlli applicano, da dove viene e quanto è stata verificata. Controllato il
 **6 ottobre 2026**, minimi e contributi ricontrollati sulle fonti primarie il **9 ottobre 2026**; le regole F14-F23
-lette il **6 novembre 2026**. Non è consulenza del lavoro.
+lette il **6 novembre 2026**, quelle fiscali F24-F29 l'**8 novembre 2026** su Normattiva, nel testo in vigore nel 2026. Non è consulenza del lavoro.
 
 **Stato**
 
@@ -38,6 +38,12 @@ lette il **6 novembre 2026**. Non è consulenza del lavoro.
 | F21 | Imposta sostitutiva del 17% sulla rivalutazione del fondo TFR | D.lgs. 33/2025, testo unico versamenti e riscossione; l'art. 11, c. 3, D.lgs. 47/2000 che la prevedeva risulta abrogato su [Normattiva](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2000-02-18;47~art11) | Fonti concordi · l'articolo del testo unico non è stato individuato |
 | F22 | Lo 0,50% della retribuzione imponibile, aggiunto ai contributi del datore di lavoro, si toglie dalla quota di TFR del periodo | [L. 297/1982, art. 3](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:1982-05-29;297~art3) | Primaria |
 | F23 | Permessi: riduzione d'orario di 56 ore l'anno, 72 nelle aziende con più di 15 dipendenti, in gruppi di 4 o 8 ore; per chi è iscritto al libro unico dopo il 1° marzo 2011, al 50% dopo 2 anni e al 100% dopo 4; ex festività: 4 giornate (32 ore), per dodicesimi. Il part-time è riproporzionato | Sintesi Filcams, "Riduzione annua" ed "Ex festività"; [D.lgs. 81/2015, art. 7, c. 2](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legislativo:2015-06-15;81~art7) | Primaria (parte firmataria, sintesi del 2011) · part-time: Primaria |
+| F24 | IRPEF 2026: 23% fino a 28.000 €, 33% da 28.000 a 50.000 €, 43% oltre; la ritenuta del periodo di paga ragguaglia gli scaglioni al periodo | [L. 207/2024, art. 1 c. 2](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:2024-12-30;207~art1) (nuovo art. 11 c. 1 TUIR); [L. 199/2025, art. 1 c. 3](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:2025-12-30;199~art1) (35% → 33%); [DPR 600/1973, art. 23 c. 2](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.del.presidente.della.repubblica:1973-09-29;600~art23) | Primaria |
+| F25 | Detrazione per lavoro dipendente: 1.955 € fino a 15.000 € (minimo effettivo 690 €), 1.910 € + 1.190 € × (28.000 − R) / 13.000 fino a 28.000 €, 1.910 € × (50.000 − R) / 22.000 fino a 50.000 €; + 65 € tra 25.000 e 35.000 €; rapporti a quattro decimali; rapportata al periodo di lavoro | [Art. 13 TUIR](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.del.presidente.della.repubblica:1986-12-22;917~art13), c. 1, 1.1 e 6, testo in vigore dal 1° gennaio 2025 al 31 dicembre 2026 | Primaria |
+| F26 | Cuneo fiscale: fino a 20.000 € di reddito una somma che non concorre al reddito, 7,1% / 5,3% / 4,8% del reddito di lavoro dipendente (fasce 8.500 e 15.000 €, sul reddito rapportato all'anno); tra 20.000 e 40.000 € un'ulteriore detrazione di 1.000 €, a scalare da 32.000 €, rapportata al periodo; il sostituto la riconosce in busta e la verifica al conguaglio | [L. 207/2024, art. 1 c. 4-7](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:legge:2024-12-30;207~art1), testo in vigore nel 2026 (il c. 6 è abrogato dal D.lgs. 117/2026 dal 2027) | Primaria |
+| F27 | Trattamento integrativo: 1.200 € l'anno fino a 15.000 € di reddito, se l'imposta lorda supera la detrazione dell'art. 13 diminuita di 75 € rapportati al periodo; tra 15.000 e 28.000 € la differenza tra detrazioni e imposta lorda, fino a 1.200 €; rapportato al periodo di lavoro | [D.L. 3/2020, art. 1](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.legge:2020-02-05;3~art1) c. 1-3; L. 207/2024, art. 1 c. 3 | Primaria |
+| F28 | Ritenuta del mese: detrazioni dell'art. 13 "rapportate al periodo stesso"; mensilità aggiuntive con gli scaglioni ragguagliati a mese | [DPR 600/1973, art. 23 c. 2](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.del.presidente.della.repubblica:1973-09-29;600~art23), lettere a) e b), testo in vigore fino al 31 dicembre 2026 | Primaria |
+| F29 | Conguaglio: alla cessazione, tra le ritenute operate e l'imposta dovuta sul complesso degli emolumenti, tenendo conto delle detrazioni spettanti | [DPR 600/1973, art. 23 c. 3](https://www.normattiva.it/uri-res/N2Ls?urn:nir:stato:decreto.del.presidente.della.repubblica:1973-09-29;600~art23) | Primaria |
 
 **Le sintesi Filcams sono del rinnovo 2011-2013.** F03, F04, F07, F11-F13, F16, F18 e F23 vengono dalla sintesi
 del CCNL 2011-2013 pubblicata dalla Filcams. La [circolare Confcommercio n. 16/2024](https://www.dottrinalavoro.it/wp-content/uploads/2024/04/Confcommercio-chiarimenti-operativi-Rinnovo-del-CCNL-e-Accordo-Integrativo-del-28-marzo-2024.pdf)
@@ -67,6 +73,10 @@ elenca gli articoli cambiati dal rinnovo del 2024 (artt. 4, 16, 16 bis, 23, 39, 
 | S05 | Arrotondamento al centesimo come ROUND di Excel, metà per eccesso | Python e foglio di calcolo devono dare lo stesso risultato |
 | S06 | C10 confronta livello, part-time, superminimo e data di assunzione con il mese prima; un cambio senza evento è una segnalazione | Un errore coerente spesso nasce da un cambio di anagrafica: il cedolino torna, ma il dato è cambiato senza motivo |
 | S07 | Gli anni per la regola dei permessi dei nuovi assunti (2 e 4) si contano all'ultimo giorno del mese | Il CCNL dice "decorsi 2 anni dall'assunzione" senza dire come si tratta il mese in cui scadono: il mese che li compie matura alla nuova misura |
+| S08 | Nella ritenuta del mese le detrazioni contano per un dodicesimo dell'importo annuo | La legge dice "rapportate al periodo" senza fissare il metodo: un dodicesimo per il mese e i giorni di lavoro su 365 al conguaglio è la prassi più diffusa; il conguaglio pareggia comunque i conti |
+| S09 | Il reddito dell'anno che decide detrazioni, cuneo e trattamento integrativo nel mese è l'imponibile del mese per le 14 mensilità | Il sostituto deve stimarlo; altri software usano il progressivo dell'anno. Con un'altra stima le ritenute dei mesi cambiano, il conguaglio no |
+| S10 | Il rapporto dell'ulteriore detrazione del cuneo (40.000 − R) / 8.000 si arrotonda a quattro decimali, come quelli dell'art. 13 | La L. 207/2024 non lo dice; la regola dell'art. 13 c. 6 è quella che i software già applicano alle detrazioni |
+| S11 | Nessuna detrazione per familiari, oneri o altri redditi dichiarati dal dipendente | I dati di esempio non li hanno; il cliente che li comunica cambia la ritenuta, e il controllo andrebbe esteso a quelle voci |
 
 ## Correzioni
 
@@ -78,6 +88,7 @@ elenca gli articoli cambiati dal rinnovo del 2024 (artt. 4, 16, 16 bis, 23, 39, 
 - **6 novembre 2026, fonti del CCNL.** Le sintesi Filcams usate per scatti, ratei, quota giornaliera e preavviso sono
   del rinnovo 2011-2013, non del CCNL vigente: segnalato sopra, con gli articoli che il rinnovo 2024 ha cambiato.
 - **6 novembre 2026, assenze, permessi e TFR.** Aggiunti C15-C19 (F16-F23), con cinque decisioni (D21-D25).
+- **8 novembre 2026, IRPEF.** Aggiunti C20 e C21 (F24-F29, S08-S11, D26-D27): scaglioni, detrazioni, cuneo fiscale e trattamento integrativo del 2026 letti su Normattiva nel testo in vigore nell'anno.
 
 - **23 ottobre 2026, revisione indipendente.** Una revisione a più mani ha trovato e fatto correggere:
   il foglio non contava C01, C02 e C14 se il livello era incollato come numero (ora lo cerca come testo e,

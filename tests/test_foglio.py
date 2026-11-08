@@ -58,9 +58,11 @@ def test_un_cedolino_incollato_viene_controllato(foglio, valori, tmp_path):
     import config as C
     import regole as R
     inps = R.contributi(1746.68, C.CLIENTI["B"]["media_semestre"])      # giusti: l'unico errore è il minimo
-    netto = R.centesimi(1746.68 - inps - 200.0 - 23.79)
+    imponibile = R.centesimi(1746.68 - inps)
+    irpef = R.irpef_mese(imponibile)["irpef"]                          # anche l'IRPEF giusta (C20)
+    netto = R.centesimi(1746.68 - inps - irpef - 23.79)
     riga = ["Z999", "B", "RSSMRA85T10A562S", "4", date(2024, 1, 15), 1.0, "", True,
-            1746.68, 0, 0.0, 0.0, 0.0, 1746.68, inps, R.centesimi(1746.68 - inps), 200.0, 23.79, netto, 150.95,
+            1746.68, 0, 0.0, 0.0, 0.0, 1746.68, inps, imponibile, irpef, 23.79, netto, 150.95,
             2.1667, 0.0, 2.1667]
     for j, v in enumerate(riga, start=1):
         ws.cell(row=r, column=j, value=v)
