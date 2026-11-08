@@ -97,9 +97,9 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add("**Strumenti:** Uno script Python, lo stesso controllo in un [foglio di calcolo](../deliverables/foglio_controllo_cedolini.xlsx) "
         "e uno [strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) dove i file restano sul computer")
     add("")
-    add("> Quattordici controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano "
-        "ogni voce dalle regole del contratto, o la confrontano con il mese prima e con l'F24: non serve sapere come "
-        "l'ha calcolata il software paghe. "
+    add("> Diciannove controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano "
+        "ogni voce dalle regole del contratto e dell'INPS, o la confrontano con il mese prima e con l'F24: "
+        "non serve sapere come l'ha calcolata il software paghe. "
         "Non è consulenza del lavoro.")
     add("")
     add("## In sintesi")
