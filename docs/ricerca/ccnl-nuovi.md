@@ -53,12 +53,48 @@ del 2025, salvo dove indicato.
   2026](https://www.fiom-cgil.it/net/industria-privata-e-installazione-impianti/trattativa-industria/ccnl-federmeccanica-assistal-ferie-e-par-dal-1-gennaio-2027-importanti-novita):
   dal 1° gennaio 2027 i giorni aggiuntivi diventano PAR a fruizione individuale (effetto del rinnovo 2025).
 
-Ancora da trovare: i minimi in vigore prima del 1° giugno 2026 (volantino Fiom "Incrementi salariali e nuovi minimi
-dal 1° giugno 2026"), per l'errore "minimo non aggiornato".
+**Seconda fonte, concorde:** [volantino Fiom del 15 giugno 2026](https://www.fiom-cgil.it/attachments/article/13017/26_06_15-ipca-fed.pdf)
+(parte sindacale firmataria): stessi minimi dal 1° giugno 2026, con gli aumenti (IPCA-NEI 1,9%, aumento CCNL 2,46%).
+I minimi in vigore prima (fino al 31 maggio 2026) sono minimo nuovo meno aumento, calcolati qui:
+
+| Livello | Aumento dal 1° giugno 2026 | Minimo fino al 31 maggio 2026 |
+|---|---:|---:|
+| D1 | 42,91 | 1742,03 |
+| D2 | 47,59 | 1931,78 |
+| C1 | 48,61 | 1973,51 |
+| C2 | 49,64 | 2015,24 |
+| C3 | 53,17 | 2158,26 |
+| B1 | 56,99 | 2313,34 |
+| B2 | 61,14 | 2481,84 |
+| B3 | 68,25 | 2770,74 |
+| A1 | 69,89 | 2837,12 |
 
 ## Turismo / pubblici esercizi (Fipe / Filcams, Fisascat, Uiltucs)
 
-Da cercare su fipe.it (il sito Filcams non risponde dall'ambiente).
+**Fonte:** [Tabelle retributive del rinnovo 2024](https://www.fipe.it/wp-content/uploads/2025/02/Tabelle-retributive-2024.pdf)
+(Fipe, parte datoriale firmataria; pagina [CCNL Fipe - il testo](https://www.fipe.it/2025/03/10/area-lavoro/ccnl-fipe-testo/ccnl-fipe-il-testo/)),
+lette l'8 novembre 2026. Primaria. Retribuzione mensile = contingenza + paga base, per i pubblici esercizi:
+
+| Livello | Contingenza | Paga base giu-25 | Totale giu-25 | Paga base giu-26 | Totale giu-26 | Totale giu-27 | Totale dic-27 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Qa | 542,70 | 1.854,49 | 2.397,19 | 1.920,26 | 2.462,96 | 2.512,30 | 2.578,07 |
+| Qb | 537,59 | 1.674,63 | 2.212,22 | 1.734,02 | 2.271,61 | 2.316,16 | 2.375,56 |
+| 1 | 536,71 | 1.517,16 | 2.053,87 | 1.570,97 | 2.107,68 | 2.148,04 | 2.201,85 |
+| 2 | 531,59 | 1.337,33 | 1.868,92 | 1.384,76 | 1.916,35 | 1.951,92 | 1.999,36 |
+| 3 | 528,26 | 1.228,88 | 1.757,14 | 1.272,47 | 1.800,73 | 1.833,42 | 1.877,00 |
+| 4 | 524,94 | 1.127,75 | 1.652,69 | 1.167,75 | 1.692,69 | 1.722,69 | 1.762,69 |
+| 5 | 522,37 | 1.021,49 | 1.543,86 | 1.057,72 | 1.580,09 | 1.607,26 | 1.643,50 |
+| 6s | 520,64 | 960,13 | 1.480,77 | 994,19 | 1.514,83 | 1.540,37 | 1.574,42 |
+| 6 | 520,51 | 937,80 | 1.458,31 | 971,06 | 1.491,57 | 1.516,52 | 1.549,78 |
+| 7 | 518,45 | 841,89 | 1.360,34 | 871,75 | 1.390,20 | 1.412,59 | 1.442,45 |
+
+(La stessa tabella ha anche i valori di giugno 2024 e una tabella a parte per la ristorazione collettiva, art. 1 c. 1
+par. II.)
+
+Ancora da trovare: scatti (gli [allegati](https://www.fipe.it/wp-content/uploads/2025/02/allegati-CCNL-2024.pdf)
+hanno solo la norma transitoria dell'allegato F; la tabella in vigore è nel testo, che Fipe pubblica come scansione:
+[rinnovo 2024](https://www.fipe.it/wp-content/uploads/2018/03/Rinnovo-Contratto-CCNL-2024.pdf)), mensilità,
+preavviso, malattia e integrazione, permessi.
 
 ## Logistica, trasporto merci e spedizione (Confetra e altre / Filt, Fit, Uiltrasporti)
 
