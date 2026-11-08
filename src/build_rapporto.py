@@ -39,6 +39,10 @@ COSA_FARE = {
            "festività, in proporzione al part-time e con la regola dei 2 e 4 anni per chi è entrato dopo marzo 2011",
     "C19": "Rifare il conteggio: coefficiente ISTAT del mese giusto (dal 15 in poi conta il mese), imposta "
            "sostitutiva del 17% sulla rivalutazione, 0,50% tolto dalle quote dell'anno; regolare la differenza",
+    "C20": "Controllare la tabella IRPEF del software (33% sul secondo scaglione dal 2026), l'ulteriore detrazione e "
+           "la somma del cuneo fiscale, il trattamento integrativo; rifare la ritenuta e correggere nel mese dopo",
+    "C21": "Rifare il conguaglio: imposta dell'anno sull'imponibile da gennaio, detrazioni e trattamento integrativo "
+           "rapportati ai giorni di lavoro, meno quanto trattenuto o erogato; consegnare il conteggio con la CU",
 }
 
 
@@ -97,7 +101,7 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add("**Strumenti:** Uno script Python, lo stesso controllo in un [foglio di calcolo](../deliverables/foglio_controllo_cedolini.xlsx) "
         "e uno [strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) dove i file restano sul computer")
     add("")
-    add("> Diciannove controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano "
+    add("> Ventuno controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano "
         "ogni voce dalle regole del contratto e dell'INPS, o la confrontano con il mese prima e con l'F24: "
         "non serve sapere come l'ha calcolata il software paghe. "
         "Non è consulenza del lavoro.")
@@ -208,12 +212,12 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
             "variazione": "variazioni del netto", "codice_fiscale": "codice fiscale", "anagrafica": "anagrafica",
             "ratei": "ratei", "tredicesima": "mensilità aggiuntive", "ferie_liquidate": "ferie non godute",
             "preavviso": "preavviso", "tfr_liquidato": "TFR liquidato", "malattia": "malattia", "carenza": "carenza",
-            "maternita": "maternità", "permessi": "permessi"}
-    uscita = {"tredicesima", "ferie_liquidate", "preavviso", "tfr_liquidato"}
+            "maternita": "maternità", "permessi": "permessi", "irpef": "IRPEF del mese", "conguaglio": "conguaglio"}
+    uscita = {"tredicesima", "ferie_liquidate", "preavviso", "tfr_liquidato", "conguaglio"}
     visti = ", ".join(nomi[t] for t in pt.loc[(pt["trovati_statistico"] > 0) & ~pt["tipo"].isin(uscita), "tipo"])
     add(f"*Il rilevatore confronta ogni cedolino con quelli dello stesso cliente, perché posizioni INPS diverse non "
         f"sono anomalie. Vede solo gli errori che spostano un rapporto ({visti}); minimi, scatti, ferie, codice "
-        f"fiscale, anagrafica, assenze e permessi richiedono di conoscere il contratto e le regole INPS, e lì non trova "
+        f"fiscale, anagrafica, IRPEF, assenze e permessi richiedono di conoscere il contratto e le regole INPS, e lì non trova "
         f"nulla. I cedolini di uscita li segnala "
         f"tutti, giusti o sbagliati, perché il netto salta rispetto al mese prima: così prende anche gli errori di "
         f"cessazione, ma i cedolini di uscita corretti diventano falsi allarmi. Su un dominio scritto in regole, le "

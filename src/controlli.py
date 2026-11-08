@@ -52,12 +52,19 @@ CONTROLLI = {
     "C19": ("TFR liquidato",
             "Alla cessazione, TFR diverso dal fondo rivalutato con l'indice ISTAT, al netto dell'imposta sostitutiva, "
             "più le quote dell'anno meno lo 0,50%", "alta"),
+    "C20": ("IRPEF del mese",
+            "Ritenuta, somma del cuneo fiscale o trattamento integrativo diversi da quelli delle regole 2026: "
+            "scaglioni ragguagliati al mese, detrazioni per un dodicesimo sul reddito presunto dell'anno", "alta"),
+    "C21": ("Conguaglio IRPEF alla cessazione",
+            "Imposta dell'anno, detrazioni e trattamento integrativo rapportati ai giorni di lavoro, meno quanto già "
+            "trattenuto o erogato: il cedolino di uscita porta una differenza diversa", "alta"),
 }
 TIPO_CONTROLLO = {"minimo": "C01", "scatto": "C02", "inps": "C03", "tfr": "C04", "ferie": "C05", "netto": "C06",
                   "variazione": "C07", "f24": "C08", "codice_fiscale": "C09",
                   "anagrafica": "C10", "ratei": "C11", "tredicesima": "C12", "ferie_liquidate": "C13",
                   "preavviso": "C14", "malattia": "C15", "carenza": "C16", "maternita": "C17", "permessi": "C18",
-                  "tfr_liquidato": "C19"}
+                  "tfr_liquidato": "C19", "irpef": "C20",
+                  "conguaglio": "C21"}
 
 CESSAZIONE = ["data_cessazione", "tipo_cessazione", "preavviso_giorni", "tredicesima", "quattordicesima",
               "ferie_liquidate"]
@@ -65,12 +72,17 @@ CESSAZIONE = ["data_cessazione", "tipo_cessazione", "preavviso_giorni", "tredice
 ASSENZE = ["malattia_dal", "malattia_al", "malattia_evento_n", "malattia_esente", "malattia_inps", "malattia_carenza",
            "maternita_dal", "maternita_al", "maternita_inps"]
 TFR_USCITA = ["fondo_tfr_prec", "tfr_quote_anno", "imponibile_anno", "tfr_liquidato"]
+# IRPEF: le somme del cuneo e il trattamento integrativo in ogni cedolino (0 se non spettano); alla cessazione
+# l'imponibile fiscale da gennaio, i giorni di lavoro e quanto già trattenuto o erogato nei mesi prima (F24-F29)
+FISCO = ["bonus_cuneo", "trattamento_integrativo"]
+CONGUAGLIO = ["imponibile_fiscale_anno", "giorni_lavoro_anno", "ritenute_anno_prec", "cuneo_anno_prec",
+              "ti_anno_prec"]
 PERMESSI = ["permessi_maturati", "permessi_goduti", "permessi_residuo"]
 
 
 def carica() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     ced = pd.read_csv(C.CEDOLINI, dtype={"livello": str, "evento": str,
-                                         **{c: str for c in CESSAZIONE + ASSENZE + TFR_USCITA}},
+                                         **{c: str for c in CESSAZIONE + ASSENZE + TFR_USCITA + CONGUAGLIO}},
                       keep_default_na=False)
     return (ced[ced["mese"] == C.MESE].reset_index(drop=True), ced[ced["mese"] == C.MESE_PRECEDENTE],
             pd.read_csv(C.F24))
@@ -94,7 +106,8 @@ def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
     extra = sum(pd.to_numeric(m[c], errors="coerce").fillna(0.0) if c in m else 0.0
                 for c in ("tredicesima", "quattordicesima", "ferie_liquidate"))
     a["lordo"] = (ordinaria + m["straordinari"] + extra).map(R.centesimi)
-    a["netto"] = (m["lordo"] - m["contributi_inps"] - m["irpef"] - m["altre_trattenute"]).map(R.centesimi)
+    somme = sum(m.get(c, 0.0) for c in FISCO)
+    a["netto"] = (m["lordo"] - m["contributi_inps"] - m["irpef"] - m["altre_trattenute"] + somme).map(R.centesimi)
     a["netto_prec"] = m["matricola"].map(prec.set_index("matricola")["netto"])
     a["variazione"] = m["netto"] / a["netto_prec"] - 1
     assunti = [date.fromisoformat(d) for d in m["data_assunzione"]]
@@ -156,6 +169,7 @@ def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.D
             if (r13, r14) != (e13, e14):
                 segnala(i, "C11", f"13ª {e13}; 14ª {e14}", f"13ª {r13}; 14ª {r14}")
         _cessazione(m.loc[i], segnala, i)
+        _fisco(m.loc[i], segnala, i)
         _assenze(m.loc[i], prev_by.get(m.loc[i, "matricola"]), segnala, i)
         if "permessi_residuo" in m and abs(m.loc[i, "permessi_residuo"]
                                            - a.loc[i, "permessi_residuo"]) > C.TOLLERANZA_ORE:
@@ -218,6 +232,24 @@ def _cessazione(r: pd.Series, segnala, i: int) -> None:
                                  float(r["imponibile_anno"]), ces)
         if atteso is not None and abs(float(r["tfr_liquidato"]) - atteso) > C.TOLLERANZA:
             segnala(i, "C19", atteso, float(r["tfr_liquidato"]))
+
+
+def _fisco(r: pd.Series, segnala, i: int) -> None:
+    """C20 sul cedolino di un mese qualsiasi, C21 su quello di uscita quando riporta i dati del conguaglio. Una sola
+    segnalazione per cedolino, sulla prima voce che non torna: ritenuta, poi cuneo, poi trattamento integrativo."""
+    if any(c not in r for c in FISCO):
+        return
+    trovato = {"irpef": float(r["irpef"]), **{c: float(r[c]) for c in FISCO}}
+    if _vuoto(r.get("data_cessazione")):
+        codice, atteso = "C20", R.irpef_mese(float(r["imponibile_irpef"]))
+    elif all(not _vuoto(r.get(c)) for c in CONGUAGLIO):
+        codice, atteso = "C21", R.conguaglio_cessazione(*(float(r[c]) for c in CONGUAGLIO))
+    else:
+        return
+    for voce in ("irpef", *FISCO):
+        if abs(trovato[voce] - atteso[voce]) > C.TOLLERANZA:
+            segnala(i, codice, atteso[voce], trovato[voce])
+            return
 
 
 def _si(v) -> bool:

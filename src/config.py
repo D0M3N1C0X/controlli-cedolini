@@ -98,3 +98,25 @@ PREAVVISO = {
     "licenziamento": {"Quadri": (60, 90, 120), "1": (60, 90, 120), "2": (30, 45, 60), "3": (30, 45, 60),
                       "4": (20, 30, 45), "5": (20, 30, 45), "6": (15, 20, 20), "7": (15, 20, 20)},
 }
+
+# ---- IRPEF 2026 (F24-F29) --------------------------------------------------------------------------------------
+# Scaglioni dell'art. 11 TUIR come sostituito dalla L. 207/2024 (art. 1 c. 2), con il 33% della L. 199/2025
+# (art. 1 c. 3) al posto del 35% dal 2026. Limite superiore e aliquota; l'ultimo non ha limite.
+SCAGLIONI_IRPEF = ((28000.0, 0.23), (50000.0, 0.33), (None, 0.43))
+SCAGLIONI_IRPEF_2025 = ((28000.0, 0.23), (50000.0, 0.35), (None, 0.43))   # solo per gli errori inseriti
+# Detrazione per lavoro dipendente, art. 13 c. 1 e 1.1 TUIR (testo in vigore nel 2026).
+DETRAZIONE_LAVORO = {"base": 1955.0, "minimo": 690.0, "fascia2": 1910.0, "fascia2_extra": 1190.0,
+                     "soglie": (15000.0, 28000.0, 50000.0), "bonus_65": 65.0, "bonus_65_soglie": (25000.0, 35000.0)}
+DECIMALI_RAPPORTO = 4            # art. 13 c. 6: i rapporti si assumono nelle prime quattro cifre decimali
+# Cuneo fiscale, L. 207/2024 art. 1: somma non imponibile fino a 20.000 € di reddito (c. 4-5) e ulteriore
+# detrazione tra 20.000 e 40.000 € (c. 6), nel testo in vigore nel 2026.
+CUNEO_SOMMA_SOGLIA = 20000.0
+CUNEO_SOMMA_FASCE = ((8500.0, 0.071), (15000.0, 0.053), (None, 0.048))
+CUNEO_DETRAZIONE = {"importo": 1000.0, "soglie": (20000.0, 32000.0, 40000.0)}
+# Trattamento integrativo, D.L. 3/2020 art. 1: 1.200 € l'anno, rapportato al periodo di lavoro; la capienza si
+# misura con la detrazione dell'art. 13 diminuita di 75 € rapportati al periodo (L. 207/2024 art. 1 c. 3).
+TRATTAMENTO_INTEGRATIVO = {"importo": 1200.0, "soglia": 15000.0, "soglia_alta": 28000.0, "riduzione_capienza": 75.0}
+# Ritenuta del mese (art. 23 c. 2 DPR 600/1973): scaglioni ragguagliati al mese, detrazioni rapportate al mese
+# (un dodicesimo, S08); il reddito dell'anno che decide detrazioni e cuneo è presunto: imponibile del mese per le
+# mensilità dell'anno (S09). Conguaglio alla cessazione (art. 23 c. 3): detrazioni rapportate ai giorni.
+GIORNI_ANNO = 365

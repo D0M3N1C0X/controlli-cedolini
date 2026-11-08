@@ -71,7 +71,14 @@ errori elencati in `errori_inseriti.csv`.
 | `lordo` | euro | Totale delle voci di retribuzione |
 | `contributi_inps` | euro | Contributi a carico del dipendente: IVS, CIGS, quota FIS e l'1% sopra la prima fascia |
 | `imponibile_irpef` | euro | Lordo meno contributi |
-| `irpef` | euro | Ritenuta IRPEF **sintetica**: verosimile ma non calcolata con le regole fiscali, serve solo a riconciliare l'F24 |
+| `irpef` | euro | Ritenuta IRPEF del mese (C20); nel cedolino di uscita, il conguaglio (C21): negativa se è un rimborso |
+| `bonus_cuneo` | euro | Somma del cuneo fiscale erogata nel mese (L. 207/2024, art. 1 c. 4): non concorre al reddito; nel cedolino di uscita, la differenza di conguaglio |
+| `trattamento_integrativo` | euro | Trattamento integrativo del mese (D.L. 3/2020); all'uscita, la differenza di conguaglio |
+| `imponibile_fiscale_anno` | euro | Solo all'uscita: imponibile fiscale da gennaio, mese di uscita compreso |
+| `giorni_lavoro_anno` | giorni | Solo all'uscita: giorni dal 1° gennaio (o dall'assunzione) all'uscita |
+| `ritenute_anno_prec` | euro | Solo all'uscita: IRPEF trattenuta nei mesi prima |
+| `cuneo_anno_prec` | euro | Solo all'uscita: somma del cuneo fiscale erogata nei mesi prima |
+| `ti_anno_prec` | euro | Solo all'uscita: trattamento integrativo erogato nei mesi prima |
 | `altre_trattenute` | euro | Trattenute sintetiche (1,5% dell'imponibile), al posto di addizionali e altre voci |
 | `netto` | euro | Imponibile meno IRPEF e altre trattenute |
 | `quota_tfr` | euro | Quota di TFR maturata nel mese |
@@ -153,3 +160,5 @@ Servono a misurare i controlli: ogni errore deve essere trovato, e nient'altro d
 | `maternita` | C17 | Indennità di maternità senza i ratei nella base |
 | `permessi` | C18 | Permessi maturati come un tempo pieno con anzianità |
 | `tfr_liquidato` | C19 | TFR liquidato con il coefficiente, l'imposta o il contributo sbagliati |
+| `irpef` | C20 | Ritenuta con la tabella del 2025, ulteriore detrazione del cuneo non applicata, somma del cuneo non erogata |
+| `conguaglio` | C21 | Conguaglio alla cessazione con le detrazioni dell'anno intero, o non fatto |

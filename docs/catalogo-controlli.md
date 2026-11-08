@@ -23,6 +23,8 @@ Una scheda per controllo: cosa controlla, da quale regola, dove sta nel foglio, 
 | [C17 · Indennità di maternità INPS](#c17--indennità-di-maternità-inps) | alta | Indennità anticipata diversa dall'80% della retribuzione media giornaliera del mese prima |
 | [C18 · Permessi ROL ed ex festività](#c18--permessi-rol-ed-ex-festività) | media | Residuo ore diverso da residuo del mese prima + maturate - godute, con la maturazione del CCNL |
 | [C19 · TFR liquidato](#c19--tfr-liquidato) | alta | Alla cessazione, TFR diverso dal fondo rivalutato con l'indice ISTAT, al netto dell'imposta sostitutiva, più le quote dell'anno meno lo 0,50% |
+| [C20 · IRPEF del mese](#c20--irpef-del-mese) | alta | Ritenuta, somma del cuneo fiscale o trattamento integrativo diversi da quelli delle regole 2026: scaglioni ragguagliati al mese, detrazioni per un dodicesimo sul reddito presunto dell'anno |
+| [C21 · Conguaglio IRPEF alla cessazione](#c21--conguaglio-irpef-alla-cessazione) | alta | Imposta dell'anno, detrazioni e trattamento integrativo rapportati ai giorni di lavoro, meno quanto già trattenuto o erogato: il cedolino di uscita porta una differenza diversa |
 
 ## C01 · Minimo tabellare
 
@@ -104,7 +106,7 @@ AL  C02 Scatti
 
 ```
 AB  Contributi attesi
-    =IF($A5="","",ROUND(ROUND(N5,0)*INDEX(Parametri!$E$46:$E$58,MATCH(B5,Parametri!$B$46:$B$58,0))+MAX(0,ROUND(N5,0)-Parametri!$C$14)*Parametri!$C$13,2))
+    =IF($A5="","",ROUND(ROUND(N5,0)*INDEX(Parametri!$E$77:$E$89,MATCH(B5,Parametri!$B$77:$B$89,0))+MAX(0,ROUND(N5,0)-Parametri!$C$14)*Parametri!$C$13,2))
 AM  C03 INPS
     =IF($A5="","",IF(ABS(O5-AB5)>Parametri!$C$19,"ERRORE","OK"))
 ```
@@ -193,7 +195,7 @@ AO  C05 Ferie
 
 **Priorità alta.** Lordo diverso dalla somma delle voci, o netto diverso da lordo meno trattenute.
 
-**La regola.** Il lordo è la somma di tabellare, scatti, superminimo e straordinari; il netto è il lordo meno contributi, IRPEF e altre trattenute.
+**La regola.** Il lordo è la somma di tabellare, scatti, superminimo e straordinari; il netto è il lordo meno contributi, IRPEF e altre trattenute, più la somma del cuneo fiscale e il trattamento integrativo.
 
 **Fonti.** [S01](fonti.md).
 
@@ -203,12 +205,12 @@ AO  C05 Ferie
 AF  Lordo atteso
     =IF($A5="","",ROUND(I5+K5+L5+M5+N(BC5)+N(BD5)+N(BE5),2))
 AG  Netto atteso
-    =IF($A5="","",ROUND(N5-O5-Q5-R5,2))
+    =IF($A5="","",ROUND(N5-O5-Q5-R5+N(CY5)+N(CZ5),2))
 AP  C06 Quadratura
     =IF($A5="","",IF(OR(ABS(N5-AF5)>Parametri!$C$19,ABS(S5-AG5)>Parametri!$C$19),"ERRORE","OK"))
 ```
 
-**Un esempio dal mese di settembre 2026.** Dipendente A005, cliente A: atteso 1.203,07 €, sul cedolino 1.240,57 €, differenza 37,50 €.
+**Un esempio dal mese di settembre 2026.** Dipendente A005, cliente A: atteso 1.336,88 €, sul cedolino 1.374,38 €, differenza 37,50 €.
 
 **Cause tipiche.**
 
@@ -220,7 +222,7 @@ AP  C06 Quadratura
 **Limiti.**
 
 - Una sola segnalazione per cedolino: se il lordo non torna, il netto non si controlla (D5).
-- Non ricalcola l'IRPEF: ne controlla solo l'effetto sul netto.
+- L'IRPEF la ricalcola C20 (C21 all'uscita): qui conta solo che il netto torni con le voci del cedolino.
 
 ## C07 · Variazione del netto
 
@@ -241,7 +243,7 @@ AQ  C07 Variazione
     =IF($A5="","",IF(AI5="","OK",IF(AND(ABS(AI5)>Parametri!$C$18,G5=""),"ERRORE","OK")))
 ```
 
-**Un esempio dal mese di settembre 2026.** Dipendente A008, cliente A: netto di agosto 1.510,13 €, di settembre 2.080,50 € (+38%), nessun evento sul cedolino.
+**Un esempio dal mese di settembre 2026.** Dipendente A008, cliente A: netto di agosto 1.637,54 €, di settembre 2.095,61 € (+28%), nessun evento sul cedolino.
 
 **Cause tipiche.**
 
@@ -278,7 +280,7 @@ H  C08 Esito
     =IF(OR(ABS(D5)>Parametri!$C$19,ABS(G5)>Parametri!$C$19),"ERRORE","OK")
 ```
 
-**Un esempio dal mese di settembre 2026.** Cliente C: somma dei cedolini 6.032,89 €, nell'F24 5.820,49 €, differenza −212,40 €.
+**Un esempio dal mese di settembre 2026.** Cliente C: somma dei cedolini 3.608,60 €, nell'F24 3.396,20 €, differenza −212,40 €.
 
 **Cause tipiche.**
 
@@ -549,7 +551,7 @@ CM  C15 Malattia
 CI  Giorni di carenza
     =IF($A5="","",IF(BQ5="","",MAX(0,MIN(BQ5+Parametri!$C$25-1,BR5,EOMONTH(Parametri!$C$5,0))-MAX(BQ5,BQ5,Parametri!$C$5)+1)))
 CN  Quota di carenza dovuta
-    =IF($A5="","",IF(OR(BQ5="",BS5=""),"",IF(ISNUMBER(MATCH(LOWER(TRIM(BT5&"")),{"true","vero","1","si","sì","yes","x"},0)),1,IF(AND(BS5>=1,BS5<=ROWS(Parametri!$C$77:$C$80)),INDEX(Parametri!$C$77:$C$80,BS5),0))))
+    =IF($A5="","",IF(OR(BQ5="",BS5=""),"",IF(ISNUMBER(MATCH(LOWER(TRIM(BT5&"")),{"true","vero","1","si","sì","yes","x"},0)),1,IF(AND(BS5>=1,BS5<=ROWS(Parametri!$C$108:$C$111)),INDEX(Parametri!$C$108:$C$111,BS5),0))))
 CO  C16 Carenza
     =IF($A5="","",IF(OR(CN5="",N(CI5)=0),"OK",IF(OR(AND(CN5=0,N(BV5)>Parametri!$C$19),AND(CN5>0,N(BV5)<=Parametri!$C$19)),"ERRORE","OK")))
 ```
@@ -615,7 +617,7 @@ CQ  C17 Maternità
 CR  Residuo permessi mese prima
     =IF($A5="","",IFERROR(INDEX('Mese precedente'!$J$5:$J$254,MATCH(A5,'Mese precedente'!$A$5:$A$254,0)),0))
 CS  Permessi maturati attesi
-    =IF($A5="","",IFERROR(ROUND((IF(INDEX(Parametri!$D$46:$D$58,MATCH(B5,Parametri!$B$46:$B$58,0))>Parametri!$C$33,Parametri!$C$32,Parametri!$C$31)*IF(E5>Parametri!$C$35,IF((YEAR(EOMONTH(Parametri!$C$5,0))-YEAR(E5)-IF(OR(MONTH(EOMONTH(Parametri!$C$5,0))<MONTH(E5),AND(MONTH(EOMONTH(Parametri!$C$5,0))=MONTH(E5),DAY(EOMONTH(Parametri!$C$5,0))<DAY(E5))),1,0))<2,0,IF((YEAR(EOMONTH(Parametri!$C$5,0))-YEAR(E5)-IF(OR(MONTH(EOMONTH(Parametri!$C$5,0))<MONTH(E5),AND(MONTH(EOMONTH(Parametri!$C$5,0))=MONTH(E5),DAY(EOMONTH(Parametri!$C$5,0))<DAY(E5))),1,0))<4,0.5,1)),1)+Parametri!$C$34)/12*F5,4),""))
+    =IF($A5="","",IFERROR(ROUND((IF(INDEX(Parametri!$D$77:$D$89,MATCH(B5,Parametri!$B$77:$B$89,0))>Parametri!$C$33,Parametri!$C$32,Parametri!$C$31)*IF(E5>Parametri!$C$35,IF((YEAR(EOMONTH(Parametri!$C$5,0))-YEAR(E5)-IF(OR(MONTH(EOMONTH(Parametri!$C$5,0))<MONTH(E5),AND(MONTH(EOMONTH(Parametri!$C$5,0))=MONTH(E5),DAY(EOMONTH(Parametri!$C$5,0))<DAY(E5))),1,0))<2,0,IF((YEAR(EOMONTH(Parametri!$C$5,0))-YEAR(E5)-IF(OR(MONTH(EOMONTH(Parametri!$C$5,0))<MONTH(E5),AND(MONTH(EOMONTH(Parametri!$C$5,0))=MONTH(E5),DAY(EOMONTH(Parametri!$C$5,0))<DAY(E5))),1,0))<4,0.5,1)),1)+Parametri!$C$34)/12*F5,4),""))
 CT  Residuo permessi atteso
     =IF($A5="","",IF(CS5="","",ROUND(CR5+CS5-N(CA5),4)))
 CU  C18 Permessi
@@ -649,7 +651,7 @@ CU  C18 Permessi
 
 ```
 CV  Coefficiente ISTAT %
-    =IF($A5="","",IF(AZ5="","",IF(IF(DAY(AZ5)>=15,MONTH(AZ5),MONTH(AZ5)-1)=0,0,IFERROR(ROUND(Parametri!$C$37*IF(DAY(AZ5)>=15,MONTH(AZ5),MONTH(AZ5)-1)/12+Parametri!$C$38*((INDEX(Parametri!$C$62:$C$73,MATCH(DATE(YEAR(AZ5),IF(DAY(AZ5)>=15,MONTH(AZ5),MONTH(AZ5)-1),1),Parametri!$B$62:$B$73,0))*Parametri!$C$40/Parametri!$C$39-1)*100),6),""))))
+    =IF($A5="","",IF(AZ5="","",IF(IF(DAY(AZ5)>=15,MONTH(AZ5),MONTH(AZ5)-1)=0,0,IFERROR(ROUND(Parametri!$C$37*IF(DAY(AZ5)>=15,MONTH(AZ5),MONTH(AZ5)-1)/12+Parametri!$C$38*((INDEX(Parametri!$C$93:$C$104,MATCH(DATE(YEAR(AZ5),IF(DAY(AZ5)>=15,MONTH(AZ5),MONTH(AZ5)-1),1),Parametri!$B$93:$B$104,0))*Parametri!$C$40/Parametri!$C$39-1)*100),6),""))))
 CW  TFR atteso
     =IF($A5="","",IF(OR(CV5="",CC5="",CD5="",CE5=""),"",ROUND(CC5+ROUND(CC5*CV5/100,2)-ROUND(ROUND(CC5*CV5/100,2)*Parametri!$C$41,2)+CD5-ROUND(CE5*Parametri!$C$42,2),2)))
 CX  C19 TFR
@@ -671,3 +673,88 @@ CX  C19 TFR
 - Controlla il lordo: la tassazione separata e le quote versate a fondi pensione o al Fondo di Tesoreria dell'INPS restano fuori.
 - Fondo al 31 dicembre, quote e imponibile dell'anno vengono dal cedolino, non sono ricalcolati.
 - Serve l'indice FOI del mese nei Parametri: per i mesi che mancano il controllo tace.
+
+## C20 · IRPEF del mese
+
+**Priorità alta.** Ritenuta, somma del cuneo fiscale o trattamento integrativo diversi da quelli delle regole 2026: scaglioni ragguagliati al mese, detrazioni per un dodicesimo sul reddito presunto dell'anno.
+
+**La regola.** La ritenuta del mese applica all'imponibile fiscale gli scaglioni del 2026 (23%, 33%, 43%) ragguagliati al mese, e toglie un dodicesimo della detrazione per lavoro dipendente e dell'ulteriore detrazione del cuneo fiscale, calcolate sul reddito presunto dell'anno (imponibile del mese per 14 mensilità). Fino a 20.000 € di reddito spetta la somma del cuneo (7,1%, 5,3% o 4,8% dell'imponibile del mese), fino a 15.000 € un dodicesimo del trattamento integrativo.
+
+**Fonti.** [F24](fonti.md), [F25](fonti.md), [F26](fonti.md), [F27](fonti.md), [F28](fonti.md), [S08](fonti.md), [S09](fonti.md), [S10](fonti.md), [S11](fonti.md).
+
+**Nel foglio** (foglio Mese, riga 5; le altre righe sono uguali):
+
+```
+DF  Reddito presunto dell'anno
+    =IF($A5="","",P5*Parametri!$C$16)
+DG  IRPEF attesa
+    =IF($A5="","",ROUND(MAX(0,(MAX(0,MIN(P5,Parametri!$C$43/12))*Parametri!$C$44+MAX(0,MIN(P5,Parametri!$C$45/12)-Parametri!$C$43/12)*Parametri!$C$46+MAX(0,P5-Parametri!$C$45/12)*Parametri!$C$47)-(IF(DF5<=Parametri!$C$52,Parametri!$C$48,IF(DF5<=Parametri!$C$53,Parametri!$C$50+Parametri!$C$51*ROUND((Parametri!$C$53-DF5)/(Parametri!$C$53-Parametri!$C$52),Parametri!$C$58),IF(DF5<=Parametri!$C$54,Parametri!$C$50*ROUND((Parametri!$C$54-DF5)/(Parametri!$C$54-Parametri!$C$53),Parametri!$C$58),0)))+IF(AND(DF5>Parametri!$C$56,DF5<=Parametri!$C$57),Parametri!$C$55,0))/12-IF(AND(DF5>Parametri!$C$66,DF5<=Parametri!$C$67),Parametri!$C$65,IF(AND(DF5>Parametri!$C$67,DF5<=Parametri!$C$68),Parametri!$C$65*ROUND((Parametri!$C$68-DF5)/(Parametri!$C$68-Parametri!$C$67),Parametri!$C$58),0))/12),2))
+DH  Cuneo atteso
+    =IF($A5="","",IF(DF5<=Parametri!$C$59,ROUND(P5*IF(DF5<=Parametri!$C$60,Parametri!$C$61,IF(DF5<=Parametri!$C$62,Parametri!$C$63,Parametri!$C$64)),2),0))
+DI  Tratt. integrativo atteso
+    =IF($A5="","",ROUND(IF(DF5<=Parametri!$C$70,IF((MAX(0,MIN(DF5,Parametri!$C$43))*Parametri!$C$44+MAX(0,MIN(DF5,Parametri!$C$45)-Parametri!$C$43)*Parametri!$C$46+MAX(0,DF5-Parametri!$C$45)*Parametri!$C$47)>(IF(DF5<=Parametri!$C$52,Parametri!$C$48,IF(DF5<=Parametri!$C$53,Parametri!$C$50+Parametri!$C$51*ROUND((Parametri!$C$53-DF5)/(Parametri!$C$53-Parametri!$C$52),Parametri!$C$58),IF(DF5<=Parametri!$C$54,Parametri!$C$50*ROUND((Parametri!$C$54-DF5)/(Parametri!$C$54-Parametri!$C$53),Parametri!$C$58),0)))+IF(AND(DF5>Parametri!$C$56,DF5<=Parametri!$C$57),Parametri!$C$55,0))-Parametri!$C$72*1,Parametri!$C$69*1,0),IF(AND(DF5<=Parametri!$C$71,(IF(DF5<=Parametri!$C$52,Parametri!$C$48,IF(DF5<=Parametri!$C$53,Parametri!$C$50+Parametri!$C$51*ROUND((Parametri!$C$53-DF5)/(Parametri!$C$53-Parametri!$C$52),Parametri!$C$58),IF(DF5<=Parametri!$C$54,Parametri!$C$50*ROUND((Parametri!$C$54-DF5)/(Parametri!$C$54-Parametri!$C$53),Parametri!$C$58),0)))+IF(AND(DF5>Parametri!$C$56,DF5<=Parametri!$C$57),Parametri!$C$55,0))>(MAX(0,MIN(DF5,Parametri!$C$43))*Parametri!$C$44+MAX(0,MIN(DF5,Parametri!$C$45)-Parametri!$C$43)*Parametri!$C$46+MAX(0,DF5-Parametri!$C$45)*Parametri!$C$47)),MIN(Parametri!$C$69*1,(IF(DF5<=Parametri!$C$52,Parametri!$C$48,IF(DF5<=Parametri!$C$53,Parametri!$C$50+Parametri!$C$51*ROUND((Parametri!$C$53-DF5)/(Parametri!$C$53-Parametri!$C$52),Parametri!$C$58),IF(DF5<=Parametri!$C$54,Parametri!$C$50*ROUND((Parametri!$C$54-DF5)/(Parametri!$C$54-Parametri!$C$53),Parametri!$C$58),0)))+IF(AND(DF5>Parametri!$C$56,DF5<=Parametri!$C$57),Parametri!$C$55,0))-(MAX(0,MIN(DF5,Parametri!$C$43))*Parametri!$C$44+MAX(0,MIN(DF5,Parametri!$C$45)-Parametri!$C$43)*Parametri!$C$46+MAX(0,DF5-Parametri!$C$45)*Parametri!$C$47)),0))/12,2))
+DJ  C20 IRPEF
+    =IF($A5="","",IF(AZ5<>"","OK",IF(OR(ABS(Q5-DG5)>Parametri!$C$19,ABS(N(CY5)-DH5)>Parametri!$C$19,ABS(N(CZ5)-DI5)>Parametri!$C$19),"ERRORE","OK")))
+```
+
+**Un esempio dal mese di settembre 2026.** Dipendente B030, cliente B: atteso 60,47 €, sul cedolino 0,00 €, differenza −60,47 €.
+
+**Cause tipiche.**
+
+- Tabella IRPEF del 2025 ancora nel software: 35% invece di 33% sul secondo scaglione.
+- Ulteriore detrazione del cuneo fiscale non applicata tra 20.000 e 40.000 € di reddito.
+- Somma del cuneo non erogata, o erogata a chi supera i 20.000 €.
+
+**Cosa fare.** Controllare la tabella IRPEF del software (33% sul secondo scaglione dal 2026), l'ulteriore detrazione e la somma del cuneo fiscale, il trattamento integrativo; rifare la ritenuta e correggere nel mese dopo.
+
+**Limiti.**
+
+- Il reddito dell'anno è presunto dall'imponibile del mese (S09): un software che lo stima dall'anno progressivo dà ritenute diverse nei mesi, uguali al conguaglio.
+- Niente detrazioni per familiari a carico, oneri o altri redditi dichiarati dal dipendente (S11).
+- Le mensilità aggiuntive pagate in un mese ordinario si tassano senza detrazioni: il controllo vale per i mesi senza tredicesima o quattordicesima.
+- Addizionali regionale e comunale fuori dal controllo: si trattengono a rate sull'anno prima.
+
+## C21 · Conguaglio IRPEF alla cessazione
+
+**Priorità alta.** Imposta dell'anno, detrazioni e trattamento integrativo rapportati ai giorni di lavoro, meno quanto già trattenuto o erogato: il cedolino di uscita porta una differenza diversa.
+
+**La regola.** Alla cessazione il sostituto fa il conguaglio: imposta dell'anno sull'imponibile fiscale da gennaio, meno detrazione per lavoro dipendente e ulteriore detrazione rapportate ai giorni di lavoro (con il minimo di 690 € fino a 15.000 €), meno quanto già trattenuto. La somma del cuneo e il trattamento integrativo spettanti per il periodo si confrontano con quelli già erogati: la differenza si paga o si recupera nel cedolino di uscita.
+
+**Fonti.** [F24](fonti.md), [F25](fonti.md), [F26](fonti.md), [F27](fonti.md), [F29](fonti.md), [S10](fonti.md), [S11](fonti.md).
+
+**Nel foglio** (foglio Mese, riga 5; le altre righe sono uguali):
+
+```
+DK  Frazione d'anno
+    =IF($A5="","",IF(AND(AZ5<>"",DA5<>"",DB5<>"",DC5<>"",DD5<>"",DE5<>""),DB5/Parametri!$C$73,""))
+DL  Imposta lorda dell'anno
+    =IF($A5="","",IF(DK5="","",(MAX(0,MIN(DA5,Parametri!$C$43))*Parametri!$C$44+MAX(0,MIN(DA5,Parametri!$C$45)-Parametri!$C$43)*Parametri!$C$46+MAX(0,DA5-Parametri!$C$45)*Parametri!$C$47)))
+DM  Detrazione rapportata
+    =IF($A5="","",IF(DK5="","",IF(DA5<=Parametri!$C$52,MAX((IF(DA5<=Parametri!$C$52,Parametri!$C$48,IF(DA5<=Parametri!$C$53,Parametri!$C$50+Parametri!$C$51*ROUND((Parametri!$C$53-DA5)/(Parametri!$C$53-Parametri!$C$52),Parametri!$C$58),IF(DA5<=Parametri!$C$54,Parametri!$C$50*ROUND((Parametri!$C$54-DA5)/(Parametri!$C$54-Parametri!$C$53),Parametri!$C$58),0)))+IF(AND(DA5>Parametri!$C$56,DA5<=Parametri!$C$57),Parametri!$C$55,0))*DK5,Parametri!$C$49),(IF(DA5<=Parametri!$C$52,Parametri!$C$48,IF(DA5<=Parametri!$C$53,Parametri!$C$50+Parametri!$C$51*ROUND((Parametri!$C$53-DA5)/(Parametri!$C$53-Parametri!$C$52),Parametri!$C$58),IF(DA5<=Parametri!$C$54,Parametri!$C$50*ROUND((Parametri!$C$54-DA5)/(Parametri!$C$54-Parametri!$C$53),Parametri!$C$58),0)))+IF(AND(DA5>Parametri!$C$56,DA5<=Parametri!$C$57),Parametri!$C$55,0))*DK5)))
+DN  Imposta netta dell'anno
+    =IF($A5="","",IF(DK5="","",ROUND(MAX(0,DL5-DM5-IF(AND(DA5>Parametri!$C$66,DA5<=Parametri!$C$67),Parametri!$C$65,IF(AND(DA5>Parametri!$C$67,DA5<=Parametri!$C$68),Parametri!$C$65*ROUND((Parametri!$C$68-DA5)/(Parametri!$C$68-Parametri!$C$67),Parametri!$C$58),0))*DK5),2)))
+DO  IRPEF di conguaglio attesa
+    =IF($A5="","",IF(DK5="","",ROUND(DN5-DC5,2)))
+DP  Cuneo di conguaglio atteso
+    =IF($A5="","",IF(DK5="","",ROUND(IF(DA5<=Parametri!$C$59,ROUND(DA5*IF(DA5*Parametri!$C$73/DB5<=Parametri!$C$60,Parametri!$C$61,IF(DA5*Parametri!$C$73/DB5<=Parametri!$C$62,Parametri!$C$63,Parametri!$C$64)),2),0)-DD5,2)))
+DQ  Tratt. integrativo di conguaglio atteso
+    =IF($A5="","",IF(DK5="","",ROUND(ROUND(IF(DA5<=Parametri!$C$70,IF(DL5>DM5-Parametri!$C$72*DK5,Parametri!$C$69*DK5,0),IF(AND(DA5<=Parametri!$C$71,DM5>DL5),MIN(Parametri!$C$69*DK5,DM5-DL5),0)),2)-DE5,2)))
+DR  C21 Conguaglio
+    =IF($A5="","",IF(DK5="","OK",IF(OR(ABS(Q5-DO5)>Parametri!$C$19,ABS(N(CY5)-DP5)>Parametri!$C$19,ABS(N(CZ5)-DQ5)>Parametri!$C$19),"ERRORE","OK")))
+```
+
+**Un esempio dal mese di settembre 2026.** Dipendente B027, cliente B: atteso 1.194,70 €, sul cedolino 444,85 €, differenza −749,85 €.
+
+**Cause tipiche.**
+
+- Detrazioni dell'anno intero invece che dei giorni di lavoro: conguaglio troppo leggero.
+- Conguaglio non fatto: ritenuta calcolata come in un mese qualsiasi.
+- Somma del cuneo non recuperata quando il reddito dell'anno supera i 20.000 €.
+
+**Cosa fare.** Rifare il conguaglio: imposta dell'anno sull'imponibile da gennaio, detrazioni e trattamento integrativo rapportati ai giorni di lavoro, meno quanto trattenuto o erogato; consegnare il conteggio con la CU.
+
+**Limiti.**
+
+- Imponibile da gennaio, giorni e somme dei mesi prima vengono dal cedolino: non sono ricostruiti.
+- Nessun altro reddito comunicato dal dipendente (art. 23 c. 4): con un precedente datore di lavoro il conguaglio cambia.
+- Alla cessazione si recupera tutto subito: le rate (oltre 60 €) valgono per il conguaglio di fine anno.

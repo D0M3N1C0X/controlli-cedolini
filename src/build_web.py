@@ -15,8 +15,9 @@ import regole as R
 
 WEB = C.ROOT / "web"
 VECTORS = C.ROOT / "tests" / "fixtures" / "js_vectors.json"
-VOCI = ["tabellare", "scatti", "superminimo", "straordinari", "lordo", "contributi_inps", "irpef",
-        "altre_trattenute", "netto", "quota_tfr", "ferie_residuo", "ferie_godute", "permessi_residuo", "permessi_goduti"]
+VOCI = ["tabellare", "scatti", "superminimo", "straordinari", "lordo", "contributi_inps", "imponibile_irpef", "irpef",
+        "bonus_cuneo", "trattamento_integrativo", "altre_trattenute", "netto", "quota_tfr", "ferie_residuo",
+        "ferie_godute", "permessi_residuo", "permessi_goduti"]
 
 
 def cfg() -> dict:
@@ -45,7 +46,12 @@ def cfg() -> dict:
             # TFR alla cessazione (F19-F22)
             "tfr_fisso": C.TFR_TASSO_FISSO, "tfr_quota": C.TFR_QUOTA_INFLAZIONE, "foi_dicembre": C.FOI_DICEMBRE,
             "foi_raccordo": C.FOI_RACCORDO, "foi_mesi": C.FOI_MESI, "imposta_tfr": C.IMPOSTA_SOSTITUTIVA_TFR,
-            "contributo_tfr": C.CONTRIBUTO_TFR}
+            "contributo_tfr": C.CONTRIBUTO_TFR,
+            # IRPEF 2026 (F24-F29)
+            "scaglioni_irpef": [list(s) for s in C.SCAGLIONI_IRPEF], "detrazione_lavoro": C.DETRAZIONE_LAVORO,
+            "decimali_rapporto": C.DECIMALI_RAPPORTO, "cuneo_somma_soglia": C.CUNEO_SOMMA_SOGLIA,
+            "cuneo_somma_fasce": [list(s) for s in C.CUNEO_SOMMA_FASCE], "cuneo_detrazione": C.CUNEO_DETRAZIONE,
+            "trattamento_integrativo": C.TRATTAMENTO_INTEGRATIVO, "giorni_anno": C.GIORNI_ANNO}
 
 
 def ccnl() -> dict:
@@ -126,7 +132,8 @@ def write_vectors(n: int = 8, seed: int = 11) -> int:
             x.loc[i, voce] = v
             patch.append([int(i), voce, v])
         eventi = [(k, v) for k in x.index for v in ("malattia_inps", "malattia_carenza", "maternita_inps",
-                                                    "tfr_liquidato") if x.loc[k, v] != ""]
+                                                    "tfr_liquidato", "imponibile_fiscale_anno", "ritenute_anno_prec",
+                                                    "cuneo_anno_prec", "ti_anno_prec") if x.loc[k, v] != ""]
         for _ in range(rng.randint(1, 4)):                         # indennità, carenza e TFR, anche a mezzo centesimo
             i, voce = rng.choice(eventi)
             v = f"{float(x.loc[i, voce]) + rng.choice([-1, 1]) * rng.choice([0.005, 0.01, 0.02, 12, 300]):.3f}"

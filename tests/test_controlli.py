@@ -118,4 +118,8 @@ def test_le_regole_battono_il_rilevatore_statistico():
     assert (stat["richiamo"] < 0.5).all() and (stat["falsi_allarmi"] > 0).all()
     pt = statistica.per_tipo().set_index("tipo")
     assert pt.loc["inps", "trovati_statistico"] == pt.loc["inps", "errori"]        # vede i rapporti
-    assert pt.loc["minimo", "trovati_statistico"] == 0                             # non vede il contratto
+    # non vede il contratto: con l'IRPEF vera il rapporto netto/lordo cambia col reddito, e un minimo sbagliato può
+    # capitare fuori scala per caso, ma la maggior parte passa; scatti, anagrafica e IRPEF non li vede mai
+    assert pt.loc["minimo", "trovati_statistico"] <= pt.loc["minimo", "errori"] // 3
+    for tipo in ("scatto", "anagrafica", "irpef", "ratei", "codice_fiscale"):
+        assert pt.loc[tipo, "trovati_statistico"] == 0, tipo

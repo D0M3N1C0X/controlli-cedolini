@@ -113,6 +113,18 @@
    "descrizione": "Alla cessazione, TFR diverso dal fondo rivalutato con l'indice ISTAT, al netto dell'imposta sostitutiva, più le quote dell'anno meno lo 0,50%",
    "cosa_fare": "Rifare il conteggio: coefficiente ISTAT del mese giusto (dal 15 in poi conta il mese), imposta sostitutiva del 17% sulla rivalutazione, 0,50% tolto dalle quote dell'anno; regolare la differenza",
    "priorita": "alta"
+  },
+  "C20": {
+   "nome": "IRPEF del mese",
+   "descrizione": "Ritenuta, somma del cuneo fiscale o trattamento integrativo diversi da quelli delle regole 2026: scaglioni ragguagliati al mese, detrazioni per un dodicesimo sul reddito presunto dell'anno",
+   "cosa_fare": "Controllare la tabella IRPEF del software (33% sul secondo scaglione dal 2026), l'ulteriore detrazione e la somma del cuneo fiscale, il trattamento integrativo; rifare la ritenuta e correggere nel mese dopo",
+   "priorita": "alta"
+  },
+  "C21": {
+   "nome": "Conguaglio IRPEF alla cessazione",
+   "descrizione": "Imposta dell'anno, detrazioni e trattamento integrativo rapportati ai giorni di lavoro, meno quanto già trattenuto o erogato: il cedolino di uscita porta una differenza diversa",
+   "cosa_fare": "Rifare il conguaglio: imposta dell'anno sull'imponibile da gennaio, detrazioni e trattamento integrativo rapportati ai giorni di lavoro, meno quanto trattenuto o erogato; consegnare il conteggio con la CU",
+   "priorita": "alta"
   }
  },
  "en": {
@@ -228,6 +240,18 @@
    "nome": "Severance pay at leaving (TFR)",
    "descrizione": "TFR different from the fund revalued with the ISTAT index, net of the substitute tax, plus the year's accruals less 0.50%",
    "cosa_fare": "Redo the sum: ISTAT coefficient of the right month (from the 15th the month counts), 17% substitute tax on the revaluation, 0.50% off the year's accruals; settle the difference",
+   "priorita": "high"
+  },
+  "C20": {
+   "nome": "Income tax of the month (IRPEF)",
+   "descrizione": "Tax withheld, tax-wedge payment or supplementary allowance different from the 2026 rules: annual brackets scaled to the month, credits for a twelfth of the year's expected income",
+   "cosa_fare": "Check the payroll software's tax table (33% in the second bracket from 2026), the extra credit and the tax-wedge payment, the supplementary allowance; redo the withholding and correct it next month",
+   "priorita": "high"
+  },
+  "C21": {
+   "nome": "Income tax adjustment at leaving",
+   "descrizione": "The year's tax, with credits and supplementary allowance in proportion to the days worked, less what was withheld or paid: the leaver's payslip carries a different difference",
+   "cosa_fare": "Redo the adjustment: the year's tax on taxable pay since January, credits and allowance for the days worked, less what was already withheld or paid; hand the workings over with the CU",
    "priorita": "high"
   }
  }

@@ -20,11 +20,11 @@ C093,C,C04,Quota TFR,175.06,171.27,-3.79,media
 A015,A,C05,Residuo ferie,29.6064,27.4397,-2.17,media
 B058,B,C05,Residuo ferie,20.478,18.3113,-2.17,media
 C099,C,C05,Residuo ferie,12.5839,10.4172,-2.17,media
-A005,A,C06,Quadratura,1203.07,1240.57,37.50,alta
-C107,C,C06,Quadratura,1086.81,1186.81,100.00,alta
-A008,A,C07,Variazione del netto,1510.13,2080.5,570.37,media
-B020,B,C07,Variazione del netto,1960.05,2548.3,588.25,media
-,C,C08,Riconciliazione F24,6032.89,5820.49,-212.40,alta
+A005,A,C06,Quadratura,1336.88,1374.38,37.50,alta
+C107,C,C06,Quadratura,1224.71,1324.71,100.00,alta
+A008,A,C07,Variazione del netto,1637.54,2095.61,458.07,media
+B020,B,C07,Variazione del netto,2021.13,2487.65,466.52,media
+,C,C08,Riconciliazione F24,3608.6,3396.2,-212.40,alta
 B040,B,C09,Codice fiscale,valido,CPTFPV79H01Z105A,,alta
 B070,B,C09,Codice fiscale,valido,FZTSLD68R18Z151A,,alta
 B061,B,C10,Anagrafica,livello 4,livello 5,,alta
@@ -43,3 +43,8 @@ C103,C,C18,Permessi ROL ed ex festività,51.7529,53.9196,2.17,media
 B027,B,C19,TFR liquidato,23446.76,23604.31,157.55,alta
 B038,B,C19,TFR liquidato,6314.85,6465.86,151.01,alta
 B051,B,C19,TFR liquidato,11694.38,11743.95,49.57,alta
+B030,B,C20,IRPEF del mese,60.47,0.0,-60.47,alta
+B041,B,C20,IRPEF del mese,373.68,375.21,1.53,alta
+C097,C,C20,IRPEF del mese,71.85,155.18,83.33,alta
+B027,B,C21,Conguaglio IRPEF alla cessazione,1194.7,444.85,-749.85,alta
+B038,B,C21,Conguaglio IRPEF alla cessazione,1000.65,710.99,-289.66,alta

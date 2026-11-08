@@ -5,6 +5,29 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
 
 ## [Non rilasciato]
 
+## [2.1.0] - 2026-11-08
+
+### Aggiunto
+
+- **C20 IRPEF del mese:** le regole 2026 lette nei testi ufficiali su Normattiva. Scaglioni del 23%, 33% (L. 199/2025,
+  prima 35%) e 43% ragguagliati al mese, detrazione per lavoro dipendente (art. 13 TUIR), ulteriore detrazione e somma
+  del cuneo fiscale (L. 207/2024), trattamento integrativo (D.L. 3/2020) (F24-F28).
+- **C21 Conguaglio IRPEF alla cessazione:** imposta dell'anno sull'imponibile da gennaio, detrazioni e trattamento
+  integrativo rapportati ai giorni di lavoro, meno quanto trattenuto o erogato nei mesi prima (F29).
+- Colonne `bonus_cuneo` e `trattamento_integrativo` in ogni cedolino; per chi esce, imponibile fiscale dell'anno,
+  giorni di lavoro e somme dei mesi prima. Il netto somma le due voci del cuneo.
+- Cinque errori inseriti: tabella del 2025, ulteriore detrazione non applicata, somma del cuneo non erogata, due
+  conguagli sbagliati. Trovati 49 su 49, senza falsi allarmi.
+- Foglio: parametri IRPEF con la fonte, colonne CY-DR, 983 valori riconciliati (erano 737). Strumento nel browser: le
+  stesse regole in JavaScript, verificate su 2.898 valori (erano 2.593).
+
+### Cambiato
+
+- L'IRPEF dei dati di esempio è calcolata con le regole, non più sintetica (D26). Le scelte S08-S11 dicono come il mese
+  stima il reddito dell'anno e ripartisce le detrazioni.
+- L'integrazione aziendale di malattia e maternità sul netto resta fuori (D21, aggiornata): servono cedolini che
+  riducano la retribuzione dei giorni di assenza, previsti con i prossimi CCNL.
+
 ## [2.0.0] - 2026-11-06
 
 ### Aggiunto

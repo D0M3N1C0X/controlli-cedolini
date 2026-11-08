@@ -27,12 +27,15 @@ FOGLIO_COLONNE = {
     "C14": ("Mese", ["BN", "BO"], "BP"), "C15": ("Mese", ["CG", "CH", "CI", "CJ", "CK", "CL"], "CM"),
     "C16": ("Mese", ["CI", "CN"], "CO"), "C17": ("Mese", ["CH", "CP"], "CQ"), "C18": ("Mese", ["CR", "CS", "CT"], "CU"),
     "C19": ("Mese", ["CV", "CW"], "CX"),
+    "C20": ("Mese", ["DF", "DG", "DH", "DI"], "DJ"), "C21": ("Mese", ["DK", "DL", "DM", "DN", "DO", "DP", "DQ"], "DR"),
 }
 FONTI = {
     "C01": ["F01", "F02"], "C02": ["F03", "S04"], "C03": ["F05", "F10", "F14", "F15"], "C04": ["F06", "S03"], "C05": ["F04"],
     "C06": ["S01"], "C07": ["S02"], "C08": ["F09"], "C09": ["F08"], "C10": ["S06"], "C11": ["F11"],
     "C12": ["F11"], "C13": ["F12", "F04"], "C14": ["F13"], "C15": ["F16", "F17"], "C16": ["F16"],
     "C17": ["F17", "F18"], "C18": ["F23", "S07"], "C19": ["F19", "F20", "F21", "F22"],
+    "C20": ["F24", "F25", "F26", "F27", "F28", "S08", "S09", "S10", "S11"],
+    "C21": ["F24", "F25", "F26", "F27", "F29", "S10", "S11"],
 }
 
 SCHEDE = {
@@ -85,11 +88,11 @@ SCHEDE = {
     },
     "C06": {
         "regola": "Il lordo è la somma di tabellare, scatti, superminimo e straordinari; il netto è il lordo meno "
-                  "contributi, IRPEF e altre trattenute.",
+                  "contributi, IRPEF e altre trattenute, più la somma del cuneo fiscale e il trattamento integrativo.",
         "cause": ["Una voce aggiunta a mano e non sommata.",
                   "Una trattenuta inserita due volte."],
         "limiti": ["Una sola segnalazione per cedolino: se il lordo non torna, il netto non si controlla (D5).",
-                   "Non ricalcola l'IRPEF: ne controlla solo l'effetto sul netto."],
+                   "L'IRPEF la ricalcola C20 (C21 all'uscita): qui conta solo che il netto torni con le voci del cedolino."],
     },
     "C07": {
         "regola": "Il netto non deve cambiare di oltre il 20%, in su o in giù, rispetto al mese prima, a meno che il "
@@ -222,6 +225,36 @@ SCHEDE = {
                    "Tesoreria dell'INPS restano fuori.",
                    "Fondo al 31 dicembre, quote e imponibile dell'anno vengono dal cedolino, non sono ricalcolati.",
                    "Serve l'indice FOI del mese nei Parametri: per i mesi che mancano il controllo tace."],
+    },
+    "C20": {
+        "regola": "La ritenuta del mese applica all'imponibile fiscale gli scaglioni del 2026 (23%, 33%, 43%) "
+                  "ragguagliati al mese, e toglie un dodicesimo della detrazione per lavoro dipendente e "
+                  "dell'ulteriore detrazione del cuneo fiscale, calcolate sul reddito presunto dell'anno (imponibile del "
+                  "mese per 14 mensilità). Fino a 20.000 € di reddito spetta la somma del cuneo (7,1%, 5,3% o 4,8% "
+                  "dell'imponibile del mese), fino a 15.000 € un dodicesimo del trattamento integrativo.",
+        "cause": ["Tabella IRPEF del 2025 ancora nel software: 35% invece di 33% sul secondo scaglione.",
+                  "Ulteriore detrazione del cuneo fiscale non applicata tra 20.000 e 40.000 € di reddito.",
+                  "Somma del cuneo non erogata, o erogata a chi supera i 20.000 €."],
+        "limiti": ["Il reddito dell'anno è presunto dall'imponibile del mese (S09): un software che lo stima "
+                   "dall'anno progressivo dà ritenute diverse nei mesi, uguali al conguaglio.",
+                   "Niente detrazioni per familiari a carico, oneri o altri redditi dichiarati dal dipendente (S11).",
+                   "Le mensilità aggiuntive pagate in un mese ordinario si tassano senza detrazioni: il controllo "
+                   "vale per i mesi senza tredicesima o quattordicesima.",
+                   "Addizionali regionale e comunale fuori dal controllo: si trattengono a rate sull'anno prima."],
+    },
+    "C21": {
+        "regola": "Alla cessazione il sostituto fa il conguaglio: imposta dell'anno sull'imponibile fiscale da "
+                  "gennaio, meno detrazione per lavoro dipendente e ulteriore detrazione rapportate ai giorni di lavoro "
+                  "(con il minimo di 690 € fino a 15.000 €), meno quanto già trattenuto. La somma del cuneo e il "
+                  "trattamento integrativo spettanti per il periodo si confrontano con quelli già erogati: la "
+                  "differenza si paga o si recupera nel cedolino di uscita.",
+        "cause": ["Detrazioni dell'anno intero invece che dei giorni di lavoro: conguaglio troppo leggero.",
+                  "Conguaglio non fatto: ritenuta calcolata come in un mese qualsiasi.",
+                  "Somma del cuneo non recuperata quando il reddito dell'anno supera i 20.000 €."],
+        "limiti": ["Imponibile da gennaio, giorni e somme dei mesi prima vengono dal cedolino: non sono ricostruiti.",
+                   "Nessun altro reddito comunicato dal dipendente (art. 23 c. 4): con un precedente datore di "
+                   "lavoro il conguaglio cambia.",
+                   "Alla cessazione si recupera tutto subito: le rate (oltre 60 €) valgono per il conguaglio di fine anno."],
     },
 }
 

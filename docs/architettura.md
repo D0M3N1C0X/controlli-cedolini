@@ -1,6 +1,6 @@
 # Architettura: una regola, tre motori
 
-Gli stessi diciannove controlli esistono tre volte, per tre modi di lavorare: uno script Python, un foglio di calcolo con
+Gli stessi ventuno controlli esistono tre volte, per tre modi di lavorare: uno script Python, un foglio di calcolo con
 formule vive e una pagina web che gira solo nel browser. Il rischio di avere tre copie è che divergano. Questa
 pagina spiega come restano uguali, e come si cambia qualcosa senza romperle.
 
@@ -11,7 +11,7 @@ flowchart LR
     T["data/ccnl_terziario.csv<br>minimi e scatti"] --> R["src/regole.py<br>le regole, una volta"]
     P["src/config.py<br>parametri e soglie"] --> R
     G["src/genera.py<br>dati sintetici ed errori registrati"] --> D["data/cedolini.csv<br>data/f24.csv"]
-    R --> K["src/controlli.py<br>C01-C19 e valutazione"]
+    R --> K["src/controlli.py<br>C01-C21 e valutazione"]
     D --> K
     K --> F["src/build_foglio.py<br>foglio con formule vive"]
     K --> W["src/build_web.py<br>parametri e casi di prova per il browser"]

@@ -4,15 +4,15 @@
 **Dati:** Clienti e dipendenti inventati, con errori inseriti apposta; minimi e scatti del CCNL reali, con le fonti in [docs/fonti.md](../docs/fonti.md)
 **Strumenti:** Uno script Python, lo stesso controllo in un [foglio di calcolo](../deliverables/foglio_controllo_cedolini.xlsx) e uno [strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) dove i file restano sul computer
 
-> Diciannove controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano ogni voce dalle regole del contratto e dell'INPS, o la confrontano con il mese prima e con l'F24: non serve sapere come l'ha calcolata il software paghe. Non è consulenza del lavoro.
+> Ventuno controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano ogni voce dalle regole del contratto e dell'INPS, o la confrontano con il mese prima e con l'F24: non serve sapere come l'ha calcolata il software paghe. Non è consulenza del lavoro.
 
 ## In sintesi
 
-- **44 segnalazioni: 42 cedolini e 1 F24**, 30 ad alta priorità; cliente A 9, cliente B 27, cliente C 8.
+- **49 segnalazioni: 45 cedolini e 1 F24**, 35 ad alta priorità; cliente A 9, cliente B 31, cliente C 9.
 - **6 dipendenti sono pagati sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Mancano 175,44 € al mese in tutto, più gli arretrati da novembre 2025.
 - **L'F24 del cliente C ha 212,40 € di ritenute in meno** della somma dei cedolini: va integrato prima della scadenza del versamento.
 - **Dal 1° novembre 2026 i minimi salgono:** 3.892,67 € al mese per 118 dipendenti. Il superminimo assorbibile ne copre 1.443,69 € in 44 casi; restano 2.448,98 € al mese, 34.286 € l'anno su 14 mensilità.
-- **I controlli trovano ogni alterazione sopra il centesimo:** tutte le 861 delle 1.100 prove casuali che superano il centesimo (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).
+- **I controlli trovano ogni alterazione sopra il centesimo:** tutte le 857 delle 1.100 prove casuali che superano il centesimo (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).
 
 ## 1. Le segnalazioni, cedolino per cedolino
 
@@ -39,11 +39,11 @@
 | A015 | A | C05 | media | 29,61 gg | 27,44 gg | −2,17 gg |
 | B058 | B | C05 | media | 20,48 gg | 18,31 gg | −2,17 gg |
 | C099 | C | C05 | media | 12,58 gg | 10,42 gg | −2,17 gg |
-| A005 | A | C06 | alta | 1.203,07 € | 1.240,57 € | 37,50 € |
-| C107 | C | C06 | alta | 1.086,81 € | 1.186,81 € | 100,00 € |
-| A008 | A | C07 | media | 1.510,13 € | 2.080,50 € | 570,37 € |
-| B020 | B | C07 | media | 1.960,05 € | 2.548,30 € | 588,25 € |
-| F24 | C | C08 | alta | 6.032,89 € | 5.820,49 € | −212,40 € |
+| A005 | A | C06 | alta | 1.336,88 € | 1.374,38 € | 37,50 € |
+| C107 | C | C06 | alta | 1.224,71 € | 1.324,71 € | 100,00 € |
+| A008 | A | C07 | media | 1.637,54 € | 2.095,61 € | 458,07 € |
+| B020 | B | C07 | media | 2.021,13 € | 2.487,65 € | 466,52 € |
+| F24 | C | C08 | alta | 3.608,60 € | 3.396,20 € | −212,40 € |
 | B040 | B | C09 | alta | valido | `CPTFPV79H01Z105A` | - |
 | B070 | B | C09 | alta | valido | `FZTSLD68R18Z151A` | - |
 | B061 | B | C10 | alta | livello 4 | livello 5 | - |
@@ -62,6 +62,11 @@
 | B027 | B | C19 | alta | 23.446,76 € | 23.604,31 € | 157,55 € |
 | B038 | B | C19 | alta | 6.314,85 € | 6.465,86 € | 151,01 € |
 | B051 | B | C19 | alta | 11.694,38 € | 11.743,95 € | 49,57 € |
+| B030 | B | C20 | alta | 60,47 € | 0,00 € | −60,47 € |
+| B041 | B | C20 | alta | 373,68 € | 375,21 € | 1,53 € |
+| C097 | C | C20 | alta | 71,85 € | 155,18 € | 83,33 € |
+| B027 | B | C21 | alta | 1.194,70 € | 444,85 € | −749,85 € |
+| B038 | B | C21 | alta | 1.000,65 € | 710,99 € | −289,66 € |
 
 **Cosa fare, per controllo**
 
@@ -86,6 +91,8 @@
 | C17 Indennità di maternità INPS | Ricalcolare l'indennità all'80% della retribuzione media giornaliera, ratei compresi, e correggere il conguaglio con l'INPS; l'integrazione al 100% resta a carico dell'azienda |
 | C18 Permessi ROL ed ex festività | Rifare la maturazione dei permessi: 72 o 56 ore di riduzione d'orario secondo i dipendenti, più 32 di ex festività, in proporzione al part-time e con la regola dei 2 e 4 anni per chi è entrato dopo marzo 2011 |
 | C19 TFR liquidato | Rifare il conteggio: coefficiente ISTAT del mese giusto (dal 15 in poi conta il mese), imposta sostitutiva del 17% sulla rivalutazione, 0,50% tolto dalle quote dell'anno; regolare la differenza |
+| C20 IRPEF del mese | Controllare la tabella IRPEF del software (33% sul secondo scaglione dal 2026), l'ulteriore detrazione e la somma del cuneo fiscale, il trattamento integrativo; rifare la ritenuta e correggere nel mese dopo |
+| C21 Conguaglio IRPEF alla cessazione | Rifare il conguaglio: imposta dell'anno sull'imponibile da gennaio, detrazioni e trattamento integrativo rapportati ai giorni di lavoro, meno quanto trattenuto o erogato; consegnare il conteggio con la CU |
 
 *C07 non dice che il cedolino è sbagliato: dice che il netto è cambiato di oltre il 20% senza un evento registrato. Le assunzioni del mese, gli straordinari dichiarati e il passaggio a part-time non sono segnalati.*
 
@@ -93,9 +100,9 @@
 
 | Cliente | Ritenute in F24 (1001) | Ritenute nei cedolini | Differenza | Contributi in F24 | Contributi nei cedolini | Differenza |
 |---|---:|---:|---:|---:|---:|---:|
-| A | 4.551,81 € | 4.551,81 € | 0,00 € | 3.220,04 € | 3.220,04 € | 0,00 € |
-| B | 25.086,64 € | 25.086,64 € | 0,00 € | 16.043,08 € | 16.043,08 € | 0,00 € |
-| C | 5.820,49 € | 6.032,89 € | −212,40 € | 4.657,16 € | 4.657,16 € | 0,00 € |
+| A | 2.883,57 € | 2.883,57 € | 0,00 € | 3.220,04 € | 3.220,04 € | 0,00 € |
+| B | 18.176,48 € | 18.176,48 € | 0,00 € | 16.043,08 € | 16.043,08 € | 0,00 € |
+| C | 3.396,20 € | 3.608,60 € | −212,40 € | 4.657,16 € | 4.657,16 € | 0,00 € |
 
 *Le ritenute IRPEF dei dati sintetici non sono calcolate con le regole fiscali: servono solo a mostrare la riconciliazione.*
 
@@ -113,7 +120,7 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 
 ## 4. Quanto ci si può fidare dei controlli
 
-**Sugli errori inseriti.** 44 su 44, nessun falso allarme. Dimostra che i controlli fanno quello che dicono, non che troverebbero errori reali: gli errori li ho scelti io.
+**Sugli errori inseriti.** 49 su 49, nessun falso allarme. Dimostra che i controlli fanno quello che dicono, non che troverebbero errori reali: gli errori li ho scelti io.
 
 | Controllo | Errori inseriti | Trovati | Mancati | Falsi allarmi |
 |---|---:|---:|---:|---:|
@@ -136,18 +143,20 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 | C17 Indennità di maternità INPS | 1 | 1 | 0 | 0 |
 | C18 Permessi ROL ed ex festività | 2 | 2 | 0 | 0 |
 | C19 TFR liquidato | 3 | 3 | 0 | 0 |
+| C20 IRPEF del mese | 3 | 3 | 0 | 0 |
+| C21 Conguaglio IRPEF alla cessazione | 2 | 2 | 0 | 0 |
 
 **Su alterazioni casuali.** 1.100 prove: una voce a caso di un cedolino corretto, cambiata di un importo a caso. La tabella dice quante volte almeno un controllo se ne accorge.
 
 | Voce alterata | ± 0,005 € | ± 0,02 € | ± 1,00 € | ± 10,00 € | ± 100,00 € |
 |---|---:|---:|---:|---:|---:|
-| tabellare | 14% | 100% | 100% | 100% | 100% |
-| scatti | 22% | 100% | 100% | 100% | 100% |
-| superminimo | 12% | 100% | 100% | 100% | 100% |
-| straordinari | 0% | 100% | 100% | 100% | 100% |
+| tabellare | 21% | 100% | 100% | 100% | 100% |
+| scatti | 24% | 100% | 100% | 100% | 100% |
+| superminimo | 6% | 100% | 100% | 100% | 100% |
+| straordinari | 16% | 100% | 100% | 100% | 100% |
 | lordo | 0% | 100% | 100% | 100% | 100% |
-| contributi inps | 69% | 100% | 100% | 100% | 100% |
-| irpef | 36% | 100% | 100% | 100% | 100% |
+| contributi inps | 61% | 100% | 100% | 100% | 100% |
+| irpef | 38% | 100% | 100% | 100% | 100% |
 | altre trattenute | 0% | 100% | 100% | 100% | 100% |
 | netto | 0% | 100% | 100% | 100% | 100% |
 | quota tfr | 0% | 100% | 100% | 100% | 100% |
@@ -159,14 +168,14 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 
 | Metodo | Cedolini sbagliati | Trovati | Falsi allarmi | Precisione |
 |---|---:|---:|---:|---:|
-| Statistico, z oltre 3 | 42 | 16 | 10 | 62% |
-| Statistico, z oltre 3,5 | 42 | 15 | 5 | 75% |
-| Statistico, z oltre 5 | 42 | 13 | 4 | 76% |
-| Regole (C01-C19) | 42 | 42 | 0 | 100% |
+| Statistico, z oltre 3 | 45 | 19 | 14 | 58% |
+| Statistico, z oltre 3,5 | 45 | 17 | 9 | 65% |
+| Statistico, z oltre 5 | 45 | 12 | 4 | 75% |
+| Regole (C01-C21) | 45 | 45 | 0 | 100% |
 
-*Il rilevatore confronta ogni cedolino con quelli dello stesso cliente, perché posizioni INPS diverse non sono anomalie. Vede solo gli errori che spostano un rapporto (contributi, TFR, netto, variazioni del netto); minimi, scatti, ferie, codice fiscale, anagrafica, assenze e permessi richiedono di conoscere il contratto e le regole INPS, e lì non trova nulla. I cedolini di uscita li segnala tutti, giusti o sbagliati, perché il netto salta rispetto al mese prima: così prende anche gli errori di cessazione, ma i cedolini di uscita corretti diventano falsi allarmi. Su un dominio scritto in regole, le regole vincono; la statistica serve dove una regola non c'è.*
+*Il rilevatore confronta ogni cedolino con quelli dello stesso cliente, perché posizioni INPS diverse non sono anomalie. Vede solo gli errori che spostano un rapporto (minimi, contributi, TFR, netto, variazioni del netto); minimi, scatti, ferie, codice fiscale, anagrafica, IRPEF, assenze e permessi richiedono di conoscere il contratto e le regole INPS, e lì non trova nulla. I cedolini di uscita li segnala tutti, giusti o sbagliati, perché il netto salta rispetto al mese prima: così prende anche gli errori di cessazione, ma i cedolini di uscita corretti diventano falsi allarmi. Su un dominio scritto in regole, le regole vincono; la statistica serve dove una regola non c'è.*
 
-**Il limite, e come C10 lo restringe.** Un errore coerente passa i controlli aritmetici: il dipendente A003 è assunto al 4° livello; inserito al 5° e ricalcolato da capo, il cedolino torna in ogni voce e prende 80,04 € netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima, senza un evento che lo spieghi, lo trova C10: i due errori di anagrafica inseriti (un livello, un superminimo azzerato) sono segnalati. Resta invisibile solo se è sbagliato fin dall'assunzione: lì serve il confronto con i documenti del cliente, lettera di assunzione e mansioni.
+**Il limite, e come C10 lo restringe.** Un errore coerente passa i controlli aritmetici: il dipendente A003 è assunto al 4° livello; inserito al 5° e ricalcolato da capo, il cedolino torna in ogni voce e prende 77,98 € netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima, senza un evento che lo spieghi, lo trova C10: i due errori di anagrafica inseriti (un livello, un superminimo azzerato) sono segnalati. Resta invisibile solo se è sbagliato fin dall'assunzione: lì serve il confronto con i documenti del cliente, lettera di assunzione e mansioni.
 
 ## 5. Come lo userei in un team payroll
 

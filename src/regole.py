@@ -258,3 +258,99 @@ def tfr_liquidato(fondo: float, quote_anno: float, imponibile_anno: float, cessa
     imposta = centesimi(rivalutazione * C.IMPOSTA_SOSTITUTIVA_TFR)
     contributo = centesimi(imponibile_anno * C.CONTRIBUTO_TFR)
     return centesimi(fondo + rivalutazione - imposta + quote_anno - contributo)
+
+
+# ---- IRPEF 2026 ------------------------------------------------------------------------------------------------
+def imposta_lorda(reddito: float, periodi: int = 1, scaglioni=None) -> float:
+    """Imposta lorda per scaglioni (F24). Con `periodi` = 12 gli scaglioni annui sono ragguagliati al mese, come vuole
+    l'art. 23 c. 2 DPR 600/1973 per la ritenuta del periodo di paga. Non arrotondata."""
+    imposta, sotto = 0.0, 0.0
+    for limite, aliquota in scaglioni or C.SCAGLIONI_IRPEF:
+        tetto = reddito if limite is None else min(reddito, limite / periodi)
+        if tetto > sotto:
+            imposta += (tetto - sotto) * aliquota
+        if limite is None or reddito <= limite / periodi:
+            break
+        sotto = limite / periodi
+    return imposta
+
+
+def detrazione_lavoro(reddito: float) -> float:
+    """Detrazione annua per lavoro dipendente, art. 13 c. 1 e 1.1 TUIR (F25), prima del rapporto al periodo.
+    I rapporti hanno quattro decimali (c. 6)."""
+    d = C.DETRAZIONE_LAVORO
+    s1, s2, s3 = d["soglie"]
+    if reddito <= s1:
+        base = d["base"]
+    elif reddito <= s2:
+        base = d["fascia2"] + d["fascia2_extra"] * arrotonda((s2 - reddito) / (s2 - s1), C.DECIMALI_RAPPORTO)
+    elif reddito <= s3:
+        base = d["fascia2"] * arrotonda((s3 - reddito) / (s3 - s2), C.DECIMALI_RAPPORTO)
+    else:
+        base = 0.0
+    lo, hi = d["bonus_65_soglie"]
+    return base + (d["bonus_65"] if lo < reddito <= hi else 0.0)
+
+
+def detrazione_cuneo(reddito: float) -> float:
+    """Ulteriore detrazione annua, L. 207/2024 art. 1 c. 6 (F26): 1.000 € tra 20.000 e 32.000 €, poi a scalare fino
+    a 40.000 €; il rapporto con quattro decimali come nell'art. 13 (S10)."""
+    d = C.CUNEO_DETRAZIONE
+    s1, s2, s3 = d["soglie"]
+    if s1 < reddito <= s2:
+        return d["importo"]
+    if s2 < reddito <= s3:
+        return d["importo"] * arrotonda((s3 - reddito) / (s3 - s2), C.DECIMALI_RAPPORTO)
+    return 0.0
+
+
+def percentuale_cuneo(reddito_annuo: float) -> float:
+    """Percentuale della somma non imponibile, L. 207/2024 art. 1 c. 4 (F26), sul reddito di lavoro rapportato
+    all'anno (c. 5)."""
+    for limite, p in C.CUNEO_SOMMA_FASCE:
+        if limite is None or reddito_annuo <= limite:
+            return p
+    return 0.0
+
+
+def trattamento_integrativo(reddito: float, lorda: float, detrazione: float, frazione: float) -> float:
+    """Trattamento integrativo dell'anno, D.L. 3/2020 art. 1 (F27), rapportato al periodo (`frazione`). Fino a
+    15.000 € se l'imposta lorda supera la detrazione dell'art. 13 meno 75 € rapportati; tra 15.000 e 28.000 € la
+    differenza tra detrazioni e imposta lorda, se positiva (nessun'altra detrazione nel modello, S11)."""
+    t = C.TRATTAMENTO_INTEGRATIVO
+    tetto = t["importo"] * frazione
+    if reddito <= t["soglia"]:
+        return tetto if lorda > detrazione - t["riduzione_capienza"] * frazione else 0.0
+    if reddito <= t["soglia_alta"] and detrazione > lorda:
+        return min(tetto, detrazione - lorda)
+    return 0.0
+
+
+def irpef_mese(imponibile: float, mensilita: int = C.MENSILITA, scaglioni=None) -> dict:
+    """La ritenuta del mese e le somme del cuneo e del trattamento integrativo (C20). Reddito dell'anno presunto =
+    imponibile × mensilità (S09); detrazioni e trattamento integrativo per un dodicesimo (S08)."""
+    annuo = imponibile * mensilita
+    lorda = imposta_lorda(imponibile, 12, scaglioni)
+    det = detrazione_lavoro(annuo)
+    ritenuta = centesimi(max(0.0, lorda - det / 12 - detrazione_cuneo(annuo) / 12))
+    somma = centesimi(imponibile * percentuale_cuneo(annuo)) if annuo <= C.CUNEO_SOMMA_SOGLIA else 0.0
+    ti = centesimi(trattamento_integrativo(annuo, imposta_lorda(annuo, 1, scaglioni), det, 1.0) / 12)
+    return {"irpef": ritenuta, "bonus_cuneo": somma, "trattamento_integrativo": ti}
+
+
+def conguaglio_cessazione(imponibile_anno: float, giorni: int, ritenute_prec: float, cuneo_prec: float,
+                          ti_prec: float, scaglioni=None, rapporta: bool = True) -> dict:
+    """Conguaglio IRPEF alla cessazione (art. 23 c. 3 DPR 600/1973, C21): imposta dell'anno sull'imponibile da
+    gennaio, detrazioni e trattamento integrativo rapportati ai giorni di lavoro, meno quanto già trattenuto o
+    erogato nei mesi prima. Ritorna le voci del cedolino di uscita: positive = da trattenere o da erogare."""
+    frazione = giorni / C.GIORNI_ANNO if rapporta else 1.0
+    lorda = imposta_lorda(imponibile_anno, 1, scaglioni)
+    det = detrazione_lavoro(imponibile_anno) * frazione
+    if imponibile_anno <= C.DETRAZIONE_LAVORO["soglie"][0]:
+        det = max(det, C.DETRAZIONE_LAVORO["minimo"])
+    netta = centesimi(max(0.0, lorda - det - detrazione_cuneo(imponibile_anno) * frazione))
+    annuo = imponibile_anno * C.GIORNI_ANNO / giorni
+    somma = centesimi(imponibile_anno * percentuale_cuneo(annuo)) if imponibile_anno <= C.CUNEO_SOMMA_SOGLIA else 0.0
+    ti = centesimi(trattamento_integrativo(imponibile_anno, lorda, det, frazione))
+    return {"irpef": centesimi(netta - ritenute_prec), "bonus_cuneo": centesimi(somma - cuneo_prec),
+            "trattamento_integrativo": centesimi(ti - ti_prec), "imposta_netta": netta}

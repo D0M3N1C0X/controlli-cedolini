@@ -16,18 +16,24 @@ import pandas as pd
 import codice_fiscale
 import config as C
 import regole as R
-from controlli import ASSENZE, TFR_USCITA
+from controlli import ASSENZE, CONGUAGLIO, TFR_USCITA
 
 LIVELLI = ["Quadri", "1", "2", "3", "4", "5", "6", "7"]
 PESI_LIVELLO = [1, 3, 8, 18, 34, 20, 10, 6]
 
 
-def irpef_sintetica(imponibile: float) -> float:
-    """Ritenuta verosimile ma NON calcolata con le regole fiscali: serve solo a riconciliare l'F24."""
-    annuo = imponibile * 12
-    imposta = 0.23 * min(annuo, 28000) + 0.33 * max(0, min(annuo, 50000) - 28000) + 0.43 * max(0, annuo - 50000)
-    detrazione = max(0.0, 1955 - 0.04 * max(0, annuo - 15000))
-    return R.centesimi(max(0.0, imposta - detrazione) / 12)
+def fisco(r: dict, **kw) -> dict:
+    """Dall'imponibile fiscale: ritenuta IRPEF del mese, somma del cuneo, trattamento integrativo (C20), altre
+    trattenute e netto. `kw` passa a R.irpef_mese, per gli errori inseriti."""
+    r.update(R.irpef_mese(r["imponibile_irpef"], **kw))
+    return netto(r)
+
+
+def netto(r: dict) -> dict:
+    r["altre_trattenute"] = R.centesimi(r["imponibile_irpef"] * 0.015)
+    r["netto"] = R.centesimi(r["imponibile_irpef"] - r["irpef"] - r["altre_trattenute"] + r["bonus_cuneo"]
+                             + r["trattamento_integrativo"])
+    return r
 
 
 def anagrafica(rng: random.Random) -> pd.DataFrame:
@@ -70,25 +76,23 @@ def cedolino(d: pd.Series, mese: str, rng: random.Random, residuo_prec: float, s
     inps = R.contributi(lordo, R.media_cliente(d["cliente"]))
     permessi = R.permessi_mese(assunzione, mese, C.CLIENTI[d["cliente"]]["dipendenti"], pt)
     imponibile = R.centesimi(lordo - inps)
-    irpef = irpef_sintetica(imponibile)
-    altre = R.centesimi(imponibile * 0.015)
     maturate = R.ferie_mese()
-    return {"mese": mese, "matricola": d["matricola"], "cliente": d["cliente"], "codice_fiscale": d["codice_fiscale"],
+    return fisco({"mese": mese, "matricola": d["matricola"], "cliente": d["cliente"],
+                  "codice_fiscale": d["codice_fiscale"],
             "livello": d["livello"], "data_assunzione": d["data_assunzione"], "part_time": pt,
             "superminimo_assorbibile": d["superminimo_assorbibile"], "evento": "",
             "tabellare": tab, "scatti_n": n, "scatti": sc, "superminimo": d["superminimo"],
             "straordinari": straordinari, "lordo": lordo, "contributi_inps": inps, "imponibile_irpef": imponibile,
-            "irpef": irpef, "altre_trattenute": altre, "netto": R.centesimi(imponibile - irpef - altre),
             "quota_tfr": R.quota_tfr(ordinaria), "ferie_maturate": maturate, "ferie_godute": ferie_godute,
             "ferie_residuo": round(residuo_prec + maturate - ferie_godute, 4),
             "ratei_13": R.ratei_13(assunzione, mese), "ratei_14": R.ratei_14(assunzione, mese),
             # voci della cessazione: vuote finché il dipendente resta
             "data_cessazione": "", "tipo_cessazione": "", "preavviso_giorni": "", "tredicesima": "",
             "quattordicesima": "", "ferie_liquidate": "",
-            # assenze del mese e TFR alla cessazione: vuoti se non ci sono
-            **{c: "" for c in ASSENZE + TFR_USCITA},
+            # assenze del mese, TFR e conguaglio alla cessazione: vuoti se non ci sono
+            **{c: "" for c in ASSENZE + TFR_USCITA + CONGUAGLIO},
             "permessi_maturati": permessi, "permessi_goduti": permessi_goduti,
-            "permessi_residuo": round(permessi_prec + permessi - permessi_goduti, 4)}
+            "permessi_residuo": round(permessi_prec + permessi - permessi_goduti, 4)})
 
 
 def _importo(v) -> float:
@@ -102,9 +106,7 @@ def ricalcola(r: dict) -> dict:
                                                                  ("tredicesima", "quattordicesima", "ferie_liquidate")))
     r["contributi_inps"] = R.contributi(r["lordo"], R.media_cliente(r["cliente"]))
     r["imponibile_irpef"] = R.centesimi(r["lordo"] - r["contributi_inps"])
-    r["irpef"] = irpef_sintetica(r["imponibile_irpef"])
-    r["altre_trattenute"] = R.centesimi(r["imponibile_irpef"] * 0.015)
-    r["netto"] = R.centesimi(r["imponibile_irpef"] - r["irpef"] - r["altre_trattenute"])
+    fisco(r)
     r["quota_tfr"] = R.quota_tfr(ordinaria)
     return r
 
@@ -186,11 +188,10 @@ def main() -> None:
 
     def contributi_errati(i, importo: float) -> None:
         """Il software ha trattenuto un altro importo: imponibile fiscale, IRPEF e netto seguono."""
-        S.loc[i, "contributi_inps"] = importo
-        S.loc[i, "imponibile_irpef"] = R.centesimi(S.loc[i, "lordo"] - S.loc[i, "contributi_inps"])
-        S.loc[i, "irpef"] = irpef_sintetica(S.loc[i, "imponibile_irpef"])
-        S.loc[i, "altre_trattenute"] = R.centesimi(S.loc[i, "imponibile_irpef"] * 0.015)
-        S.loc[i, "netto"] = R.centesimi(S.loc[i, "imponibile_irpef"] - S.loc[i, "irpef"] - S.loc[i, "altre_trattenute"])
+        r = S.loc[i].to_dict()
+        r["contributi_inps"] = importo
+        r["imponibile_irpef"] = R.centesimi(r["lordo"] - r["contributi_inps"])
+        S.loc[i] = pd.Series(fisco(r))
 
     for cliente in ("B", "C", "B"):        # CIGS e FIS non trattenuti: solo l'IVS
         i = prendi(lambda r, cliente=cliente: libero(r) and r["cliente"] == cliente)
@@ -229,7 +230,7 @@ def main() -> None:
     d["matricola"], d["livello"] = S.loc[i, "matricola"], "5"
     r = cedolino(d, C.MESE, rng, ago[i]["ferie_residuo"], ferie_godute=S.loc[i, "ferie_godute"])
     for k in ("livello", "tabellare", "scatti", "lordo", "contributi_inps", "imponibile_irpef", "irpef",
-              "altre_trattenute", "netto", "quota_tfr"):
+              "bonus_cuneo", "trattamento_integrativo", "altre_trattenute", "netto", "quota_tfr"):
         S.loc[i, k] = r[k]
     registra(i, "anagrafica", "livello passato da 4 a 5 senza evento: il cedolino torna, ma è più basso")
     i = prendi(lambda r: libero(r) and r["superminimo"] > 0)
@@ -333,6 +334,38 @@ def main() -> None:
         if errore:
             registra(i, "tfr_liquidato", nota)
 
+    # Conguaglio IRPEF alla cessazione (C21): l'imponibile da gennaio, i giorni di lavoro e quanto già trattenuto o
+    # erogato nei mesi prima (ogni mese come agosto, con le regole di C20); poi il cedolino di uscita porta la
+    # differenza. Due uscite con un errore: detrazioni piene invece che rapportate ai giorni, e conguaglio non fatto.
+    for col in CONGUAGLIO:
+        S[col] = S[col].astype(object)
+    errori_conguaglio = iter(["detrazioni", "non_fatto"])
+    inizio_anno = date(R.primo_del_mese(C.MESE).year, 1, 1)
+    for i in S.index[S["evento"] == "cessazione"]:
+        r = S.loc[i].to_dict()
+        assunto, uscita = date.fromisoformat(r["data_assunzione"]), date.fromisoformat(r["data_cessazione"])
+        dal = max(assunto, inizio_anno)
+        mesi_prec = (R.primo_del_mese(C.MESE).month - dal.month) if dal.year == inizio_anno.year else 0
+        g = R.irpef_mese(ago[i]["imponibile_irpef"])
+        prec = {k: R.centesimi(g[k] * mesi_prec) for k in ("irpef", "bonus_cuneo", "trattamento_integrativo")}
+        imp_anno = R.centesimi(ago[i]["imponibile_irpef"] * mesi_prec + r["imponibile_irpef"])
+        giorni = (uscita - dal).days + 1
+        errore = next(errori_conguaglio, "")
+        if errore == "non_fatto":
+            r.update(R.irpef_mese(r["imponibile_irpef"]))
+            nota = "conguaglio non fatto alla cessazione: ritenuta calcolata come in un mese qualsiasi"
+        else:
+            c = R.conguaglio_cessazione(imp_anno, giorni, prec["irpef"], prec["bonus_cuneo"],
+                                        prec["trattamento_integrativo"], rapporta=errore != "detrazioni")
+            r.update({k: c[k] for k in ("irpef", "bonus_cuneo", "trattamento_integrativo")})
+            nota = "conguaglio con le detrazioni dell'anno intero invece che rapportate ai giorni di lavoro"
+        r.update(dict(zip(CONGUAGLIO, [f"{imp_anno:.2f}", str(giorni), f"{prec['irpef']:.2f}",
+                                       f"{prec['bonus_cuneo']:.2f}", f"{prec['trattamento_integrativo']:.2f}"],
+                          strict=True)))
+        S.loc[i] = pd.Series(netto(r))
+        if errore:
+            registra(i, "conguaglio", nota)
+
     # Assenze di settembre (C15-C17). La base è la retribuzione di agosto; le indennità sono voci a parte.
     inizio = R.primo_del_mese(C.MESE)
 
@@ -410,12 +443,27 @@ def main() -> None:
     r = sopra[1]
     r["contributi_inps"] = R.centesimi(R.euro(r["lordo"]) * R.aliquota_dipendente(C.CLIENTI["B"]["media_semestre"]))
     r["imponibile_irpef"] = R.centesimi(r["lordo"] - r["contributi_inps"])
-    r["irpef"] = irpef_sintetica(r["imponibile_irpef"])
-    r["altre_trattenute"] = R.centesimi(r["imponibile_irpef"] * 0.015)
-    r["netto"] = R.centesimi(r["imponibile_irpef"] - r["irpef"] - r["altre_trattenute"])
+    fisco(r)
     errori.append({"matricola": r["matricola"], "cliente": "B", "tipo": "inps",
                    "nota": "retribuzione oltre 4.685 €: contributo aggiuntivo dell'1% non trattenuto"})
     nuovi += sopra
+
+    # IRPEF del mese (C20): tre ritenute sbagliate, ognuna con un netto coerente, così la quadratura torna
+    annuo = lambda r: r["imponibile_irpef"] * C.MENSILITA       # noqa: E731
+    # lo scaglione del 33% è ragguagliato al mese: serve un imponibile mensile oltre 28.000 / 12
+    i = prendi(lambda r: libero(r) and r["imponibile_irpef"] > C.SCAGLIONI_IRPEF[0][0] / 12 + 50)
+    S.loc[i] = pd.Series(fisco(S.loc[i].to_dict(), scaglioni=C.SCAGLIONI_IRPEF_2025))
+    registra(i, "irpef", "ritenuta con lo scaglione del 35% del 2025 invece che del 33% del 2026")
+    i = prendi(lambda r: libero(r) and C.CUNEO_DETRAZIONE["soglie"][0] < annuo(r) <= C.CUNEO_DETRAZIONE["soglie"][1])
+    r = fisco(S.loc[i].to_dict())
+    r["irpef"] = R.centesimi(r["irpef"] + C.CUNEO_DETRAZIONE["importo"] / 12)
+    S.loc[i] = pd.Series(netto(r))
+    registra(i, "irpef", "ulteriore detrazione del cuneo fiscale (1.000 € l'anno) non applicata")
+    i = prendi(lambda r: libero(r) and annuo(r) <= C.CUNEO_SOMMA_SOGLIA)
+    r = fisco(S.loc[i].to_dict())
+    r["bonus_cuneo"] = 0.0
+    S.loc[i] = pd.Series(netto(r))
+    registra(i, "irpef", "somma del cuneo fiscale non erogata a un reddito sotto i 20.000 €")
 
     S = pd.concat([S, pd.DataFrame(nuovi)], ignore_index=True)
     ced = pd.concat([pd.DataFrame(ago), S], ignore_index=True)

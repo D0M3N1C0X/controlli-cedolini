@@ -1,4 +1,4 @@
-// I diciannove controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
+// I ventuno controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
 // tests/js/check_controlli.mjs li fa girare sui dati di casi preparati in Python
 // (tests/fixtures/js_vectors.json) e la CI fallisce alla prima differenza.
 
@@ -10,7 +10,7 @@ export const CONTROLLI = {
   C12: ["Tredicesima e quattordicesima pagate", "alta"], C13: ["Ferie non godute", "alta"], C14: ["Preavviso", "alta"],
   C15: ["Indennità di malattia INPS", "alta"], C16: ["Carenza di malattia", "media"],
   C17: ["Indennità di maternità INPS", "alta"], C18: ["Permessi ROL ed ex festività", "media"],
-  C19: ["TFR liquidato", "alta"],
+  C19: ["TFR liquidato", "alta"], C20: ["IRPEF del mese", "alta"], C21: ["Conguaglio IRPEF alla cessazione", "alta"],
 };
 
 const ANAGRAFICA = ["livello", "part_time", "superminimo", "data_assunzione"];
@@ -193,6 +193,66 @@ export function tfrLiquidato(fondo, quote, imponibile, cessazione, cfg) {
   return centesimi(fondo + riv - centesimi(riv * cfg.imposta_tfr) + quote - centesimi(imponibile * cfg.contributo_tfr));
 }
 
+// ---- IRPEF 2026 (come regole.imposta_lorda e seguenti; F24-F29) ------------------------------------------
+// scaglioni: [[limite, aliquota], ..., [null, aliquota]]; con periodi = 12 i limiti annui sono ragguagliati al mese
+export function impostaLorda(reddito, periodi, cfg, scaglioni = cfg.scaglioni_irpef) {
+  let imposta = 0, sotto = 0;
+  for (const [limite, aliquota] of scaglioni) {
+    const tetto = limite == null ? reddito : Math.min(reddito, limite / periodi);
+    if (tetto > sotto) imposta += (tetto - sotto) * aliquota;
+    if (limite == null || reddito <= limite / periodi) break;
+    sotto = limite / periodi;
+  }
+  return imposta;
+}
+export function detrazioneLavoro(reddito, cfg) {
+  const d = cfg.detrazione_lavoro, [s1, s2, s3] = d.soglie;
+  let base;
+  if (reddito <= s1) base = d.base;
+  else if (reddito <= s2) base = d.fascia2 + d.fascia2_extra * arrotonda((s2 - reddito) / (s2 - s1), cfg.decimali_rapporto);
+  else if (reddito <= s3) base = d.fascia2 * arrotonda((s3 - reddito) / (s3 - s2), cfg.decimali_rapporto);
+  else base = 0;
+  const [lo, hi] = d.bonus_65_soglie;
+  return base + (lo < reddito && reddito <= hi ? d.bonus_65 : 0);
+}
+export function detrazioneCuneo(reddito, cfg) {
+  const d = cfg.cuneo_detrazione, [s1, s2, s3] = d.soglie;
+  if (s1 < reddito && reddito <= s2) return d.importo;
+  if (s2 < reddito && reddito <= s3) return d.importo * arrotonda((s3 - reddito) / (s3 - s2), cfg.decimali_rapporto);
+  return 0;
+}
+export function percentualeCuneo(redditoAnnuo, cfg) {
+  for (const [limite, p] of cfg.cuneo_somma_fasce) if (limite == null || redditoAnnuo <= limite) return p;
+  return 0;
+}
+export function trattamentoIntegrativo(reddito, lorda, detrazione, frazione, cfg) {
+  const t = cfg.trattamento_integrativo, tetto = t.importo * frazione;
+  if (reddito <= t.soglia) return lorda > detrazione - t.riduzione_capienza * frazione ? tetto : 0;
+  if (reddito <= t.soglia_alta && detrazione > lorda) return Math.min(tetto, detrazione - lorda);
+  return 0;
+}
+export function irpefMese(imponibile, cfg) {
+  const annuo = imponibile * cfg.mensilita;
+  const lorda = impostaLorda(imponibile, 12, cfg), det = detrazioneLavoro(annuo, cfg);
+  return { irpef: centesimi(Math.max(0, lorda - det / 12 - detrazioneCuneo(annuo, cfg) / 12)),
+    bonus_cuneo: annuo <= cfg.cuneo_somma_soglia ? centesimi(imponibile * percentualeCuneo(annuo, cfg)) : 0,
+    trattamento_integrativo: centesimi(trattamentoIntegrativo(annuo, impostaLorda(annuo, 1, cfg), det, 1, cfg) / 12) };
+}
+export function conguaglioCessazione(imp, giorni, ritenutePrec, cuneoPrec, tiPrec, cfg) {
+  const frazione = giorni / cfg.giorni_anno;
+  const lorda = impostaLorda(imp, 1, cfg);
+  let det = detrazioneLavoro(imp, cfg) * frazione;
+  if (imp <= cfg.detrazione_lavoro.soglie[0]) det = Math.max(det, cfg.detrazione_lavoro.minimo);
+  const netta = centesimi(Math.max(0, lorda - det - detrazioneCuneo(imp, cfg) * frazione));
+  const annuo = imp * cfg.giorni_anno / giorni;
+  const somma = imp <= cfg.cuneo_somma_soglia ? centesimi(imp * percentualeCuneo(annuo, cfg)) : 0;
+  const ti = centesimi(trattamentoIntegrativo(imp, lorda, det, frazione, cfg));
+  return { irpef: centesimi(netta - ritenutePrec), bonus_cuneo: centesimi(somma - cuneoPrec),
+    trattamento_integrativo: centesimi(ti - tiPrec), imposta_netta: netta };
+}
+const FISCO = ["bonus_cuneo", "trattamento_integrativo"];
+const CONGUAGLIO = ["imponibile_fiscale_anno", "giorni_lavoro_anno", "ritenute_anno_prec", "cuneo_anno_prec", "ti_anno_prec"];
+
 // Giorni di preavviso del CCNL: fino a 5 anni di servizio, dal 6° al 10°, oltre il 10° (F13).
 export function preavvisoMinimo(tipo, livello, assunzione, cessazione, cfg) {
   const anni = anniDiServizio(assunzione, cessazione);
@@ -235,6 +295,19 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
       if (atteso != null && Math.abs(Number(r.tfr_liquidato) - atteso) > cfg.tolleranza) segnala(r, "C19", atteso, Number(r.tfr_liquidato));
     }
   }
+  // C20 nel mese, C21 alla cessazione con i dati del conguaglio (come _fisco): una segnalazione, sulla prima voce
+  function fisco(r) {
+    if (FISCO.some((c) => r[c] == null)) return;
+    let codice, atteso;
+    if (vuoto(r.data_cessazione)) { codice = "C20"; atteso = irpefMese(Number(r.imponibile_irpef), cfg); }
+    else if (CONGUAGLIO.every((c) => !vuoto(r[c]))) {
+      codice = "C21";
+      atteso = conguaglioCessazione(...CONGUAGLIO.map((c) => Number(r[c])), cfg);
+    } else return;
+    for (const voce of ["irpef", ...FISCO]) {
+      if (Math.abs(Number(r[voce]) - atteso[voce]) > cfg.tolleranza) { segnala(r, codice, atteso[voce], Number(r[voce])); return; }
+    }
+  }
   // C15-C17: le indennità anticipate per l'INPS e la carenza, sulla retribuzione del mese prima (come _assenze)
   const si = (v) => /^(true|vero|1|si|sì|yes|x)$/i.test(String(v ?? "").trim());
   function assenze(r, p) {
@@ -273,7 +346,8 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
     a.ferie_residuo = round4((p ? p.ferie_residuo : 0) + ferieMese - r.ferie_godute);
     const extra = ["tredicesima", "quattordicesima", "ferie_liquidate"].reduce((s, k) => s + (vuoto(r[k]) ? 0 : Number(r[k])), 0);
     a.lordo = centesimi(ordinaria + r.straordinari + extra);
-    a.netto = centesimi(r.lordo - r.contributi_inps - r.irpef - r.altre_trattenute);
+    a.netto = centesimi(r.lordo - r.contributi_inps - r.irpef - r.altre_trattenute
+      + FISCO.reduce((s, c) => s + (r[c] == null ? 0 : Number(r[c])), 0));
     for (const [codice, voce, tol] of [["C01", "tabellare", cfg.tolleranza], ["C02", "scatti", cfg.tolleranza],
       ["C03", "contributi_inps", cfg.tolleranza], ["C04", "quota_tfr", cfg.tolleranza],
       ["C05", "ferie_residuo", cfg.tolleranza_ferie]]) {
@@ -294,6 +368,7 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
       if (r.ratei_13 !== e13 || r.ratei_14 !== e14) segnala(r, "C11", `13ª ${e13}; 14ª ${e14}`, `13ª ${r.ratei_13}; 14ª ${r.ratei_14}`);
     }
     cessazione(r);
+    fisco(r);
     assenze(r, p);
     if (r.permessi_residuo != null && !vuoto(r.permessi_residuo)) {
       const maturati = permessiMese(r.data_assunzione, cfg.mese, posizione(r.cliente, cfg).dipendenti, r.part_time, cfg);
@@ -365,7 +440,9 @@ const NUMERI = ["part_time", "tabellare", "scatti_n", "scatti", "superminimo", "
 
 const FACOLTATIVI = ["ratei_13", "ratei_14", "preavviso_giorni", "tredicesima", "quattordicesima", "ferie_liquidate",
   "malattia_evento_n", "malattia_inps", "malattia_carenza", "maternita_inps", "permessi_maturati", "permessi_goduti",
-  "permessi_residuo", "fondo_tfr_prec", "tfr_quote_anno", "imponibile_anno", "tfr_liquidato"];
+  "permessi_residuo", "fondo_tfr_prec", "tfr_quote_anno", "imponibile_anno", "tfr_liquidato",
+  "bonus_cuneo", "trattamento_integrativo", "imponibile_fiscale_anno", "giorni_lavoro_anno", "ritenute_anno_prec",
+  "cuneo_anno_prec", "ti_anno_prec"];
 const DATE_FACOLTATIVE = ["malattia_dal", "malattia_al", "maternita_dal", "maternita_al"];
 
 export function numero(s, decimaleVirgola) {

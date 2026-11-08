@@ -32,7 +32,11 @@ NUOVE = [("BQ", "malattia_dal", "data"), ("BR", "malattia_al", "data"), ("BS", "
          ("BW", "maternita_dal", "data"), ("BX", "maternita_al", "data"), ("BY", "maternita_inps", "euro"),
          ("BZ", "permessi_maturati", "ore"), ("CA", "permessi_goduti", "ore"), ("CB", "permessi_residuo", "ore"),
          ("CC", "fondo_tfr_prec", "euro"), ("CD", "tfr_quote_anno", "euro"), ("CE", "imponibile_anno", "euro"),
-         ("CF", "tfr_liquidato", "euro")]
+         ("CF", "tfr_liquidato", "euro"),
+         # IRPEF (C20-C21): somme del cuneo e trattamento integrativo in ogni cedolino; dati del conguaglio all'uscita
+         ("CY", "bonus_cuneo", "euro"), ("CZ", "trattamento_integrativo", "euro"),
+         ("DA", "imponibile_fiscale_anno", "euro"), ("DB", "giorni_lavoro_anno", "intero"),
+         ("DC", "ritenute_anno_prec", "euro"), ("DD", "cuneo_anno_prec", "euro"), ("DE", "ti_anno_prec", "euro")]
 RIGHE = 250          # righe con le formule già pronte nei fogli Mese, Mese precedente e Novembre 2026
 REPO = "https://github.com/D0M3N1C0X/controlli-cedolini"
 
@@ -192,6 +196,46 @@ class Foglio:
              "17%: D.lgs. 33/2025 (testo unico versamenti e riscossione), già art. 11 D.lgs. 47/2000."),
             ("contributo_tfr", "Contributo tolto dalle quote di TFR", C.CONTRIBUTO_TFR, "0.00%", None,
              "0,50% dell'imponibile previdenziale (L. 297/1982, art. 3)."),
+            ("irp_s1", "IRPEF: fine del primo scaglione, euro l'anno", C.SCAGLIONI_IRPEF[0][0], NUM2, None,
+             "Art. 11 TUIR, sostituito dalla L. 207/2024, art. 1 c. 2."),
+            ("irp_a1", "IRPEF: aliquota del primo scaglione", C.SCAGLIONI_IRPEF[0][1], "0%", None, ""),
+            ("irp_s2", "IRPEF: fine del secondo scaglione, euro l'anno", C.SCAGLIONI_IRPEF[1][0], NUM2, None, ""),
+            ("irp_a2", "IRPEF: aliquota del secondo scaglione", C.SCAGLIONI_IRPEF[1][1], "0%", YELLOW,
+             "33% dal 2026: L. 199/2025, art. 1 c. 3 (era 35%)."),
+            ("irp_a3", "IRPEF: aliquota oltre il secondo scaglione", C.SCAGLIONI_IRPEF[2][1], "0%", None, ""),
+            ("det_base", "Detrazione lavoro dipendente fino alla prima soglia", C.DETRAZIONE_LAVORO["base"], NUM2, None,
+             "Art. 13 c. 1 TUIR, testo in vigore nel 2026."),
+            ("det_min", "Detrazione minima effettiva (fino alla prima soglia)", C.DETRAZIONE_LAVORO["minimo"], NUM2, None,
+             "690 €: 1.380 € per i contratti a termine, non presenti nei dati di esempio."),
+            ("det_f2", "Detrazione: importo fisso della seconda e terza fascia", C.DETRAZIONE_LAVORO["fascia2"], NUM2, None, ""),
+            ("det_f2x", "Detrazione: parte variabile della seconda fascia", C.DETRAZIONE_LAVORO["fascia2_extra"], NUM2, None, ""),
+            ("det_s1", "Detrazione: prima soglia di reddito", C.DETRAZIONE_LAVORO["soglie"][0], NUM2, None, ""),
+            ("det_s2", "Detrazione: seconda soglia di reddito", C.DETRAZIONE_LAVORO["soglie"][1], NUM2, None, ""),
+            ("det_s3", "Detrazione: terza soglia di reddito", C.DETRAZIONE_LAVORO["soglie"][2], NUM2, None, ""),
+            ("det_65", "Detrazione: maggiorazione", C.DETRAZIONE_LAVORO["bonus_65"], NUM2, None, "Art. 13 c. 1.1 TUIR."),
+            ("det_65a", "Maggiorazione: reddito oltre", C.DETRAZIONE_LAVORO["bonus_65_soglie"][0], NUM2, None, ""),
+            ("det_65b", "Maggiorazione: reddito fino a", C.DETRAZIONE_LAVORO["bonus_65_soglie"][1], NUM2, None, ""),
+            ("dec", "Decimali dei rapporti delle detrazioni", C.DECIMALI_RAPPORTO, "0", None, "Art. 13 c. 6 TUIR."),
+            ("cu_soglia", "Cuneo: somma fino a questo reddito", C.CUNEO_SOMMA_SOGLIA, NUM2, None,
+             "L. 207/2024, art. 1 c. 4-5: somma che non concorre al reddito."),
+            ("cu_f1", "Cuneo: prima fascia di reddito", C.CUNEO_SOMMA_FASCE[0][0], NUM2, None, ""),
+            ("cu_p1", "Cuneo: percentuale della prima fascia", C.CUNEO_SOMMA_FASCE[0][1], "0.0%", None, ""),
+            ("cu_f2", "Cuneo: seconda fascia di reddito", C.CUNEO_SOMMA_FASCE[1][0], NUM2, None, ""),
+            ("cu_p2", "Cuneo: percentuale della seconda fascia", C.CUNEO_SOMMA_FASCE[1][1], "0.0%", None, ""),
+            ("cu_p3", "Cuneo: percentuale oltre la seconda fascia", C.CUNEO_SOMMA_FASCE[2][1], "0.0%", None, ""),
+            ("cd_imp", "Cuneo: ulteriore detrazione annua", C.CUNEO_DETRAZIONE["importo"], NUM2, None,
+             "L. 207/2024, art. 1 c. 6."),
+            ("cd_s1", "Ulteriore detrazione: reddito oltre", C.CUNEO_DETRAZIONE["soglie"][0], NUM2, None, ""),
+            ("cd_s2", "Ulteriore detrazione: piena fino a", C.CUNEO_DETRAZIONE["soglie"][1], NUM2, None, ""),
+            ("cd_s3", "Ulteriore detrazione: a scalare fino a", C.CUNEO_DETRAZIONE["soglie"][2], NUM2, None, ""),
+            ("ti_imp", "Trattamento integrativo annuo", C.TRATTAMENTO_INTEGRATIVO["importo"], NUM2, None,
+             "D.L. 3/2020, art. 1, rapportato al periodo di lavoro."),
+            ("ti_s1", "Trattamento integrativo: reddito fino a", C.TRATTAMENTO_INTEGRATIVO["soglia"], NUM2, None, ""),
+            ("ti_s2", "Trattamento integrativo: con incapienza, fino a", C.TRATTAMENTO_INTEGRATIVO["soglia_alta"], NUM2, None, ""),
+            ("ti_rid", "Capienza: detrazione diminuita di", C.TRATTAMENTO_INTEGRATIVO["riduzione_capienza"], NUM2, None,
+             "L. 207/2024, art. 1 c. 3."),
+            ("giorni_anno", "Giorni dell'anno per il conguaglio", C.GIORNI_ANNO, "0", None,
+             "Detrazioni rapportate ai giorni di lavoro."),
         ]
         header(ws, 4, ["", "Parametro", "Valore", "Fonte e note"], height=20)
         for r, (key, label, value, fmt, fill, note) in enumerate(rows, start=5):
@@ -305,8 +349,8 @@ class Foglio:
     def settembre(self, ws) -> None:
         R_, m, a = self.R, self.o["mese"], self.o["attesi"]
         title(ws, "Mese: cedolini e controlli (nei dati di esempio, settembre 2026)",
-              f"Colonne A-W, AU-AV e AZ-BE: i dati del software paghe (blu), fino a {RIGHE} righe. Le altre: valori attesi ed "
-              "esiti, in formula.")
+              f"Colonne A-W, AU-AV, AZ-BE, BQ-CF e CY-DE: i dati del software paghe (blu), fino a {RIGHE} righe. Le altre: "
+              "valori attesi ed esiti, in formula.")
         inputs = ["matricola", "cliente", "codice_fiscale", "livello", "data_assunzione", "part_time", "evento",
                   "superminimo_assorbibile", "tabellare", "scatti_n", "scatti", "superminimo", "straordinari", "lordo",
                   "contributi_inps", "imponibile_irpef", "irpef", "altre_trattenute", "netto", "quota_tfr",
@@ -329,7 +373,13 @@ class Foglio:
             "Retribuzione mese prima", "Retribuzione media giornaliera", "Giorni di carenza", "Giorni al 50%",
             "Giorni al 66,66%", "Malattia attesa", "C15 Malattia", "Quota di carenza dovuta", "C16 Carenza",
             "Maternità attesa", "C17 Maternità", "Residuo permessi mese prima", "Permessi maturati attesi",
-            "Residuo permessi atteso", "C18 Permessi", "Coefficiente ISTAT %", "TFR atteso", "C19 TFR"]
+            "Residuo permessi atteso", "C18 Permessi", "Coefficiente ISTAT %", "TFR atteso", "C19 TFR",
+            "Cuneo: somma erogata", "Trattamento integrativo", "Imponibile fiscale dell'anno", "Giorni di lavoro nell'anno",
+            "IRPEF trattenuta mesi prima", "Cuneo erogato mesi prima", "Tratt. integrativo mesi prima",
+            "Reddito presunto dell'anno", "IRPEF attesa", "Cuneo atteso", "Tratt. integrativo atteso", "C20 IRPEF",
+            "Frazione d'anno", "Imposta lorda dell'anno", "Detrazione rapportata", "Imposta netta dell'anno",
+            "IRPEF di conguaglio attesa", "Cuneo di conguaglio atteso", "Tratt. integrativo di conguaglio atteso",
+            "C21 Conguaglio"]
         header(ws, 4, heads, height=44)
         widths(ws, {**{col(k): 11 for k in range(1, len(heads) + 1)}, "C": 19, "G": 14})
         first = 5
@@ -387,7 +437,7 @@ class Foglio:
             put(ws, f"AD{i}", g(f'IFERROR(INDEX({R_["ag_f"]},MATCH(A{i},{R_["ag_m"]},0)),0)'), color=GREEN, fmt=NUM4)
             put(ws, f"AE{i}", g(f"ROUND(AD{i}+ROUND({R_['ferie']}/12,4)-V{i},4)"), fmt=NUM4)
             put(ws, f"AF{i}", g(f"ROUND(I{i}+K{i}+L{i}+M{i}+N(BC{i})+N(BD{i})+N(BE{i}),2)"), fmt=NUM2)
-            put(ws, f"AG{i}", g(f"ROUND(N{i}-O{i}-Q{i}-R{i},2)"), fmt=NUM2)
+            put(ws, f"AG{i}", g(f"ROUND(N{i}-O{i}-Q{i}-R{i}+N(CY{i})+N(CZ{i}),2)"), fmt=NUM2)
             put(ws, f"AH{i}", g(f'IFERROR(INDEX({R_["ag_n"]},MATCH(A{i},{R_["ag_m"]},0)),"")'), color=GREEN, fmt=NUM2)
             put(ws, f"AI{i}", g(f'IF(AH{i}="","",S{i}/AH{i}-1)'), fmt=PCT)
             odd = "{1,3,5,7,9,11,13,15}"
@@ -411,7 +461,8 @@ class Foglio:
             put(ws, f"AT{i}", g(f'COUNTIF(AK{i}:AS{i},"ERRORE")+COUNTIF(AY{i},"ERRORE")+COUNTIF(BK{i},"ERRORE")'
                                 f'+COUNTIF(BM{i},"ERRORE")+COUNTIF(BP{i},"ERRORE")+COUNTIF(CM{i},"ERRORE")'
                                 f'+COUNTIF(CO{i},"ERRORE")+COUNTIF(CQ{i},"ERRORE")+COUNTIF(CU{i},"ERRORE")'
-                                f'+COUNTIF(CX{i},"ERRORE")'), bold=True)
+                                f'+COUNTIF(CX{i},"ERRORE")+COUNTIF(DJ{i},"ERRORE")+COUNTIF(DR{i},"ERRORE")'),
+                bold=True)
             # C11: dodicesimi dal 1° gennaio (13ª) e dal 1° luglio (14ª); il mese di assunzione conta se ha almeno
             # "giorni_mese" giorni di servizio
             mese, gm = R_["mese"], R_["giorni_mese"]
@@ -499,6 +550,30 @@ class Foglio:
                                 f'-ROUND({riv}*{R_["imposta_tfr"]},2)+CD{i}-ROUND(CE{i}*{R_["contributo_tfr"]},2),2))'),
                 fmt=NUM2)
             put(ws, f"CX{i}", g(f'IF(OR(CW{i}="",CF{i}=""),"OK",IF(ABS(CF{i}-CW{i})>{tol},"ERRORE","OK"))'))
+            # C20: la ritenuta del mese e le somme del cuneo e del trattamento integrativo, per chi non esce
+            put(ws, f"DF{i}", g(f"P{i}*{R_['mensilita']}"), fmt=NUM2)
+            put(ws, f"DG{i}", g(f"ROUND(MAX(0,{self.lorda(f'P{i}', 12)}-{self.det13(f'DF{i}')}/12"
+                                f"-{self.detc(f'DF{i}')}/12),2)"), fmt=NUM2)
+            put(ws, f"DH{i}", g(f"IF(DF{i}<={R_['cu_soglia']},ROUND(P{i}*{self.pct(f'DF{i}')},2),0)"), fmt=NUM2)
+            put(ws, f"DI{i}", g(f"ROUND({self.ti(f'DF{i}', self.lorda(f'DF{i}', 1), self.det13(f'DF{i}'), '1')}/12,2)"),
+                fmt=NUM2)
+            put(ws, f"DJ{i}", g(f'IF(AZ{i}<>"","OK",IF(OR(ABS(Q{i}-DG{i})>{tol},ABS(N(CY{i})-DH{i})>{tol},'
+                                f'ABS(N(CZ{i})-DI{i})>{tol}),"ERRORE","OK"))'))
+            # C21: il conguaglio alla cessazione, quando il cedolino porta i dati dell'anno
+            pieno = f'AND(AZ{i}<>"",DA{i}<>"",DB{i}<>"",DC{i}<>"",DD{i}<>"",DE{i}<>"")'
+            put(ws, f"DK{i}", g(f'IF({pieno},DB{i}/{R_["giorni_anno"]},"")'), fmt="0.000000")
+            put(ws, f"DL{i}", g(f'IF(DK{i}="","",{self.lorda(f"DA{i}", 1)})'), fmt=NUM2)
+            put(ws, f"DM{i}", g(f'IF(DK{i}="","",IF(DA{i}<={R_["det_s1"]},MAX({self.det13(f"DA{i}")}*DK{i},'
+                                f'{R_["det_min"]}),{self.det13(f"DA{i}")}*DK{i}))'), fmt=NUM2)
+            put(ws, f"DN{i}", g(f'IF(DK{i}="","",ROUND(MAX(0,DL{i}-DM{i}-{self.detc(f"DA{i}")}*DK{i}),2))'), fmt=NUM2)
+            put(ws, f"DO{i}", g(f'IF(DK{i}="","",ROUND(DN{i}-DC{i},2))'), fmt=NUM2)
+            annuo = f"DA{i}*{R_['giorni_anno']}/DB{i}"
+            put(ws, f"DP{i}", g(f'IF(DK{i}="","",ROUND(IF(DA{i}<={R_["cu_soglia"]},'
+                                f'ROUND(DA{i}*{self.pct(annuo)},2),0)-DD{i},2))'), fmt=NUM2)
+            put(ws, f"DQ{i}", g(f'IF(DK{i}="","",ROUND(ROUND({self.ti(f"DA{i}", f"DL{i}", f"DM{i}", f"DK{i}")},2)'
+                                f'-DE{i},2))'), fmt=NUM2)
+            put(ws, f"DR{i}", g(f'IF(DK{i}="","OK",IF(OR(ABS(Q{i}-DO{i})>{tol},ABS(N(CY{i})-DP{i})>{tol},'
+                                f'ABS(N(CZ{i})-DQ{i})>{tol}),"ERRORE","OK"))'))
         prec_ret = {p.matricola: R.centesimi(p.tabellare + p.scatti + p.superminimo)
                     for p in self.o["precedente"].itertuples(index=False)}
         for i, t in enumerate(m.itertuples(index=False), start=first):
@@ -521,6 +596,18 @@ class Foglio:
                 self.check("Mese", f"{t.matricola} coefficiente ISTAT", R.coefficiente_tfr(ces), f"Mese!CV{i}")
                 self.check("Mese", f"{t.matricola} TFR atteso", R.tfr_liquidato(
                     float(t.fondo_tfr_prec), float(t.tfr_quote_anno), float(t.imponibile_anno), ces), f"Mese!CW{i}")
+                if str(t.imponibile_fiscale_anno).strip():
+                    cg = R.conguaglio_cessazione(float(t.imponibile_fiscale_anno), int(float(t.giorni_lavoro_anno)),
+                                                 float(t.ritenute_anno_prec), float(t.cuneo_anno_prec),
+                                                 float(t.ti_anno_prec))
+                    self.check("Mese", f"{t.matricola} imposta netta dell'anno", cg["imposta_netta"], f"Mese!DN{i}")
+                    for letter, key in (("DO", "irpef"), ("DP", "bonus_cuneo"), ("DQ", "trattamento_integrativo")):
+                        self.check("Mese", f"{t.matricola} conguaglio {key}", cg[key], f"Mese!{letter}{i}")
+            else:
+                im = R.irpef_mese(float(t.imponibile_irpef))
+                if k % 3 == 0 or (im["bonus_cuneo"] or im["trattamento_integrativo"]):
+                    for letter, key in (("DG", "irpef"), ("DH", "bonus_cuneo"), ("DI", "trattamento_integrativo")):
+                        self.check("Mese", f"{t.matricola} {key} atteso", im[key], f"Mese!{letter}{i}")
             base = prec_ret.get(t.matricola)
             if str(t.malattia_dal).strip() and base is not None:
                 dal, al = date.fromisoformat(t.malattia_dal), date.fromisoformat(t.malattia_al)
@@ -539,20 +626,20 @@ class Foglio:
                     self.check("Mese", f"{t.matricola} {name} atteso", a.loc[k, name], f"Mese!{letter}{i}")
         esito_rule(ws, f"AK{first}:AS{last}")
         esito_rule(ws, f"AY{first}:AY{last}")
-        for letter in ("BK", "BM", "BP", "CM", "CO", "CQ", "CU", "CX"):
+        for letter in ("BK", "BM", "BP", "CM", "CO", "CQ", "CU", "CX", "DJ", "DR"):
             esito_rule(ws, f"{letter}{first}:{letter}{last}")
         E = lambda letter: f"Mese!${letter}${first}:${letter}${last}"
         self.R.update({"s_cli": E("B"), "s_m": E("A"), "s_irpef": E("Q"), "s_inps": E("O"), "s_err": E("AT"),
                        **{f"s_{c}": E(letter) for c, letter in zip(
                            ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C09", "C10", "C11", "C12", "C13", "C14",
-                            "C15", "C16", "C17", "C18", "C19"],
+                            "C15", "C16", "C17", "C18", "C19", "C20", "C21"],
                            ["AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AY", "BK", "BM", "BP",
-                            "CM", "CO", "CQ", "CU", "CX"], strict=True)}})
+                            "CM", "CO", "CQ", "CU", "CX", "DJ", "DR"], strict=True)}})
         # each Python finding must be an ERRORE in the sheet, and every other row OK
         an = self.o["anomalie"]
         colonna = {"C01": "AK", "C02": "AL", "C03": "AM", "C04": "AN", "C05": "AO", "C06": "AP", "C07": "AQ", "C09": "AR",
                    "C10": "AS", "C11": "AY", "C12": "BK", "C13": "BM", "C14": "BP", "C15": "CM", "C16": "CO",
-                   "C17": "CQ", "C18": "CU", "C19": "CX"}
+                   "C17": "CQ", "C18": "CU", "C19": "CX", "C20": "DJ", "C21": "DR"}
         trovate = set(zip(an["controllo"], an["matricola"], strict=True))
         for k, t in enumerate(m.itertuples(index=False)):
             for codice, letter in colonna.items():
@@ -560,7 +647,36 @@ class Foglio:
                     esito = "ERRORE" if (codice, t.matricola) in trovate else "OK"
                     self.check("Mese", f"{t.matricola} {codice}", esito, f"Mese!{letter}{first + k}")
         ws.freeze_panes = "D5"
-        ws.auto_filter.ref = f"A4:CX{last}"
+        ws.auto_filter.ref = f"A4:DR{last}"
+
+    # ---- IRPEF in formula: le stesse operazioni, nello stesso ordine, delle funzioni di regole.py ----------------
+    def lorda(self, x: str, periodi: int) -> str:
+        R_ = self.R
+        s1, s2 = (f"{R_['irp_s1']}/{periodi}", f"{R_['irp_s2']}/{periodi}") if periodi > 1 else (R_["irp_s1"], R_["irp_s2"])
+        return (f"(MAX(0,MIN({x},{s1}))*{R_['irp_a1']}+MAX(0,MIN({x},{s2})-{s1})*{R_['irp_a2']}"
+                f"+MAX(0,{x}-{s2})*{R_['irp_a3']})")
+
+    def det13(self, x: str) -> str:
+        R_ = self.R
+        return (f"(IF({x}<={R_['det_s1']},{R_['det_base']},IF({x}<={R_['det_s2']},{R_['det_f2']}+{R_['det_f2x']}"
+                f"*ROUND(({R_['det_s2']}-{x})/({R_['det_s2']}-{R_['det_s1']}),{R_['dec']}),IF({x}<={R_['det_s3']},"
+                f"{R_['det_f2']}*ROUND(({R_['det_s3']}-{x})/({R_['det_s3']}-{R_['det_s2']}),{R_['dec']}),0)))"
+                f"+IF(AND({x}>{R_['det_65a']},{x}<={R_['det_65b']}),{R_['det_65']},0))")
+
+    def detc(self, x: str) -> str:
+        R_ = self.R
+        return (f"IF(AND({x}>{R_['cd_s1']},{x}<={R_['cd_s2']}),{R_['cd_imp']},IF(AND({x}>{R_['cd_s2']},"
+                f"{x}<={R_['cd_s3']}),{R_['cd_imp']}*ROUND(({R_['cd_s3']}-{x})/({R_['cd_s3']}-{R_['cd_s2']}),"
+                f"{R_['dec']}),0))")
+
+    def pct(self, x: str) -> str:
+        R_ = self.R
+        return f"IF({x}<={R_['cu_f1']},{R_['cu_p1']},IF({x}<={R_['cu_f2']},{R_['cu_p2']},{R_['cu_p3']}))"
+
+    def ti(self, x: str, lorda: str, det: str, frazione: str) -> str:
+        R_ = self.R
+        return (f"IF({x}<={R_['ti_s1']},IF({lorda}>{det}-{R_['ti_rid']}*{frazione},{R_['ti_imp']}*{frazione},0),"
+                f"IF(AND({x}<={R_['ti_s2']},{det}>{lorda}),MIN({R_['ti_imp']}*{frazione},{det}-{lorda}),0))")
 
     def f24(self, ws) -> None:
         R_, rec = self.R, self.o["riconciliazione_f24"]
@@ -698,7 +814,7 @@ class Foglio:
     def leggimi(self, ws, names) -> None:
         widths(ws, {"A": 3, "B": 22, "C": 100})
         put(ws, "B2", "Controlli cedolini", bold=True, size=18)
-        put(ws, "B3", "Diciannove controlli sui cedolini del mese, prima dell'invio al cliente: CCNL Terziario Confcommercio",
+        put(ws, "B3", "Ventuno controlli sui cedolini del mese, prima dell'invio al cliente: CCNL Terziario Confcommercio",
             color=MUTED, size=12)
         put(ws, "B5", "Come si usa", bold=True, size=11)
         for i, text in enumerate([
@@ -734,8 +850,7 @@ class Foglio:
         put(ws, f"C{r}", f"={self.recon}", color=GREEN, bold=True)
         put(ws, f"B{r + 2}", "Dati", bold=True, size=11)
         put(ws, f"C{r + 2}", f"Sintetici: tre clienti e {len(self.o['mese'])} dipendenti inventati, con errori inseriti apposta. "
-                             "Minimi, aliquote, tassi e indici sono reali (fonti in docs/fonti.md). IRPEF non calcolata: "
-                             "serve solo a riconciliare l'F24.",
+                             "Minimi, aliquote, tassi, indici e IRPEF 2026 sono reali (fonti in docs/fonti.md).",
             wrap=True)
         ws.row_dimensions[r + 2].height = 28
         put(ws, f"B{r + 3}", "Limiti", bold=True, size=11)
