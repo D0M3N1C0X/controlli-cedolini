@@ -98,4 +98,35 @@ preavviso, malattia e integrazione, permessi.
 
 ## Logistica, trasporto merci e spedizione (Confetra e altre / Filt, Fit, Uiltrasporti)
 
-Da cercare su filtcgil.it e confetra.com.
+**Fonte:** [Testo unico del CCNL sottoscritto il 25 settembre 2025](https://www.confetra.com/wp-content/uploads/Nuovo-Testo-Unico-del-CCNL-logistica-trasporto-e-spedizione_pulito.pdf)
+(Confetra, parte datoriale firmataria; testo leggibile), letto l'8 novembre 2026; i minimi 2026 anche nella
+[tabella della pagina Confetra](https://www.confetra.com/minimi-contrattuali/), concorde. Primaria. Il rinnovo è
+l'[accordo del 6 dicembre 2024](https://www.confetra.com/wp-content/uploads/Testo-accordo-del-6.12.2024.pdf) (scansione).
+
+**Minimi mensili, personale non viaggiante** (minimo conglobato + EPA = totale; il controllo usa il minimo e l'EPA):
+
+| Livello | Minimo 1.1.2025 | Minimo 1.1.2026 | EPA 2026 | Totale 1.1.2026 | Minimo 1.6.2027 |
+|---|---:|---:|---:|---:|---:|
+| Quadri | 2.477,10 | 2.528,31 | 46,67 | 2.574,98 | 2.541,12 |
+| 1° | 2.326,61 | 2.374,79 | 36,67 | 2.411,46 | 2.386,84 |
+| 2° | 2.137,31 | 2.181,55 | 36,67 | 2.218,22 | 2.192,61 |
+| 3° Super | 1.930,37 | 1.970,37 | 30,00 | 2.000,37 | 1.980,37 |
+| 3° | 1.878,05 | 1.916,84 | 30,00 | 1.946,84 | 1.926,54 |
+| 4° | 1.786,59 | 1.823,56 | 26,67 | 1.850,23 | 1.832,80 |
+| 4° Junior | 1.740,19 | 1.776,25 | 26,67 | 1.802,92 | 1.785,27 |
+| 5° | 1.703,16 | 1.738,31 | 23,33 | 1.761,64 | 1.747,10 |
+| 6° | 1.592,38 | 1.625,41 | 23,33 | 1.648,74 | 1.633,67 |
+
+Dal 1.1.2027 l'EPA raddoppia (es. Quadri 93,34), dal 1.6.2027 sale ancora (Quadri 140,00).
+
+- **Scatti** (art. 17): ogni **biennio**, **massimo 5**, cifra fissa del livello al momento della maturazione, dal mese
+  dopo: Quadri 30,99; 1° 29,44; 2° 26,86; 3° S 24,79; 3° 24,27; 4° 23,24; 4° J 22,34; 5° 22,21; 6° 20,66; 6° J 18,78.
+  Al passaggio di livello gli scatti già maturati restano nell'importo del livello di provenienza.
+- **Tredicesima** (art. 18) e **quattordicesima** (art. 19, periodo 1° luglio - 30 giugno): la frazione di mese
+  **superiore a 15 giorni** conta intera.
+- **Preavviso** (art. 36): impiegati, fino a 5 anni: Quadri e 1° 2 mesi e 15 giorni, 2° 1 mese e 15 giorni, altri 1
+  mese; da 5 a 10 anni: 3 mesi e 15 giorni / 2 mesi / 1 mese e 15 giorni; oltre 10: 4 mesi e 15 giorni / 2 mesi e 15
+  giorni / 2 mesi. Per le dimissioni dell'impiegato i termini sono **ridotti della metà**. Operai: 6 giorni lavorativi.
+- **Malattia** (Parte speciale, Sezione prima, art. 63): **intera retribuzione globale mensile** per 3 mesi e metà
+  per altri 5 (fino a 5 anni di anzianità), 5 mesi e metà per altri 7 (oltre 5); il trattamento **integra
+  l'indennità INPS per differenza** (c. 13): un'integrazione sul lordo, non sul netto. Comporto 245 / 365 giorni.
