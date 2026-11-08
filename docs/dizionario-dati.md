@@ -69,7 +69,7 @@ errori elencati in `errori_inseriti.csv`.
 | `superminimo` | euro | Superminimo pagato nel mese |
 | `straordinari` | euro | Straordinari pagati nel mese |
 | `lordo` | euro | Totale delle voci di retribuzione |
-| `contributi_inps` | euro | Contributo IVS a carico del dipendente |
+| `contributi_inps` | euro | Contributi a carico del dipendente: IVS, CIGS, quota FIS e l'1% sopra la prima fascia |
 | `imponibile_irpef` | euro | Lordo meno contributi |
 | `irpef` | euro | Ritenuta IRPEF **sintetica**: verosimile ma non calcolata con le regole fiscali, serve solo a riconciliare l'F24 |
 | `altre_trattenute` | euro | Trattenute sintetiche (1,5% dell'imponibile), al posto di addizionali e altre voci |
@@ -86,13 +86,31 @@ errori elencati in `errori_inseriti.csv`.
 | `tredicesima` | euro | Tredicesima pagata nel mese: a dicembre o alla cessazione; vuoto se non pagata |
 | `quattordicesima` | euro | Quattordicesima pagata nel mese: a luglio o alla cessazione; vuoto se non pagata |
 | `ferie_liquidate` | euro | Ferie non godute pagate alla cessazione (F12); vuoto per chi resta |
+| `malattia_dal` | data | Primo giorno dell'evento di malattia; vuoto se nel mese non c'è |
+| `malattia_al` | data | Ultimo giorno dell'evento di malattia |
+| `malattia_evento_n` | intero | Numero dell'evento di malattia nell'anno solare (una ricaduta è lo stesso evento) |
+| `malattia_esente` | `true`/`false` | Ricovero, prognosi iniziale di almeno 12 giorni, terapie salvavita o gravidanza: niente limiti alla carenza (F16) |
+| `malattia_inps` | euro | Indennità di malattia anticipata per conto dell'INPS (F16, F17) |
+| `malattia_carenza` | euro | Integrazione dei primi 3 giorni pagata dall'azienda |
+| `maternita_dal` | data | Primo giorno del congedo di maternità; vuoto se nel mese non c'è |
+| `maternita_al` | data | Ultimo giorno previsto del congedo |
+| `maternita_inps` | euro | Indennità di maternità anticipata per conto dell'INPS (F18) |
+| `permessi_maturati` | ore | Ore di riduzione d'orario ed ex festività maturate nel mese (F23) |
+| `permessi_goduti` | ore | Ore di permesso godute nel mese |
+| `permessi_residuo` | ore | Residuo delle ore di permesso a fine mese |
+| `fondo_tfr_prec` | euro | Fondo TFR al 31 dicembre dell'anno prima; solo per chi cessa |
+| `tfr_quote_anno` | euro | Quote di TFR lorde dell'anno, fino alla cessazione |
+| `imponibile_anno` | euro | Imponibile previdenziale dello stesso periodo, per lo 0,50% (F22) |
+| `tfr_liquidato` | euro | TFR lordo liquidato alla cessazione (F19-F22) |
 
 | Evento | Significato |
 |---|---|
 | `assunzione` | Assunto nel mese: nessun cedolino il mese prima |
 | `straordinari` | Straordinari che spiegano un netto più alto |
 | `variazione part-time` | Cambio di percentuale di part-time, comunicato |
-| `cessazione` | Ultimo cedolino: con data, tipo e preavviso, le mensilità aggiuntive e le ferie non godute |
+| `cessazione` | Ultimo cedolino: con data, tipo e preavviso, le mensilità aggiuntive, le ferie non godute e il TFR |
+| `malattia` | Un evento di malattia nel mese, con l'indennità INPS e la carenza |
+| `maternità` | Inizio del congedo di maternità, con l'indennità INPS |
 
 ## `data/f24.csv`: le deleghe F24 di settembre 2026, una per cliente
 
@@ -118,7 +136,7 @@ Servono a misurare i controlli: ogni errore deve essere trovato, e nient'altro d
 |---|---|---|
 | `minimo` | C01 | Tabellare fermo a una tranche vecchia |
 | `scatto` | C02 | Scatto maturato non applicato |
-| `inps` | C03 | Aliquota sbagliata |
+| `inps` | C03 | Aliquota della posizione sbagliata, o 1% aggiuntivo dimenticato |
 | `tfr` | C04 | TFR calcolato su una base sbagliata |
 | `ferie` | C05 | Residuo ferie che non torna |
 | `netto` | C06 | Lordo o netto che non quadrano con le voci |
@@ -130,3 +148,8 @@ Servono a misurare i controlli: ogni errore deve essere trovato, e nient'altro d
 | `tredicesima` | C12 | Mensilità aggiuntiva pagata con i dodicesimi sbagliati |
 | `ferie_liquidate` | C13 | Ferie non godute pagate con un divisore diverso da 26 |
 | `preavviso` | C14 | Preavviso più corto del minimo del CCNL |
+| `malattia` | C15 | Indennità di malattia INPS con la base giornaliera sbagliata |
+| `carenza` | C16 | Carenza pagata quando non è più dovuta |
+| `maternita` | C17 | Indennità di maternità senza i ratei nella base |
+| `permessi` | C18 | Permessi maturati come un tempo pieno con anzianità |
+| `tfr_liquidato` | C19 | TFR liquidato con il coefficiente, l'imposta o il contributo sbagliati |

@@ -14,8 +14,8 @@
   },
   "C03": {
    "nome": "Contributi INPS",
-   "descrizione": "Contributo a carico del dipendente diverso da imponibile arrotondato all'euro × aliquota",
-   "cosa_fare": "Correggere l'aliquota nella posizione del dipendente",
+   "descrizione": "Contributo a carico del dipendente diverso da imponibile arrotondato all'euro × aliquota della posizione (IVS, CIGS, FIS), più l'1% oltre la prima fascia pensionabile",
+   "cosa_fare": "Correggere l'aliquota nella posizione INPS del cliente: CIGS e FIS dipendono dalla media dei dipendenti nel semestre; sopra 4.685 € al mese si aggiunge l'1%",
    "priorita": "alta"
   },
   "C04": {
@@ -83,6 +83,36 @@
    "descrizione": "Alla cessazione, giorni di preavviso sotto il minimo del CCNL per livello e anni di servizio",
    "cosa_fare": "Verificare la data della lettera. Licenziamento: i giorni di preavviso non lavorati si pagano come indennità sostitutiva. Dimissioni: il preavviso non dato si può trattenere come indennità a carico del dipendente",
    "priorita": "alta"
+  },
+  "C15": {
+   "nome": "Indennità di malattia INPS",
+   "descrizione": "Indennità anticipata diversa dal 50% (4°-20° giorno) e 66,66% (21°-180°) della retribuzione media giornaliera del mese prima",
+   "cosa_fare": "Ricalcolare l'indennità sulla retribuzione del mese prima × 14/12 / 30, al 50% dal 4° al 20° giorno e al 66,66% dopo, e correggere il conguaglio con l'INPS nel flusso UniEmens",
+   "priorita": "alta"
+  },
+  "C16": {
+   "nome": "Carenza di malattia",
+   "descrizione": "Integrazione dei primi 3 giorni pagata dal 5° evento dell'anno, o non pagata quando è dovuta",
+   "cosa_fare": "Contare gli eventi di malattia dell'anno: dal quinto la carenza non si paga, salvo ricovero, prognosi di almeno 12 giorni, terapie salvavita o gravidanza; se è dovuta e manca, pagarla",
+   "priorita": "media"
+  },
+  "C17": {
+   "nome": "Indennità di maternità INPS",
+   "descrizione": "Indennità anticipata diversa dall'80% della retribuzione media giornaliera del mese prima",
+   "cosa_fare": "Ricalcolare l'indennità all'80% della retribuzione media giornaliera, ratei compresi, e correggere il conguaglio con l'INPS; l'integrazione al 100% resta a carico dell'azienda",
+   "priorita": "alta"
+  },
+  "C18": {
+   "nome": "Permessi ROL ed ex festività",
+   "descrizione": "Residuo ore diverso da residuo del mese prima + maturate - godute, con la maturazione del CCNL",
+   "cosa_fare": "Rifare la maturazione dei permessi: 72 o 56 ore di riduzione d'orario secondo i dipendenti, più 32 di ex festività, in proporzione al part-time e con la regola dei 2 e 4 anni per chi è entrato dopo marzo 2011",
+   "priorita": "media"
+  },
+  "C19": {
+   "nome": "TFR liquidato",
+   "descrizione": "Alla cessazione, TFR diverso dal fondo rivalutato con l'indice ISTAT, al netto dell'imposta sostitutiva, più le quote dell'anno meno lo 0,50%",
+   "cosa_fare": "Rifare il conteggio: coefficiente ISTAT del mese giusto (dal 15 in poi conta il mese), imposta sostitutiva del 17% sulla rivalutazione, 0,50% tolto dalle quote dell'anno; regolare la differenza",
+   "priorita": "alta"
   }
  },
  "en": {
@@ -100,7 +130,7 @@
   },
   "C03": {
    "nome": "Social security (INPS)",
-   "descrizione": "Employee contribution different from the contribution base rounded to the euro × rate",
+   "descrizione": "Employee contribution different from the contribution base rounded to the euro × the position's rate (pensions, CIGS, FIS), plus 1% above the first pensionable band",
    "cosa_fare": "Correct the rate in the employee's INPS position",
    "priorita": "high"
   },
@@ -168,6 +198,36 @@
    "nome": "Notice period",
    "descrizione": "Notice shorter than the CCNL minimum for grade, years of service and who ends the contract",
    "cosa_fare": "Check the date of the letter. Dismissal: notice days not worked are paid as an allowance. Resignation: notice not given can be withheld as an allowance owed by the employee",
+   "priorita": "high"
+  },
+  "C15": {
+   "nome": "INPS sick pay",
+   "descrizione": "Sick pay advanced for INPS different from 50% (days 4-20) and 66.66% (days 21-180) of last month's average daily pay",
+   "cosa_fare": "Recompute on last month's pay × 14/12 / 30, at 50% from day 4 to 20 and 66.66% after, and correct the offset in the UniEmens return",
+   "priorita": "high"
+  },
+  "C16": {
+   "nome": "Sick-leave waiting days",
+   "descrizione": "The first 3 days topped up from the 5th sickness of the year, or not topped up when they are due",
+   "cosa_fare": "Count the year's sicknesses: from the fifth the waiting days are not paid, unless hospital, a first prognosis of 12 days or more, life-saving treatment or pregnancy; if due and missing, pay them",
+   "priorita": "medium"
+  },
+  "C17": {
+   "nome": "INPS maternity pay",
+   "descrizione": "Maternity pay advanced for INPS different from 80% of last month's average daily pay",
+   "cosa_fare": "Recompute at 80% of average daily pay, accruals included, and correct the offset with INPS; the top-up to 100% stays with the employer",
+   "priorita": "high"
+  },
+  "C18": {
+   "nome": "Paid leave hours (ROL and former holidays)",
+   "descrizione": "Hours balance different from last month's + hours accrued − hours taken, with the CCNL accrual",
+   "cosa_fare": "Redo the accrual: 72 or 56 hours of working-time reduction by headcount, plus 32 of former holidays, pro rata for part-time, with the 2- and 4-year rule for staff hired after March 2011",
+   "priorita": "medium"
+  },
+  "C19": {
+   "nome": "Severance pay at leaving (TFR)",
+   "descrizione": "TFR different from the fund revalued with the ISTAT index, net of the substitute tax, plus the year's accruals less 0.50%",
+   "cosa_fare": "Redo the sum: ISTAT coefficient of the right month (from the 15th the month counts), 17% substitute tax on the revaluation, 0.50% off the year's accruals; settle the difference",
    "priorita": "high"
   }
  }

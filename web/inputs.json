@@ -82,16 +82,61 @@
   }
  },
  "cfg": {
+  "aggiuntiva": 0.01,
   "aliquota": 0.0919,
+  "carenza": 3,
+  "carenza_percentuali": [
+   1.0,
+   1.0,
+   0.66,
+   0.5
+  ],
+  "cigs": 0.003,
+  "cigs_soglia": 15,
   "colonna_minimo": "minimo_2025_11",
   "colonna_minimo_prossimo": "minimo_2026_11",
+  "contributo_tfr": 0.005,
+  "dipendenti_default": 20,
   "divisore_giornaliero": 26,
+  "divisore_rmgg": 30,
   "divisore_tfr": 13.5,
+  "ex_festivita": 32,
+  "f1": 20,
+  "f2": 180,
   "ferie_annue": 26,
+  "fis_fino_a_5": 0.005,
+  "fis_oltre_5": 0.008,
+  "fis_quota": 3,
+  "fis_soglia": 5,
+  "foi_dicembre": 121.5,
+  "foi_mesi": {
+   "2026-08": 103.7,
+   "2026-09": 104.3
+  },
+  "foi_raccordo": 1.214,
   "giorni_mese_intero": 15,
+  "imposta_tfr": 0.17,
+  "maternita": 0.8,
+  "media_default": 20.0,
   "mensilita": 14,
   "mese": "2026-09",
   "mese_precedente": "2026-08",
+  "p1": 0.5,
+  "p2": 0.6666,
+  "posizioni": {
+   "A": {
+    "dipendenti": 18,
+    "media_semestre": 14.5
+   },
+   "B": {
+    "dipendenti": 74,
+    "media_semestre": 74.0
+   },
+   "C": {
+    "dipendenti": 27,
+    "media_semestre": 27.0
+   }
+  },
   "preavviso": {
    "dimissioni": {
     "1": [
@@ -178,11 +223,19 @@
     ]
    }
   },
+  "prima_fascia": 4685.0,
   "prossima_tranche": "2026-11-01",
+  "rol_fino_a_15": 56,
+  "rol_nuovi_assunti": "2011-03-01",
+  "rol_oltre_15": 72,
+  "rol_soglia": 15,
   "scatti_anni": 3,
   "scatti_max": 10,
   "soglia": 0.2,
+  "tfr_fisso": 1.5,
+  "tfr_quota": 0.75,
   "tolleranza": 0.01,
-  "tolleranza_ferie": 0.01
+  "tolleranza_ferie": 0.01,
+  "tolleranza_ore": 0.01
  }
 }

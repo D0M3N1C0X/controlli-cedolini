@@ -16,7 +16,7 @@ import regole as R
 WEB = C.ROOT / "web"
 VECTORS = C.ROOT / "tests" / "fixtures" / "js_vectors.json"
 VOCI = ["tabellare", "scatti", "superminimo", "straordinari", "lordo", "contributi_inps", "irpef",
-        "altre_trattenute", "netto", "quota_tfr", "ferie_residuo", "ferie_godute"]
+        "altre_trattenute", "netto", "quota_tfr", "ferie_residuo", "ferie_godute", "permessi_residuo", "permessi_goduti"]
 
 
 def cfg() -> dict:
@@ -26,7 +26,26 @@ def cfg() -> dict:
             "soglia": C.SOGLIA_VARIAZIONE, "tolleranza": C.TOLLERANZA, "tolleranza_ferie": C.TOLLERANZA_FERIE,
             "scatti_max": C.SCATTI_MAX, "scatti_anni": C.SCATTI_ANNI, "giorni_mese_intero": C.GIORNI_MESE_INTERO,
             "divisore_giornaliero": C.DIVISORE_GIORNALIERO, "prossima_tranche": C.PROSSIMA_TRANCHE.isoformat(),
-            "preavviso": {tipo: {lv: list(g) for lv, g in t.items()} for tipo, t in C.PREAVVISO.items()}}
+            "preavviso": {tipo: {lv: list(g) for lv, g in t.items()} for tipo, t in C.PREAVVISO.items()},
+            # contributi per posizione INPS (F14, F15): l'esempio ha le sue; per i file dell'utente valgono i campi
+            # della pagina, che partono da questi valori
+            "posizioni": {c: {"media_semestre": v["media_semestre"], "dipendenti": v["dipendenti"]}
+                          for c, v in C.CLIENTI.items()},
+            "media_default": 20.0, "dipendenti_default": 20,
+            "cigs": C.CIGS_DIPENDENTE, "cigs_soglia": C.CIGS_SOGLIA, "fis_fino_a_5": C.FIS_ALIQUOTA["fino_a_5"],
+            "fis_oltre_5": C.FIS_ALIQUOTA["oltre_5"], "fis_soglia": C.FIS_SOGLIA, "fis_quota": C.FIS_QUOTA_DIPENDENTE,
+            "aggiuntiva": C.ALIQUOTA_AGGIUNTIVA, "prima_fascia": C.PRIMA_FASCIA_MENSILE,
+            # assenze e permessi (F16-F18, F23)
+            "divisore_rmgg": C.DIVISORE_RMGG, "carenza": C.MALATTIA_CARENZA, "f1": C.MALATTIA_FASCE[0][0],
+            "p1": C.MALATTIA_FASCE[0][1], "f2": C.MALATTIA_FASCE[1][0], "p2": C.MALATTIA_FASCE[1][1],
+            "maternita": C.MATERNITA_PERCENTUALE, "carenza_percentuali": list(C.CARENZA_PERCENTUALI),
+            "rol_fino_a_15": C.ROL_ORE["fino_a_15"], "rol_oltre_15": C.ROL_ORE["oltre_15"], "rol_soglia": C.ROL_SOGLIA,
+            "ex_festivita": C.EX_FESTIVITA_ORE, "rol_nuovi_assunti": C.ROL_NUOVI_ASSUNTI,
+            "tolleranza_ore": C.TOLLERANZA_ORE,
+            # TFR alla cessazione (F19-F22)
+            "tfr_fisso": C.TFR_TASSO_FISSO, "tfr_quota": C.TFR_QUOTA_INFLAZIONE, "foi_dicembre": C.FOI_DICEMBRE,
+            "foi_raccordo": C.FOI_RACCORDO, "foi_mesi": C.FOI_MESI, "imposta_tfr": C.IMPOSTA_SOSTITUTIVA_TFR,
+            "contributo_tfr": C.CONTRIBUTO_TFR}
 
 
 def ccnl() -> dict:
@@ -104,6 +123,13 @@ def write_vectors(n: int = 8, seed: int = 11) -> int:
                 v = str(max(0, int(x.loc[i, voce]) + rng.choice([-30, -1, 0, 1])))
             else:
                 v = f"{float(x.loc[i, voce]) + rng.choice([-1, 1]) * rng.choice([0.005, 0.01, 0.02, 25]):.3f}"
+            x.loc[i, voce] = v
+            patch.append([int(i), voce, v])
+        eventi = [(k, v) for k in x.index for v in ("malattia_inps", "malattia_carenza", "maternita_inps",
+                                                    "tfr_liquidato") if x.loc[k, v] != ""]
+        for _ in range(rng.randint(1, 4)):                         # indennità, carenza e TFR, anche a mezzo centesimo
+            i, voce = rng.choice(eventi)
+            v = f"{float(x.loc[i, voce]) + rng.choice([-1, 1]) * rng.choice([0.005, 0.01, 0.02, 12, 300]):.3f}"
             x.loc[i, voce] = v
             patch.append([int(i), voce, v])
         i = rng.choice(list(x.index))                              # un codice fiscale trascritto male

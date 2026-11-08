@@ -20,7 +20,8 @@ CONTROLLI = {
                                  "part-time compreso", "alta"),
     "C02": ("Scatti di anzianità", "Importo degli scatti diverso da quelli maturati dalla data di assunzione", "alta"),
     "C03": ("Contributi INPS",
-            "Contributo a carico del dipendente diverso da imponibile arrotondato all'euro × aliquota", "alta"),
+            "Contributo a carico del dipendente diverso da imponibile arrotondato all'euro × aliquota della posizione "
+            "(IVS, CIGS, FIS), più l'1% oltre la prima fascia pensionabile", "alta"),
     "C04": ("Quota TFR", "Rateo TFR diverso da retribuzione ordinaria × 14 / 13,5 / 12", "media"),
     "C05": ("Residuo ferie", "Residuo diverso da residuo del mese prima + maturate - godute", "media"),
     "C06": ("Quadratura", "Lordo diverso dalla somma delle voci, o netto diverso da lordo meno trattenute", "alta"),
@@ -39,18 +40,37 @@ CONTROLLI = {
             "Alla cessazione, ferie residue pagate diversamente da 1/26 della retribuzione mensile al giorno", "alta"),
     "C14": ("Preavviso",
             "Alla cessazione, giorni di preavviso sotto il minimo del CCNL per livello e anni di servizio", "alta"),
+    "C15": ("Indennità di malattia INPS",
+            "Indennità anticipata diversa dal 50% (4°-20° giorno) e 66,66% (21°-180°) della retribuzione media "
+            "giornaliera del mese prima", "alta"),
+    "C16": ("Carenza di malattia",
+            "Integrazione dei primi 3 giorni pagata dal 5° evento dell'anno, o non pagata quando è dovuta", "media"),
+    "C17": ("Indennità di maternità INPS",
+            "Indennità anticipata diversa dall'80% della retribuzione media giornaliera del mese prima", "alta"),
+    "C18": ("Permessi ROL ed ex festività",
+            "Residuo ore diverso da residuo del mese prima + maturate - godute, con la maturazione del CCNL", "media"),
+    "C19": ("TFR liquidato",
+            "Alla cessazione, TFR diverso dal fondo rivalutato con l'indice ISTAT, al netto dell'imposta sostitutiva, "
+            "più le quote dell'anno meno lo 0,50%", "alta"),
 }
 TIPO_CONTROLLO = {"minimo": "C01", "scatto": "C02", "inps": "C03", "tfr": "C04", "ferie": "C05", "netto": "C06",
                   "variazione": "C07", "f24": "C08", "codice_fiscale": "C09",
                   "anagrafica": "C10", "ratei": "C11", "tredicesima": "C12", "ferie_liquidate": "C13",
-                  "preavviso": "C14"}
+                  "preavviso": "C14", "malattia": "C15", "carenza": "C16", "maternita": "C17", "permessi": "C18",
+                  "tfr_liquidato": "C19"}
 
 CESSAZIONE = ["data_cessazione", "tipo_cessazione", "preavviso_giorni", "tredicesima", "quattordicesima",
               "ferie_liquidate"]
+# Voci facoltative: vuote se nel mese non c'è l'evento (F16-F23)
+ASSENZE = ["malattia_dal", "malattia_al", "malattia_evento_n", "malattia_esente", "malattia_inps", "malattia_carenza",
+           "maternita_dal", "maternita_al", "maternita_inps"]
+TFR_USCITA = ["fondo_tfr_prec", "tfr_quote_anno", "imponibile_anno", "tfr_liquidato"]
+PERMESSI = ["permessi_maturati", "permessi_goduti", "permessi_residuo"]
 
 
 def carica() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    ced = pd.read_csv(C.CEDOLINI, dtype={"livello": str, "evento": str, **{c: str for c in CESSAZIONE}},
+    ced = pd.read_csv(C.CEDOLINI, dtype={"livello": str, "evento": str,
+                                         **{c: str for c in CESSAZIONE + ASSENZE + TFR_USCITA}},
                       keep_default_na=False)
     return (ced[ced["mese"] == C.MESE].reset_index(drop=True), ced[ced["mese"] == C.MESE_PRECEDENTE],
             pd.read_csv(C.F24))
@@ -65,7 +85,8 @@ def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
     a["scatti_n"] = [R.scatti_maturati(date.fromisoformat(d), C.MESE) for d in m["data_assunzione"]]
     a["scatti"] = [R.centesimi(t.loc[lv, "scatto"] * n * p)
                    for lv, n, p in zip(m["livello"], a["scatti_n"], m["part_time"], strict=True)]
-    a["contributi_inps"] = m["lordo"].map(R.contributi)
+    a["contributi_inps"] = [R.contributi(lordo, R.media_cliente(c)) for lordo, c in zip(m["lordo"], m["cliente"],
+                                                                                      strict=True)]
     ordinaria = m["tabellare"] + m["scatti"] + m["superminimo"]
     a["quota_tfr"] = ordinaria.map(R.quota_tfr)
     residuo_prec = m["matricola"].map(prec.set_index("matricola")["ferie_residuo"]).fillna(0.0)
@@ -82,6 +103,11 @@ def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
              for d, c in zip(assunti, uscite, strict=True)]
     a["ratei_13"] = [r[0] for r in ratei]
     a["ratei_14"] = [r[1] for r in ratei]
+    if "permessi_residuo" in m:
+        res_prec = m["matricola"].map(prec.set_index("matricola")["permessi_residuo"]).fillna(0.0)
+        a["permessi_maturati"] = [R.permessi_mese(d, C.MESE, C.CLIENTI[c]["dipendenti"], p)
+                                  for d, c, p in zip(assunti, m["cliente"], m["part_time"], strict=True)]
+        a["permessi_residuo"] = (res_prec + a["permessi_maturati"] - m["permessi_goduti"]).round(4)
     return a
 
 
@@ -130,6 +156,10 @@ def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.D
             if (r13, r14) != (e13, e14):
                 segnala(i, "C11", f"13ª {e13}; 14ª {e14}", f"13ª {r13}; 14ª {r14}")
         _cessazione(m.loc[i], segnala, i)
+        _assenze(m.loc[i], prev_by.get(m.loc[i, "matricola"]), segnala, i)
+        if "permessi_residuo" in m and abs(m.loc[i, "permessi_residuo"]
+                                           - a.loc[i, "permessi_residuo"]) > C.TOLLERANZA_ORE:
+            segnala(i, "C18", float(a.loc[i, "permessi_residuo"]), float(m.loc[i, "permessi_residuo"]))
         p = prev_by.get(m.loc[i, "matricola"])
         if p is not None and m.loc[i, "evento"] == "":
             cambi = [(c, p[c], m.loc[i, c]) for c in ANAGRAFICA if _diverso(p[c], m.loc[i, c])]
@@ -183,6 +213,40 @@ def _cessazione(r: pd.Series, segnala, i: int) -> None:
         minimo = R.preavviso_minimo(tipo, str(r["livello"]), assunzione, ces)
         if int(float(r["preavviso_giorni"])) < minimo:
             segnala(i, "C14", float(minimo), float(r["preavviso_giorni"]))
+    if all(not _vuoto(r.get(c)) for c in TFR_USCITA):
+        atteso = R.tfr_liquidato(float(r["fondo_tfr_prec"]), float(r["tfr_quote_anno"]),
+                                 float(r["imponibile_anno"]), ces)
+        if atteso is not None and abs(float(r["tfr_liquidato"]) - atteso) > C.TOLLERANZA:
+            segnala(i, "C19", atteso, float(r["tfr_liquidato"]))
+
+
+def _si(v) -> bool:
+    return str(v).strip().lower() in ("true", "vero", "1", "si", "sì", "yes", "x")
+
+
+def _assenze(r: pd.Series, prec, segnala, i: int) -> None:
+    """C15-C17: le indennità anticipate per conto dell'INPS e la carenza, quando il cedolino riporta l'evento. La
+    base è la retribuzione del mese prima: senza il suo cedolino, o per un evento iniziato prima, non si controlla."""
+    inizio = R.primo_del_mese(C.MESE)
+    base = None if prec is None else R.centesimi(prec["tabellare"] + prec["scatti"] + prec["superminimo"])
+    if not _vuoto(r.get("malattia_dal")):
+        dal, al = date.fromisoformat(str(r["malattia_dal"])), date.fromisoformat(str(r["malattia_al"]))
+        if base is not None and dal >= inizio and not _vuoto(r.get("malattia_inps")):
+            atteso = R.indennita_malattia(base, dal, al, C.MESE)
+            if abs(float(r["malattia_inps"]) - atteso) > C.TOLLERANZA:
+                segnala(i, "C15", atteso, float(r["malattia_inps"]))
+        carenza, _, _ = R.giorni_malattia(dal, al, C.MESE)
+        if carenza and not _vuoto(r.get("malattia_evento_n")):
+            quota = R.carenza_percentuale(int(float(r["malattia_evento_n"])), _si(r.get("malattia_esente")))
+            pagata = 0.0 if _vuoto(r.get("malattia_carenza")) else float(r["malattia_carenza"])
+            if (quota == 0 and pagata > C.TOLLERANZA) or (quota > 0 and pagata <= C.TOLLERANZA):
+                segnala(i, "C16", f"{quota:.0%}" if quota else "non dovuta", pagata)
+    if not _vuoto(r.get("maternita_dal")) and not _vuoto(r.get("maternita_inps")) and base is not None:
+        dal, al = date.fromisoformat(str(r["maternita_dal"])), date.fromisoformat(str(r["maternita_al"]))
+        if dal >= inizio:
+            atteso = R.indennita_maternita(base, dal, al, C.MESE)
+            if abs(float(r["maternita_inps"]) - atteso) > C.TOLLERANZA:
+                segnala(i, "C17", atteso, float(r["maternita_inps"]))
 
 
 def valutazione(anomalie: pd.DataFrame) -> pd.DataFrame:

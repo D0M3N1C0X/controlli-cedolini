@@ -12,7 +12,8 @@ CONTROLLI_EN = {
             "Seniority increments different from those earned since the hiring date",
             "Add the increment earned and check the date it starts from"),
     "C03": ("Social security (INPS)",
-            "Employee contribution different from the contribution base rounded to the euro × rate",
+            "Employee contribution different from the contribution base rounded to the euro × the position's rate "
+            "(pensions, CIGS, FIS), plus 1% above the first pensionable band",
             "Correct the rate in the employee's INPS position"),
     "C04": ("Severance accrual (TFR)",
             "Monthly TFR accrual different from ordinary pay × 14 / 13.5 / 12",
@@ -50,6 +51,28 @@ CONTROLLI_EN = {
             "Notice shorter than the CCNL minimum for grade, years of service and who ends the contract",
             "Check the date of the letter. Dismissal: notice days not worked are paid as an allowance. Resignation: "
             "notice not given can be withheld as an allowance owed by the employee"),
+    "C15": ("INPS sick pay",
+            "Sick pay advanced for INPS different from 50% (days 4-20) and 66.66% (days 21-180) of last month's "
+            "average daily pay",
+            "Recompute on last month's pay × 14/12 / 30, at 50% from day 4 to 20 and 66.66% after, and correct the "
+            "offset in the UniEmens return"),
+    "C16": ("Sick-leave waiting days",
+            "The first 3 days topped up from the 5th sickness of the year, or not topped up when they are due",
+            "Count the year's sicknesses: from the fifth the waiting days are not paid, unless hospital, a first "
+            "prognosis of 12 days or more, life-saving treatment or pregnancy; if due and missing, pay them"),
+    "C17": ("INPS maternity pay",
+            "Maternity pay advanced for INPS different from 80% of last month's average daily pay",
+            "Recompute at 80% of average daily pay, accruals included, and correct the offset with INPS; the top-up "
+            "to 100% stays with the employer"),
+    "C18": ("Paid leave hours (ROL and former holidays)",
+            "Hours balance different from last month's + hours accrued − hours taken, with the CCNL accrual",
+            "Redo the accrual: 72 or 56 hours of working-time reduction by headcount, plus 32 of former holidays, "
+            "pro rata for part-time, with the 2- and 4-year rule for staff hired after March 2011"),
+    "C19": ("Severance pay at leaving (TFR)",
+            "TFR different from the fund revalued with the ISTAT index, net of the substitute tax, plus the year's "
+            "accruals less 0.50%",
+            "Redo the sum: ISTAT coefficient of the right month (from the 15th the month counts), 17% substitute tax "
+            "on the revaluation, 0.50% off the year's accruals; settle the difference"),
 }
 
 PRIORITA_EN = {"alta": "high", "media": "medium"}

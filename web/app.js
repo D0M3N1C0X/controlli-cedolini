@@ -13,7 +13,7 @@ const UI = {
   it: {
     brand: "Controlli cedolini", eyebrow: "CCNL Terziario · prima dell'invio al cliente",
     title: "Controlla i cedolini del mese",
-    lead: "Carica l'export del tuo software paghe: quattordici controlli ricalcolano ogni voce dalle regole del contratto e ti dicono cosa correggere, prima che il cliente se ne accorga.",
+    lead: "Carica l'export del tuo software paghe: diciannove controlli ricalcolano ogni voce dalle regole del contratto e ti dicono cosa correggere, prima che il cliente se ne accorga.",
     privacy: "I tuoi file restano su questo computer: i controlli girano in questa pagina e niente viene inviato. Puoi verificarlo staccando la rete dopo che la pagina si è aperta.",
     step1: "I tuoi file", step1sub: "File Excel (.xlsx) o CSV, così come escono dal software paghe.",
     dropMese: "Cedolini del mese", dropMeseSub: "Obbligatorio · trascinalo qui o tocca per sceglierlo",
@@ -26,7 +26,8 @@ const UI = {
     colonneMancano: "Mancano {n} colonne: sceglile qui sotto per continuare.",
     nonPresente: "— non presente —", facoltativa: "facoltativa",
     step3: "Le impostazioni", mese: "Mese da controllare", meseSub: "Preso dal file, se c'è la colonna del mese.",
-    aliquota: "Contributo INPS a carico del dipendente", aliquotaSub: "0,0919 è l'aliquota generale: usa quella della posizione del cliente.",
+    media: "Dipendenti medi nel semestre", mediaSub: "Decide CIGS (oltre 15) e FIS (oltre 5) a carico del dipendente.",
+    dipendenti: "Dipendenti in azienda", dipendentiSub: "Oltre 15, la riduzione d'orario è di 72 ore l'anno invece di 56.",
     soglia: "Variazione del netto da spiegare", sogliaSub: "0,20 vuol dire 20% in più o in meno del mese prima.",
     esegui: "Controlla i cedolini", step4: "Cosa correggere",
     filtroCliente: "Filtra per cliente", filtroControllo: "Filtra per controllo",
@@ -51,7 +52,7 @@ const UI = {
     eNumero: "C'è un valore non numerico in una colonna di importi: {e}.",
     fileFoglio: "{n} righe · foglio «{s}»", fileRighe: "{n} righe",
     xSegnalazioni: "Segnalazioni", xPerCliente: "Per cliente", xNovembre: "Novembre 2026", xParametri: "Parametri",
-    xMese: "Mese controllato", xAliquota: "Contributo INPS dipendente", xSoglia: "Soglia di variazione del netto",
+    xMese: "Mese controllato", xMedia: "Dipendenti medi nel semestre", xDipendenti: "Dipendenti in azienda", xSoglia: "Soglia di variazione del netto",
     xData: "Controllato il", xFonte: "Generato da controlli-cedolini",
     f_mese: "Mese", f_matricola: "Matricola", f_cliente: "Cliente", f_codice_fiscale: "Codice fiscale", f_livello: "Livello",
     f_data_assunzione: "Data di assunzione", f_part_time: "Percentuale di part-time", f_evento: "Evento del mese",
@@ -64,12 +65,19 @@ const UI = {
     f_data_cessazione: "Data di cessazione", f_tipo_cessazione: "Tipo di cessazione (dimissioni o licenziamento)",
     f_preavviso_giorni: "Giorni di preavviso", f_tredicesima: "Tredicesima pagata", f_quattordicesima: "Quattordicesima pagata",
     f_ferie_liquidate: "Ferie non godute pagate",
+    f_malattia_dal: "Malattia dal", f_malattia_al: "Malattia al", f_malattia_evento_n: "Evento di malattia nell'anno (1, 2, 3...)",
+    f_malattia_esente: "Malattia esente dai limiti di carenza", f_malattia_inps: "Indennità di malattia INPS",
+    f_malattia_carenza: "Carenza pagata", f_maternita_dal: "Maternità dal", f_maternita_al: "Maternità al",
+    f_maternita_inps: "Indennità di maternità INPS", f_permessi_maturati: "Permessi maturati (ore)",
+    f_permessi_goduti: "Permessi goduti (ore)", f_permessi_residuo: "Residuo permessi (ore)",
+    f_fondo_tfr_prec: "Fondo TFR al 31/12", f_tfr_quote_anno: "Quote TFR dell'anno", f_imponibile_anno: "Imponibile dell'anno",
+    f_tfr_liquidato: "TFR liquidato",
     f_ritenute_1001: "Ritenute IRPEF (codice 1001)", f_contributi_dipendente: "Contributi dei dipendenti",
   },
   en: {
     brand: "Payslip checks", eyebrow: "Italian CCNL Terziario · before payslips go to the client",
     title: "Check this month's payslips",
-    lead: "Load the export from your payroll software: fourteen checks recompute every item from the collective agreement's rules and tell you what to fix, before the client notices.",
+    lead: "Load the export from your payroll software: nineteen checks recompute every item from the collective agreement's rules and tell you what to fix, before the client notices.",
     privacy: "Your files stay on this computer: the checks run in this page and nothing is sent. You can confirm it by going offline once the page has opened.",
     step1: "Your files", step1sub: "Excel (.xlsx) or CSV files, as they come out of the payroll software.",
     dropMese: "This month's payslips", dropMeseSub: "Required · drop it here or tap to choose it",
@@ -82,7 +90,8 @@ const UI = {
     colonneMancano: "{n} columns are missing: choose them below to continue.",
     nonPresente: "— not in the file —", facoltativa: "optional",
     step3: "Settings", mese: "Month to check", meseSub: "Taken from the file when it has a month column.",
-    aliquota: "Employee INPS contribution", aliquotaSub: "0.0919 is the general rate: use the one of the client's INPS position.",
+    media: "Average employees in the half-year", mediaSub: "Decides CIGS (over 15) and FIS (over 5) on the employee's side.",
+    dipendenti: "Employees today", dipendentiSub: "Over 15, the working-time reduction is 72 hours a year instead of 56.",
     soglia: "Change in net pay to explain", sogliaSub: "0.20 means 20% above or below last month.",
     esegui: "Check the payslips", step4: "What to fix",
     filtroCliente: "Filter by client", filtroControllo: "Filter by check",
@@ -106,7 +115,7 @@ const UI = {
     eNumero: "A column of amounts has a value that is not a number: {e}.",
     fileFoglio: "{n} rows · sheet “{s}”", fileRighe: "{n} rows",
     xSegnalazioni: "Flags", xPerCliente: "By client", xNovembre: "November 2026", xParametri: "Settings",
-    xMese: "Month checked", xAliquota: "Employee INPS contribution", xSoglia: "Net pay change threshold",
+    xMese: "Month checked", xMedia: "Average employees in the half-year", xDipendenti: "Employees today", xSoglia: "Net pay change threshold",
     xData: "Checked on", xFonte: "Made with controlli-cedolini",
     f_mese: "Month", f_matricola: "Employee number", f_cliente: "Client", f_codice_fiscale: "Tax code", f_livello: "Grade",
     f_data_assunzione: "Hiring date", f_part_time: "Part-time share", f_evento: "Event this month",
@@ -119,6 +128,13 @@ const UI = {
     f_data_cessazione: "Leaving date", f_tipo_cessazione: "Type of leaving (dimissioni or licenziamento)",
     f_preavviso_giorni: "Notice days", f_tredicesima: "13th month paid", f_quattordicesima: "14th month paid",
     f_ferie_liquidate: "Untaken holiday paid",
+    f_malattia_dal: "Sick from", f_malattia_al: "Sick until", f_malattia_evento_n: "Sickness number in the year (1, 2, 3...)",
+    f_malattia_esente: "Sickness exempt from the waiting-day limits", f_malattia_inps: "INPS sick pay",
+    f_malattia_carenza: "Waiting days paid", f_maternita_dal: "Maternity from", f_maternita_al: "Maternity until",
+    f_maternita_inps: "INPS maternity pay", f_permessi_maturati: "Leave hours accrued",
+    f_permessi_goduti: "Leave hours taken", f_permessi_residuo: "Leave hours balance",
+    f_fondo_tfr_prec: "TFR fund at 31/12", f_tfr_quote_anno: "Year's TFR accruals", f_imponibile_anno: "Year's contribution base",
+    f_tfr_liquidato: "TFR paid",
     f_ritenute_1001: "Income tax withheld (code 1001)", f_contributi_dipendente: "Employee contributions",
   },
 };
@@ -157,6 +173,22 @@ const CAMPI_CEDOLINI = [
   ["tredicesima", false, ["tredicesima mensilita", "13a mensilita", "mensilita 13"]],
   ["quattordicesima", false, ["quattordicesima mensilita", "14a mensilita", "mensilita 14"]],
   ["ferie_liquidate", false, ["indennita ferie non godute", "ferie liquidate", "ferie non godute liquidate"]],
+  ["malattia_dal", false, ["inizio malattia", "malattia dal", "data inizio malattia"]],
+  ["malattia_al", false, ["fine malattia", "malattia al", "data fine malattia"]],
+  ["malattia_evento_n", false, ["evento malattia", "numero evento malattia", "evento n"]],
+  ["malattia_esente", false, ["esente carenza", "malattia esente"]],
+  ["malattia_inps", false, ["indennita malattia inps", "malattia inps", "indennita malattia"]],
+  ["malattia_carenza", false, ["carenza", "carenza malattia", "integrazione carenza"]],
+  ["maternita_dal", false, ["inizio maternita", "maternita dal", "congedo maternita dal"]],
+  ["maternita_al", false, ["fine maternita", "maternita al", "congedo maternita al"]],
+  ["maternita_inps", false, ["indennita maternita inps", "maternita inps", "indennita maternita"]],
+  ["permessi_maturati", false, ["permessi maturati", "rol maturati", "ore permesso maturate"]],
+  ["permessi_goduti", false, ["permessi goduti", "rol goduti", "permessi fruiti"]],
+  ["permessi_residuo", false, ["residuo permessi", "residuo rol", "permessi residui"]],
+  ["fondo_tfr_prec", false, ["fondo tfr", "fondo tfr al 31 12", "tfr anni precedenti"]],
+  ["tfr_quote_anno", false, ["quote tfr anno", "tfr anno corrente", "tfr maturato anno"]],
+  ["imponibile_anno", false, ["imponibile previdenziale anno", "imponibile anno"]],
+  ["tfr_liquidato", false, ["tfr liquidato", "tfr lordo liquidato", "liquidazione tfr"]],
 ].map(([key, required, aliases]) => ({ key, required, aliases }));
 const CAMPI_F24 = [
   ["cliente", true, ["azienda", "ditta", "client"]],
@@ -175,7 +207,10 @@ const testo = (codice) => TESTI[i18n.lang][codice];
 const files = { mese: null, prima: null, f24: null };
 let risultato = null;
 
-$("aliquota").value = CFG.aliquota;
+$("media").value = CFG.media_default;
+$("dipendenti").value = CFG.dipendenti_default;
+// i dati di esempio portano le posizioni INPS dei loro tre clienti; i file dell'utente usano i campi della pagina
+let esempio = false;
 $("soglia").value = CFG.soglia;
 $("mese").value = CFG.mese;
 
@@ -187,6 +222,7 @@ function messaggio(text, kind = "error") {
 
 // ---- files -------------------------------------------------------------------------------------------
 async function prendiFile(slot, file) {
+  esempio = false;
   try {
     const table = await readTable(file);
     files[slot] = { name: file.name, ...table };
@@ -224,6 +260,7 @@ $("esempio").addEventListener("click", async () => {
   } catch (e) { messaggio(t("eFile", { f: "dati di esempio", e: e.message })); return; }
   const ced = parseCsv(c);
   files.mese = { name: "cedolini.csv", ...ced };
+  esempio = true;
   files.prima = null;
   $("nome-prima").textContent = "";                               // a last-month file loaded before no longer applies
   $("drop-prima").classList.remove("is-done");
@@ -337,7 +374,8 @@ function controlla() {
     messaggio("");
     illeggibili = 0;
     const mese = $("mese").value;
-    const cfg = { ...CFG, mese, aliquota: +$("aliquota").value, soglia: +$("soglia").value };
+    const cfg = { ...CFG, mese, soglia: +$("soglia").value, posizioni: esempio ? CFG.posizioni : {},
+      media_default: +$("media").value, dipendenti_default: +$("dipendenti").value };
     const tutti = [...righe("mese", mese), ...(files.prima ? righe("prima", precedente(mese)) : [])];
     if (!tutti.length) throw new Error(t("eVuoto"));
     const corr = tutti.filter((r) => r.mese === mese);
@@ -440,7 +478,7 @@ $("scarica-xlsx").addEventListener("click", () => {
       return [t("clienteN", { c }), s.length, tot("aumento"), tot("assorbito"), tot("da_pagare")];
     })];
   const oggi = new Date().toISOString().slice(0, 10);
-  const parametri = [[t("xParametri"), ""], [t("xMese"), cfg.mese], [t("xAliquota"), cfg.aliquota], [t("xSoglia"), cfg.soglia],
+  const parametri = [[t("xParametri"), ""], [t("xMese"), cfg.mese], ...(esempio ? [] : [[t("xMedia"), cfg.media_default], [t("xDipendenti"), cfg.dipendenti_default]]), [t("xSoglia"), cfg.soglia],
     [t("xData"), oggi], [t("xFonte"), "https://github.com/D0M3N1C0X/controlli-cedolini"]];
   const bytes = writeXlsx([
     { name: t("xSegnalazioni"), rows: segnalazioni, widths: [12, 10, 28, 48, 10, 14, 14, 12, 48, 16, 12, 30] },

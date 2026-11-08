@@ -20,14 +20,15 @@
 
 An Italian payroll provider sends hundreds of payslips a month to its clients, and every mistake the client finds
 first costs money and trust: a minimum still at last year's rate, a seniority step not applied, social security on the
-wrong base, a tax payment that does not match the payslips. These **fourteen checks run before the payslips go out**.
+wrong base, a tax payment that does not match the payslips. These **nineteen checks run before the payslips go out**.
 Each one **recomputes the item from the rules of the collective agreement** (CCNL Terziario, the contract for retail
 and services), or compares it with last month and with the F24 tax payment, so it does not depend on how the payroll
 software calculated it.
 
-> **Synthetic data, real rules.** Three clients and 122 invented employees, with errors planted on purpose; minimums
-> (rebuilt to the cent from the employers' association's note), seniority steps, holidays and notice periods of the
-> CCNL Terziario, with every source in [docs/fonti.md](docs/fonti.md). Not legal advice. The report, the catalogue
+> **Synthetic data, real rules.** Three clients and 124 invented employees, with errors planted on purpose; minimums
+> (rebuilt to the cent from the employers' association's note), seniority steps, holidays, leave hours and notice
+> periods of the CCNL Terziario; INPS rates by position, sick and maternity pay from INPS circulars; severance
+> revaluation from ISTAT's indices, recomputed to the sixth decimal. Every source is in [docs/fonti.md](docs/fonti.md). Not legal advice. The report, the catalogue
 > and the runbook are in Italian, the language of Italian payroll; the browser tool switches between Italian and
 > English.
 
@@ -35,17 +36,18 @@ software calculated it.
 
 | | |
 |---|---|
-| **35 flags on 122 payslips and 3 F24 payments**, 24 high priority. Each with the expected value, the value found and what to do. | **6 employees below the minimum:** basic pay is stuck at the March 2025 rate. €175.44 a month in all, plus arrears since November 2025. |
-| **One F24 with €212.40 less in withholding tax** than the client's payslips add up to. | **November 2026:** €3,765.80 a month of higher minimums for those who stay; absorbable personal supplements cover €1,385.82, leaving **€2,379.98 a month** to pay. |
-| **Six leavers in September**, three with an error: the 14th month counted from January, untaken holiday paid at 1/30, a dismissal with half the notice the agreement requires. | |
+| **44 flags on 124 payslips and 3 F24 payments**, 30 high priority. Each with the expected value, the value found and what to do. | **6 employees below the minimum:** basic pay is stuck at the March 2025 rate. €175.44 a month in all, plus arrears since November 2025. |
+| **Five contributions withheld at the wrong rate:** CIGS and the FIS share missing where the client averages more than 15 staff, CIGS taken where it averages fewer, and the extra 1% forgotten on pay above €4,685 a month. | **One F24 with €212.40 less in withholding tax** than the client's payslips add up to. |
+| **Six leavers in September**, with errors in the 14th month, untaken holiday, notice and three severance payments: a coefficient from the wrong month, the 17% substitute tax not deducted, the 0.50% left in. | **Absences and leave:** sick pay based on 1/26 instead of × 14/12 / 30, waiting days paid on the fifth sickness of the year, maternity pay without the accruals in its base, leave hours accrued as if full-time and senior. |
+| **November 2026:** €3,892.67 a month of higher minimums for those who stay; absorbable personal supplements cover €1,443.69, leaving **€2,448.98 a month** to pay. | |
 
-## The fourteen checks
+## The nineteen checks
 
 | Code | Check | How |
 |---|---|---|
 | C01 | Minimum basic pay | Base pay, other elements and cost-of-living allowance = the grade's minimum × part-time share |
 | C02 | Seniority steps | Steps earned since the hiring date (ten three-year steps, from the following month) × the grade's amount |
-| C03 | Social security (INPS) | Employee contribution = contribution base rounded to the euro × rate |
+| C03 | Social security (INPS) | Contribution base rounded to the euro × the position's rate: 9.19% pensions, + 0.30% CIGS above 15 staff on average in the half-year, + a third of the FIS; + 1% above €4,685 a month |
 | C04 | Severance accrual (TFR) | Accrual = ordinary pay × 14 / 13.5 / 12 |
 | C05 | Holiday balance | Balance = last month's balance + 26/12 − days taken |
 | C06 | Payslip arithmetic | Gross = sum of the items; net = gross − deductions |
@@ -57,6 +59,11 @@ software calculated it.
 | C12 | 13th and 14th month paid | Monthly pay × twelfths earned / 12: in December from the accruals, on leaving up to the last day |
 | C13 | Untaken holiday | On leaving, monthly pay / 26 × days left |
 | C14 | Notice period | Calendar days at least the agreement's minimum for grade, years of service and resignation or dismissal |
+| C15 | INPS sick pay | Last month's pay × 14/12 / 30, at 50% for days 4-20 of the sickness and 66.66% for days 21-180 |
+| C16 | Waiting days | The first 3 days topped up in full for the year's first two sicknesses, 66% and 50% for the third and fourth, not from the fifth, unless exempt |
+| C17 | INPS maternity pay | 80% of the same daily pay, for each day of leave in the month |
+| C18 | Leave hours (ROL and former holidays) | Balance = last month's + (72 or 56 + 32 hours) / 12 × part-time − hours taken; staff hired after March 2011 earn the 72 at 50% after 2 years and in full after 4 |
+| C19 | Severance pay at leaving (TFR) | Fund at 31 December + revaluation (1.5% a year + 75% of the ISTAT index rise; the month counts from the 15th) − 17% tax on it + the year's accruals − 0.50% |
 
 ## See it run
 
@@ -78,21 +85,23 @@ are read as they are, and every flag comes with what to do, ready to download in
 
 ## How far you can trust it
 
-- **On the planted errors:** 35 found out of 35, no false alarms, and no flag on the legitimate cases (hires in the
-  month, declared overtime, a move to part-time, correct leavers). This shows the checks do what they claim, not that
+- **On the planted errors:** 44 found out of 44, no false alarms, and no flag on the legitimate cases (hires in the
+  month, declared overtime, a move to part-time, correct leavers, a sickness on the fifth event with no waiting days,
+  an exempt one with them, a maternity leave, a high earner with the extra 1%). This shows the checks do what they claim, not that
   they would find real errors: I chose the errors.
 - **On 1,100 random alterations** of a correct payslip, any item by any amount: above the one-cent tolerance, all are
   found.
-- **Rules against statistics:** an anomaly detector that does not know the agreement finds 11 wrong payslips out of 34, with 7 false alarms; the rules find 34 of 34, with none.
-  It only sees errors that move a ratio (contributions, severance, change in net pay), never minimums, steps, records or
-  accruals.
+- **Rules against statistics:** an anomaly detector that does not know the agreement, comparing each payslip with the
+  same client's, finds 15 wrong payslips out of 42, with 5 false alarms; the rules find 42 of 42, with none.
+  It only sees errors that move a ratio (contributions, severance, change in net pay, leavers), never minimums, steps,
+  records, accruals, absences or leave hours.
 - **The limit, narrowed by C10:** a *coherent* error passes every arithmetic check. A grade-4 employee entered at
-  grade 5, with the payslip recomputed from scratch, adds up in every item and takes home €61.29 less a month. If the
+  grade 5, with the payslip recomputed from scratch, adds up in every item and takes home €80.04 less a month. If the
   error starts with a change from last month, C10 finds it; it stays invisible only if it was wrong from the hiring
   date, where the client's documents are the check. A test keeps this limit true.
-- **Three engines, one answer:** the sheet is checked against Python on 580 values and recalculated with LibreOffice
-  in CI; the browser tool is checked against Python on 2,219 values, including half-cent alterations and Italian file
-  formats. The sheet's reconciliation uses [excel-twin](https://github.com/D0M3N1C0X/excel-twin).
+- **Three engines, one answer:** the sheet is checked against Python on 737 values and recalculated with LibreOffice
+  in CI; the browser tool is checked against Python on 2,593 values, including half-cent alterations of absences and
+  severance and Italian file formats. The sheet's reconciliation uses [excel-twin](https://github.com/D0M3N1C0X/excel-twin).
 
 ## The judgement calls
 
@@ -103,18 +112,23 @@ are read as they are, and every flag comes with what to do, ready to download in
 - **Optional columns stay optional:** without the accrual or leaving columns, those checks do not apply and the
   others still run.
 - **A change in net pay is a question, not an error:** C07 sends the team to the client for the event behind it.
+- **INPS's share, not the employer's top-up:** the agreement tops sick and maternity pay up to a share of *net* pay,
+  which needs the whole tax computation; C15-C17 check what INPS owes and whether waiting days are paid when due.
+- **The INPS position is the client's:** the half-year average decides CIGS and FIS, today's headcount the leave
+  hours; one client sits under 15 on average and over 15 today, and is checked as such.
 
 The full list is in [docs/decisioni.md](docs/decisioni.md).
 
 ## Limits
 
-- **Social security simplified:** one 9.19% rate for everyone; FIS, CIGS and the extra 1% are not modelled. In real
-  use the rate comes from the client's INPS position.
-- **One agreement, a month without absences:** sickness, leave, year-end adjustments and the pay in lieu of notice are
-  not checked; for leavers the 13th and 14th month, untaken holiday and notice days are, the severance paid is not.
-  The synthetic income tax is not computed with the tax rules: it only feeds the F24.
-- **Sources:** seniority step amounts come from two concordant secondary sources and should be checked against the
-  agreement's text before real use.
+- **One agreement, no tax:** only the CCNL Terziario; the employer's top-up of sick and maternity pay, the year-end
+  tax adjustment, the pay in lieu of notice and the separate taxation of severance are not checked. The synthetic
+  income tax is not computed with the tax rules: it only feeds the F24.
+- **Social security:** the FIS reduction for small employers, bilateral funds other than the FIS and contribution
+  reliefs are not modelled.
+- **Sources:** the agreement's rules on steps, accruals, notice, sickness, maternity and leave come from the union's
+  summary of the 2011 renewal; the employers' note on the 2024 renewal shows those articles did not change then, but
+  the 2015 renewal was not reread. Check against the current text before real use.
 
 <details>
 <summary><b>For engineers: how to run it, what is inside</b></summary>
@@ -138,7 +152,7 @@ node tests/js/check_controlli.mjs   # the browser tool against Python
 ├── src/
 │   ├── config.py            parametri e soglie
 │   ├── regole.py            le regole del contratto, scritte una volta
-│   ├── controlli.py         i quattordici controlli, la tranche di novembre, la valutazione
+│   ├── controlli.py         i diciannove controlli, la tranche di novembre, la valutazione
 │   ├── robustezza.py        alterazioni casuali e l'errore coerente
 │   ├── statistica.py        regole contro un rilevatore statistico
 │   ├── build_foglio.py      il foglio di calcolo con le formule

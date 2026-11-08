@@ -21,7 +21,7 @@ def test_readme_aggiornato(out):
     ]
     import statistica
     v = statistica.valutazione().set_index("metodo")
-    s35, rg = v.loc["Statistico, z oltre 3,5"], v.loc["Regole (C01-C14)"]
+    s35, rg = v.loc["Statistico, z oltre 3,5"], v.loc[f"Regole (C01-C{len(__import__('controlli').CONTROLLI)})"]
     n = lambda r, k: int(r[k])          # una riga di DataFrame misto torna in float: 9.0
     attese.append(f"finds {n(s35, 'trovati')} wrong payslips out of {n(s35, 'errori')}, "
                   f"with {n(s35, 'falsi_allarmi')} false alarms; "

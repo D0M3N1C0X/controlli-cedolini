@@ -9,28 +9,37 @@ A007,A,C02,Scatti di anzianità,49.68,24.84,-24.84,alta
 A016,A,C02,Scatti di anzianità,61.98,41.32,-20.66,alta
 B025,B,C02,Scatti di anzianità,38.94,19.47,-19.47,alta
 B047,B,C02,Scatti di anzianità,24.84,0.0,-24.84,alta
-A003,A,C03,Contributi INPS,182.15,188.09,5.94,alta
-A012,A,C03,Contributi INPS,139.04,143.58,4.54,alta
-B087,B,C03,Contributi INPS,125.63,129.73,4.10,alta
-C098,C,C03,Contributi INPS,198.87,205.36,6.49,alta
-B033,B,C04,Quota TFR,194.92,171.27,-23.65,media
-B059,B,C04,Quota TFR,179.38,171.27,-8.11,media
-C101,C,C04,Quota TFR,157.22,143.28,-13.94,media
-A009,A,C05,Residuo ferie,22.9553,20.7886,-2.17,media
-B055,B,C05,Residuo ferie,13.4016,11.2349,-2.17,media
-B084,B,C05,Residuo ferie,17.9678,15.8011,-2.17,media
-A001,A,C06,Quadratura,1310.0,1347.5,37.50,alta
-C093,C,C06,Quadratura,1528.2,1628.2,100.00,alta
-B090,B,C07,Variazione del netto,1752.08,2374.82,622.74,media
-C099,C,C07,Variazione del netto,1467.12,2045.04,577.92,media
-,C,C08,Riconciliazione F24,7214.66,7002.26,-212.40,alta
-B058,B,C09,Codice fiscale,valido,GFZPLG92P01Z321A,,alta
-C107,C,C09,Codice fiscale,valido,ZCCGMF94M55Z282A,,alta
-B070,B,C10,Anagrafica,superminimo 150,superminimo 0,,alta
-C100,C,C10,Anagrafica,livello 4,livello 5,,alta
+A009,A,C03,Contributi INPS,159.63,164.69,5.06,alta
+B053,B,C03,Contributi INPS,86.93,81.88,-5.05,alta
+B087,B,C03,Contributi INPS,133.37,125.63,-7.74,alta
+B191,B,C03,Contributi INPS,529.92,523.15,-6.77,alta
+C098,C,C03,Contributi INPS,211.13,198.87,-12.26,alta
+A001,A,C04,Quota TFR,146.02,133.06,-12.96,media
+B090,B,C04,Quota TFR,206.84,193.03,-13.81,media
+C093,C,C04,Quota TFR,175.06,171.27,-3.79,media
+A015,A,C05,Residuo ferie,29.6064,27.4397,-2.17,media
+B058,B,C05,Residuo ferie,20.478,18.3113,-2.17,media
+C099,C,C05,Residuo ferie,12.5839,10.4172,-2.17,media
+A005,A,C06,Quadratura,1203.07,1240.57,37.50,alta
+C107,C,C06,Quadratura,1086.81,1186.81,100.00,alta
+A008,A,C07,Variazione del netto,1510.13,2080.5,570.37,media
+B020,B,C07,Variazione del netto,1960.05,2548.3,588.25,media
+,C,C08,Riconciliazione F24,6032.89,5820.49,-212.40,alta
+B040,B,C09,Codice fiscale,valido,CPTFPV79H01Z105A,,alta
+B070,B,C09,Codice fiscale,valido,FZTSLD68R18Z151A,,alta
+B061,B,C10,Anagrafica,livello 4,livello 5,,alta
+C108,C,C10,Anagrafica,superminimo 50,superminimo 0,,alta
+A011,A,C11,Ratei 13ª e 14ª,13ª 9; 14ª 3,13ª 9; 14ª 9,,media
 B034,B,C11,Ratei 13ª e 14ª,13ª 7; 14ª 3,13ª 8; 14ª 3,,media
-B040,B,C11,Ratei 13ª e 14ª,13ª 9; 14ª 3,13ª 9; 14ª 9,,media
-B079,B,C11,Ratei 13ª e 14ª,13ª 9; 14ª 3,13ª 8; 14ª 3,,media
-B092,B,C12,Tredicesima e quattordicesima pagate,452.38,1357.13,904.75,alta
-A011,A,C13,Ferie non godute,2148.97,1862.44,-286.53,alta
-B045,B,C14,Preavviso,20.0,10.0,-10.00,alta
+B092,B,C11,Ratei 13ª e 14ª,13ª 9; 14ª 3,13ª 8; 14ª 3,,media
+B062,B,C12,Tredicesima e quattordicesima pagate,470.59,1411.76,941.17,alta
+B027,B,C13,Ferie non godute,1980.46,1716.4,-264.06,alta
+B076,B,C14,Preavviso,20.0,10.0,-10.00,alta
+B080,B,C15,Indennità di malattia INPS,682.94,675.46,-7.48,alta
+B026,B,C16,Carenza di malattia,non dovuta,151.65,,media
+C095,C,C17,Indennità di maternità INPS,1005.12,861.6,-143.52,alta
+A017,A,C18,Permessi ROL ed ex festività,33.1577,39.8244,6.67,media
+C103,C,C18,Permessi ROL ed ex festività,51.7529,53.9196,2.17,media
+B027,B,C19,TFR liquidato,23446.76,23604.31,157.55,alta
+B038,B,C19,TFR liquidato,6314.85,6465.86,151.01,alta
+B051,B,C19,TFR liquidato,11694.38,11743.95,49.57,alta

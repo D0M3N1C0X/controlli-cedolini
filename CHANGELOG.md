@@ -5,6 +5,35 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
 
 ## [Non rilasciato]
 
+## [2.0.0] - 2026-11-06
+
+### Aggiunto
+
+- **C15 Indennità di malattia INPS:** 50% dal 4° al 20° giorno e 66,66% dal 21° al 180°, sulla retribuzione del mese
+  prima × 14/12 / 30 (INPS, circ. 94/2009). **C16 Carenza:** integrazione dei primi 3 giorni per numero dell'evento
+  nell'anno, con le esenzioni del CCNL. **C17 Indennità di maternità INPS:** 80% della stessa base.
+- **C18 Permessi:** riduzione d'orario (72 o 56 ore) ed ex festività (32 ore) per dodicesimi, in proporzione al
+  part-time, con la regola dei 2 e 4 anni per chi è entrato dopo il 1° marzo 2011.
+- **C19 TFR liquidato:** fondo al 31 dicembre rivalutato con l'indice ISTAT FOI (coefficiente ricostruito al sesto
+  decimale, il mese conta dal 15), imposta sostitutiva del 17%, quote dell'anno meno lo 0,50%.
+- Nel foglio: la tabella **Clienti** con la posizione INPS di ciascuno, gli indici FOI, le colonne BQ-CX; nel
+  browser: i dipendenti medi del semestre e quelli in forza al posto dell'aliquota.
+- 44 errori inseriti (erano 35), tutti trovati, nessun falso allarme; 737 valori riconciliati nel foglio, 2.593 nel
+  browser.
+
+### Cambiato
+
+- **C03 Contributi INPS** usa l'aliquota della posizione: IVS 9,19%, CIGS 0,30% oltre 15 dipendenti di media nel
+  semestre, un terzo del FIS, più l'1% oltre la prima fascia pensionabile (4.685 € al mese nel 2026). L'aliquota
+  unica del 9,19% sottostimava i contributi di quasi tutti i dipendenti di esempio, e l'errore inserito prima
+  (9,49%) era più vicino al vero del valore corretto.
+- Il rilevatore statistico confronta ogni cedolino con quelli dello stesso cliente (D23).
+
+### Corretto
+
+- Le fonti del CCNL: la sintesi Filcams usata finora è del rinnovo 2011-2013. Ora è dichiarato in `docs/fonti.md`,
+  con gli articoli cambiati dal rinnovo 2024 secondo la circolare Confcommercio n. 16/2024.
+
 ## [1.3.1] - 2026-10-23
 
 ### Corretto
