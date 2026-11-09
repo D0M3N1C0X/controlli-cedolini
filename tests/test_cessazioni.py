@@ -108,5 +108,7 @@ def test_tipo_di_uscita_con_spazi_o_maiuscole():
 
 def test_chi_lascia_prima_di_novembre_non_riceve_la_tranche(out):
     usciti = set(out["mese"].loc[out["mese"]["data_cessazione"] != "", "matricola"])
-    assert len(usciti) == 6
+    assert len(usciti) == 12            # 6 nei clienti del Terziario, 6 nei clienti D-F (v2.2)
     assert usciti.isdisjoint(out["novembre"]["matricola"])
+    # la tranche di novembre 2026 è del Terziario: i clienti degli altri CCNL non sono nel foglio
+    assert set(out["novembre"]["cliente"]) == set(C.CLIENTI_V1)

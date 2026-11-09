@@ -7,7 +7,7 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 DATA = ROOT / "data"
-CCNL = DATA / "ccnl_terziario.csv"
+CCNL_TERZIARIO = DATA / "ccnl_terziario.csv"
 DIPENDENTI = DATA / "dipendenti.csv"
 CEDOLINI = DATA / "cedolini.csv"
 F24 = DATA / "f24.csv"
@@ -20,14 +20,20 @@ MESE_PRECEDENTE = "2026-08"
 MESE = "2026-09"                 # il mese elaborato e controllato
 PROSSIMA_TRANCHE = date(2026, 11, 1)
 
-# Clienti sintetici, tutti con il CCNL Terziario Distribuzione e Servizi (Confcommercio). "media_semestre" è la media
-# dei dipendenti nel semestre di riferimento, che decide FIS e CIGS (F14): il cliente A è cresciuto da poco e nel
-# semestre era sotto i 15, anche se oggi ne ha 18.
+# Clienti sintetici. A, B e C applicano il CCNL Terziario Distribuzione e Servizi (Confcommercio); D, E e F i tre CCNL
+# della v2.2. "media_semestre" è la media dei dipendenti nel semestre di riferimento, che decide FIS e CIGS (F14): il
+# cliente A è cresciuto da poco e nel semestre era sotto i 15, anche se oggi ne ha 18. "fis": il cliente versa al FIS;
+# un'impresa industriale no, ha la CIGO, che è tutta a carico del datore di lavoro (F31).
 CLIENTI = {
-    "A": {"nome": "Cliente A · negozio al dettaglio", "dipendenti": 18, "media_semestre": 14.5},
-    "B": {"nome": "Cliente B · commercio all'ingrosso", "dipendenti": 74, "media_semestre": 74.0},
-    "C": {"nome": "Cliente C · servizi alle imprese", "dipendenti": 27, "media_semestre": 27.0},
+    "A": {"nome": "Cliente A · negozio al dettaglio", "dipendenti": 18, "media_semestre": 14.5, "ccnl": "terziario"},
+    "B": {"nome": "Cliente B · commercio all'ingrosso", "dipendenti": 74, "media_semestre": 74.0, "ccnl": "terziario"},
+    "C": {"nome": "Cliente C · servizi alle imprese", "dipendenti": 27, "media_semestre": 27.0, "ccnl": "terziario"},
+    "D": {"nome": "Cliente D · progettazione meccanica", "dipendenti": 22, "media_semestre": 22.0,
+          "ccnl": "metalmeccanico", "fis": False},
+    "E": {"nome": "Cliente E · ristorante", "dipendenti": 16, "media_semestre": 16.0, "ccnl": "turismo"},
+    "F": {"nome": "Cliente F · casa di spedizioni", "dipendenti": 20, "media_semestre": 19.0, "ccnl": "logistica"},
 }
+CLIENTI_V1 = ("A", "B", "C")     # i clienti dei dati d'esempio fino alla v2.1, generati per primi
 
 # ---- Regole usate dai controlli ---------------------------------------------------------------
 # Minimi: CCNL Terziario, tranche dal 1° novembre 2025 (vedi docs/fonti.md, F01).
@@ -120,3 +126,81 @@ TRATTAMENTO_INTEGRATIVO = {"importo": 1200.0, "soglia": 15000.0, "soglia_alta": 
 # (un dodicesimo, S08); il reddito dell'anno che decide detrazioni e cuneo è presunto: imponibile del mese per le
 # mensilità dell'anno (S09). Conguaglio alla cessazione (art. 23 c. 3): detrazioni rapportate ai giorni.
 GIORNI_ANNO = 365
+
+
+# ---- I quattro CCNL (v2.2, F30-F40) -----------------------------------------------------------------------------
+# Le regole che cambiano da un CCNL all'altro; tutto il resto (INPS, TFR, IRPEF) vale per tutti. Il preavviso è in
+# giorni di calendario: un mese conta 30 giorni (D29). "minimo" è la colonna della tabella in vigore a settembre 2026,
+# "minimo_prec" quella della tranche prima (per gli errori inseriti), "minimo_prossimo" la prossima tranche.
+# Integrazione della malattia: "netto" = il netto del mese non sta sotto la quota garantita del netto normale;
+# "lordo" = indennità INPS più integrazione arrivano alla retribuzione dei giorni di malattia; None = nessuna.
+# "quote" = quota garantita dal 4° al 20° giorno e dal 21° al 180°. "maternita_netto": il CCNL integra il congedo di
+# maternità fino al 100% del netto (Terziario F18, Turismo F37); negli altri due non è stato verificato (D32).
+_PREAVVISO_TERZIARIO = PREAVVISO
+_metal = {**{lv: (60, 90, 120) for lv in ("B2", "B3", "A1")}, **{lv: (45, 60, 75) for lv in ("C2", "C3", "B1")},
+          **{lv: (10, 20, 30) for lv in ("D1", "D2", "C1")}}
+_turismo = {**{lv: (120, 150, 180) for lv in ("Qa", "Qb")}, "1": (60, 90, 120),
+            **{lv: (30, 45, 60) for lv in ("2", "3")}, **{lv: (20, 30, 45) for lv in ("4", "5")},
+            **{lv: (15, 20, 20) for lv in ("6s", "6", "7")}}
+_log_lic = {**{lv: (75, 105, 135) for lv in ("Quadri", "1")}, "2": (45, 60, 75),
+            **{lv: (30, 45, 60) for lv in ("3S", "3", "4", "4J", "5", "6")}}
+CCNL = {
+    "terziario": {
+        "nome": "Terziario Distribuzione e Servizi (Confcommercio)", "tabella": DATA / "ccnl_terziario.csv",
+        "minimo": "minimo_2025_11", "minimo_prec": "minimo_2025_03", "minimo_prossimo": "minimo_2026_11",
+        "prossima_tranche": date(2026, 11, 1),
+        "livelli": ["Quadri", "1", "2", "3", "4", "5", "6", "7"], "pesi": [1, 3, 8, 18, 34, 20, 10, 6],
+        "scatti_max": 10, "scatti_anni": 3, "mensilita": 14, "quattordicesima_senza_scatti": False,
+        "giorni_mese_intero": 15, "somma_frazioni": False, "ferie": ((0, 26),), "divisore_giornaliero": 26,
+        "rol": {"fino_a_15": 56, "oltre_15": 72}, "ex_festivita": 32, "rol_nuovi_assunti": "2011-03-01",
+        "preavviso": _PREAVVISO_TERZIARIO,
+        "malattia_inps": True, "malattia_fasce": ((20, 0.5), (180, 0.6666)), "carenza": "terziario",
+        "integrazione": {"base": "netto", "quote": (0.75, 1.0)}, "maternita_netto": True,
+    },
+    "metalmeccanico": {
+        "nome": "Metalmeccanico industria (Federmeccanica-Assistal)", "tabella": DATA / "ccnl_metalmeccanico.csv",
+        "minimo": "minimo_2026_06", "minimo_prec": "minimo_2025_06", "minimo_prossimo": "minimo_2027_06",
+        "prossima_tranche": date(2027, 6, 1),
+        # nei dati d'esempio solo impiegati (D30): niente D1 e D2, i livelli degli operai
+        "livelli": ["C1", "C2", "C3", "B1", "B2", "B3", "A1"], "pesi": [2, 4, 6, 5, 3, 1, 1],
+        "scatti_max": 5, "scatti_anni": 2, "mensilita": 13, "quattordicesima_senza_scatti": False,
+        "giorni_mese_intero": 16, "somma_frazioni": False, "ferie": ((0, 24), (10, 25), (18, 30)),
+        "divisore_giornaliero": 26,
+        "rol": {"fino_a_15": 72, "oltre_15": 72}, "ex_festivita": 32, "rol_nuovi_assunti": None,
+        "preavviso": {"dimissioni": _metal, "licenziamento": _metal},
+        # gli impiegati dell'industria non hanno l'indennità INPS: la malattia è tutta a carico del datore (F35)
+        "malattia_inps": False, "malattia_fasce": ((20, 0.5), (180, 0.6666)), "carenza": "metalmeccanico",
+        "integrazione": {"base": "lordo", "quote": (1.0, 1.0)}, "maternita_netto": False,
+    },
+    "turismo": {
+        "nome": "Turismo, pubblici esercizi (Fipe)", "tabella": DATA / "ccnl_turismo.csv",
+        "minimo": "totale_2026_06", "minimo_prec": "totale_2025_06", "minimo_prossimo": "totale_2027_06",
+        "prossima_tranche": date(2027, 6, 1),
+        "livelli": ["Qb", "1", "2", "3", "4", "5", "6s", "6", "7"], "pesi": [1, 1, 2, 3, 4, 4, 2, 1, 1],
+        "scatti_max": 6, "scatti_anni": 4, "mensilita": 14, "quattordicesima_senza_scatti": True,
+        "giorni_mese_intero": 15, "somma_frazioni": True, "ferie": ((0, 26),), "divisore_giornaliero": 26,
+        "rol": {"fino_a_15": 72, "oltre_15": 72}, "ex_festivita": 32, "rol_nuovi_assunti": "2017-12-31",
+        "preavviso": {"dimissioni": _turismo, "licenziamento": _turismo},
+        "malattia_inps": True, "malattia_fasce": ((20, 0.8), (180, 0.8)), "carenza": "turismo",
+        "integrazione": None, "maternita_netto": True,
+    },
+    "logistica": {
+        "nome": "Logistica, trasporto merci e spedizione (Confetra)", "tabella": DATA / "ccnl_logistica.csv",
+        "minimo": "totale_2026_01", "minimo_prec": "minimo_2026_01", "minimo_prossimo": "totale_2027_01",
+        "prossima_tranche": date(2027, 1, 1),
+        "livelli": ["Quadri", "1", "2", "3S", "3", "4", "4J", "5", "6"], "pesi": [1, 1, 2, 3, 4, 4, 2, 2, 1],
+        "scatti_max": 5, "scatti_anni": 2, "mensilita": 14, "quattordicesima_senza_scatti": False,
+        "giorni_mese_intero": 16, "somma_frazioni": False, "ferie": ((0, 22),), "divisore_giornaliero": 22,
+        "rol": {"fino_a_15": 40, "oltre_15": 40}, "ex_festivita": 32, "rol_nuovi_assunti": None,
+        # impiegati (D30): per le dimissioni i termini del licenziamento ridotti della metà
+        "preavviso": {"dimissioni": {lv: tuple(g / 2 for g in t) for lv, t in _log_lic.items()},
+                      "licenziamento": _log_lic},
+        "malattia_inps": True, "malattia_fasce": ((20, 0.5), (180, 0.6666)), "carenza": "logistica",
+        "integrazione": {"base": "lordo", "quote": (1.0, 1.0)}, "maternita_netto": False,
+    },
+}
+# Carenza (F16, F35, F37, F39): la quota dei primi 3 giorni che il datore di lavoro paga. Terziario: per numero
+# dell'evento nell'anno (CARENZA_PERCENTUALI). Metalmeccanico: intera, ma dal 4° evento di non più di 5 giorni il 66%
+# (4°) e il 50% (5° e successivi). Turismo: intera solo se la malattia supera i 5 giorni. Logistica: intera.
+CARENZA_METALMECCANICO = {"durata_max": 5, "dal_evento": 4, "quote": (0.66, 0.5)}
+CARENZA_TURISMO_DURATA = 5

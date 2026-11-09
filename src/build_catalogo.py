@@ -28,14 +28,18 @@ FOGLIO_COLONNE = {
     "C16": ("Mese", ["CI", "CN"], "CO"), "C17": ("Mese", ["CH", "CP"], "CQ"), "C18": ("Mese", ["CR", "CS", "CT"], "CU"),
     "C19": ("Mese", ["CV", "CW"], "CX"),
     "C20": ("Mese", ["DF", "DG", "DH", "DI"], "DJ"), "C21": ("Mese", ["DK", "DL", "DM", "DN", "DO", "DP", "DQ"], "DR"),
+    "C22": ("Mese", ["DV", "DX", "DY", "DZ", "EA", "EB"], "EC"),
 }
 FONTI = {
-    "C01": ["F01", "F02"], "C02": ["F03", "S04"], "C03": ["F05", "F10", "F14", "F15"], "C04": ["F06", "S03"], "C05": ["F04"],
-    "C06": ["S01"], "C07": ["S02"], "C08": ["F09"], "C09": ["F08"], "C10": ["S06"], "C11": ["F11"],
-    "C12": ["F11"], "C13": ["F12", "F04"], "C14": ["F13"], "C15": ["F16", "F17"], "C16": ["F16"],
-    "C17": ["F17", "F18"], "C18": ["F23", "S07"], "C19": ["F19", "F20", "F21", "F22"],
+    "C01": ["F01", "F02", "F30", "F33", "F38"], "C02": ["F03", "S04", "F30", "F33", "F38"],
+    "C03": ["F05", "F10", "F14", "F15", "F31", "F41"], "C04": ["F06", "S03", "F33"], "C05": ["F04", "F32"],
+    "C06": ["S01"], "C07": ["S02"], "C08": ["F09"], "C09": ["F08"], "C10": ["S06"], "C11": ["F11", "F30", "F33", "F38"],
+    "C12": ["F11", "F30", "F33", "F38"], "C13": ["F12", "F04", "F36", "F38"], "C14": ["F13", "F34", "F36", "F38"],
+    "C15": ["F16", "F17", "F35", "F37", "F40"], "C16": ["F16", "F35", "F37", "F39"],
+    "C17": ["F17", "F18"], "C18": ["F23", "S07", "F34", "F37", "F38"], "C19": ["F19", "F20", "F21", "F22"],
     "C20": ["F24", "F25", "F26", "F27", "F28", "S08", "S09", "S10", "S11"],
     "C21": ["F24", "F25", "F26", "F27", "F29", "S10", "S11"],
+    "C22": ["F16", "F18", "F35", "F39", "F41", "S12"],
 }
 
 SCHEDE = {
@@ -46,48 +50,59 @@ SCHEDE = {
                   "Livello sbagliato in anagrafica.",
                   "Part-time non riproporzionato, o riproporzionato due volte."],
         "limiti": ["Non controlla il superminimo né il suo assorbimento: quello è nel foglio Novembre 2026.",
-                   "Vale per il CCNL Terziario Confcommercio: un altro contratto richiede la sua tabella."],
+                   "Quattro CCNL: Terziario, Metalmeccanico industria, Turismo (pubblici esercizi) e Logistica. Il "
+                   "CCNL è del cliente (Parametri); un altro contratto richiede la sua tabella e le sue regole."],
     },
     "C02": {
-        "regola": "Uno scatto per ogni triennio dalla data di assunzione, in pagamento dal mese dopo il compimento, fino "
-                  "a 10; l'importo è quello del livello per il numero di scatti e per il part-time.",
+        "regola": "Uno scatto per ogni periodo compiuto dalla data di assunzione, in pagamento dal mese dopo, fino al "
+                  "massimo del CCNL: 10 triennali nel Terziario, 5 biennali nel Metalmeccanico e nella Logistica, 6 "
+                  "quadriennali nel Turismo; l'importo è quello del livello per il numero di scatti e per il part-time.",
         "cause": ["Scatto maturato e non attivato nel software.",
                   "Data di assunzione sbagliata in anagrafica.",
-                  "Scatti rimasti al livello precedente dopo un passaggio."],
+                  "Scatti rimasti al livello precedente dopo un passaggio.",
+                  "Periodicità di un altro CCNL: triennale dove è biennale."],
         "limiti": ["Valorizza tutti gli scatti al livello attuale (S04): chi ha cambiato livello va controllato a mano.",
                    "Non considera anzianità convenzionali o periodi non utili alla maturazione."],
     },
     "C03": {
         "regola": "Il contributo a carico del dipendente è l'imponibile arrotondato all'euro per l'aliquota della "
                   "posizione INPS del cliente: IVS 9,19%, più la CIGS (0,30%) se nel semestre la media supera 15 "
-                  "dipendenti, più un terzo del FIS (0,50% fino a 5 dipendenti, 0,80% oltre); più l'1% sulla parte "
-                  "oltre la prima fascia pensionabile mensilizzata (4.685 € nel 2026). Al centesimo.",
+                  "dipendenti, più un terzo del FIS (0,50% fino a 5 dipendenti, 0,80% oltre) se il cliente lo versa "
+                  "(un'impresa industriale ha la CIGO, a carico suo); più l'1% sulla parte oltre la prima fascia "
+                  "pensionabile mensilizzata (4.685 € nel 2026). Al centesimo. L'imponibile è il lordo senza le "
+                  "indennità INPS di malattia e maternità, che non sono retribuzione (F41).",
         "cause": ["Posizione INPS impostata senza CIGS o FIS, o con la CIGS quando la media del semestre è sotto 15.",
                   "Contributo aggiuntivo dell'1% dimenticato sulle retribuzioni alte.",
                   "Imponibile non arrotondato all'euro, o arrotondato due volte."],
         "limiti": ["La media del semestre va presa dalla posizione INPS del cliente: il controllo usa quella indicata.",
                    "Non considera la riduzione del FIS per chi non ha chiesto integrazioni da 24 mesi, né fondi "
                    "bilaterali diversi dal FIS.",
-                   "L'imponibile è il lordo: voci escluse dall'imponibile non sono gestite."],
+                   "Dal lordo si tolgono solo le indennità INPS: altre voci escluse dall'imponibile non sono gestite."],
     },
     "C04": {
-        "regola": "Il rateo mensile di TFR è la retribuzione ordinaria (tabellare, scatti, superminimo) per 14 "
-                  "mensilità, diviso 13,5 e diviso 12.",
+        "regola": "Il rateo mensile di TFR è la retribuzione ordinaria (tabellare, scatti, superminimo) per le "
+                  "mensilità del CCNL (14, 13 nel Metalmeccanico; nel Turismo la quattordicesima senza scatti), diviso "
+                  "13,5 e diviso 12. Nel mese di malattia si calcola sulla retribuzione normale (art. 2120 c.c.).",
         "cause": ["Base del TFR senza scatti o superminimo.",
                   "Divisore o numero di mensilità sbagliati nella configurazione."],
         "limiti": ["Non include voci variabili non occasionali né la rivalutazione del fondo.",
                    "Non sottrae il contributo dello 0,50% al Fondo pensioni lavoratori dipendenti."],
     },
     "C05": {
-        "regola": "Il residuo ferie è il residuo del mese prima più un dodicesimo dei 26 giorni annui, meno le ferie "
-                  "godute nel mese, a quattro decimali.",
+        "regola": "Il residuo ferie è il residuo del mese prima più un dodicesimo delle ferie annue del CCNL, meno le "
+                  "ferie godute nel mese, a quattro decimali: 26 giorni nel Terziario e nel Turismo, 22 nella Logistica "
+                  "(settimana di 5 giorni), nel Metalmeccanico 24 (4 settimane di 6 giorni), 25 oltre 10 anni e 30 "
+                  "oltre 18.",
         "cause": ["Maturazione del mese non registrata.",
-                  "Ferie godute non scaricate dal residuo."],
+                  "Ferie godute non scaricate dal residuo.",
+                  "Giorno in più del Metalmeccanico oltre i 10 anni non attivato."],
         "limiti": ["Ferie in giorni, non in ore; ROL ed ex festività sono in C18.",
                    "Per chi è assunto nel mese il residuo di partenza è zero."],
     },
     "C06": {
-        "regola": "Il lordo è la somma di tabellare, scatti, superminimo e straordinari; il netto è il lordo meno "
+        "regola": "Il lordo è la somma di tabellare, scatti, superminimo e straordinari, con le voci di chi lascia e, "
+                  "nel mese di un'assenza, meno la retribuzione dei giorni assenti e più indennità INPS, carenza e "
+                  "integrazione; il netto è il lordo meno "
                   "contributi, IRPEF e altre trattenute, più la somma del cuneo fiscale e il trattamento integrativo.",
         "cause": ["Una voce aggiunta a mano e non sommata.",
                   "Una trattenuta inserita due volte."],
@@ -128,8 +143,11 @@ SCHEDE = {
     },
     "C11": {
         "regola": "I dodicesimi di tredicesima (da gennaio) e di quattordicesima (da luglio) sono i mesi di servizio "
-                  "nel periodo, fino al mese del cedolino; il mese di assunzione conta se ha almeno 15 giorni.",
-        "cause": ["Mese di assunzione con meno di 15 giorni contato intero.",
+                  "nel periodo, fino al mese del cedolino. Il mese di assunzione conta se ha almeno 15 giorni nel "
+                  "Terziario e nel Turismo, più di 15 nel Metalmeccanico e nella Logistica; il Metalmeccanico non ha "
+                  "la quattordicesima. Alla cessazione, nel Turismo, le frazioni del primo e dell'ultimo mese si "
+                  "sommano: un dodicesimo ogni 30 giorni, più uno per il resto di almeno 15.",
+        "cause": ["Mese di assunzione con meno giorni di quelli del CCNL contato intero.",
                   "Quattordicesima contata da gennaio invece che da luglio.",
                   "Un dodicesimo perso senza assenze che lo spieghino."],
         "limiti": ["Controlla il numero di dodicesimi, non l'importo (D14).",
@@ -139,10 +157,12 @@ SCHEDE = {
     "C12": {
         "regola": "Tredicesima e quattordicesima sono la retribuzione mensile (tabellare, scatti e superminimo) per i "
                   "dodicesimi maturati, diviso 12. A dicembre i dodicesimi sono quelli dei ratei; alla cessazione si "
-                  "contano fino alla data di uscita, e l'ultimo mese conta se ha almeno 15 giorni.",
+                  "contano fino alla data di uscita, con la regola del CCNL per l'ultimo mese (C11). Nel Turismo la "
+                  "quattordicesima si calcola senza gli scatti.",
         "cause": ["Quattordicesima liquidata con i dodicesimi da gennaio invece che da luglio.",
                   "Ultimo mese contato intero con meno di 15 giorni di servizio.",
-                  "Mensilità calcolata sulla retribuzione senza scatti o superminimo."],
+                  "Mensilità calcolata sulla retribuzione senza scatti o superminimo; nel Turismo, quattordicesima con "
+                  "gli scatti."],
         "limiti": ["Non considera i periodi non retribuiti che riducono i dodicesimi, come l'aspettativa.",
                    "Le colonne sono facoltative: se il cedolino non riporta l'importo, C12 non si applica (D16).",
                    "Una quattordicesima pagata a luglio a chi resta è quella del periodo chiuso il 30 giugno (D19). "
@@ -150,9 +170,10 @@ SCHEDE = {
                    "va controllata a mano."],
     },
     "C13": {
-        "regola": "Alla cessazione le ferie maturate e non godute si pagano a 1/26 della retribuzione mensile per "
-                  "ogni giorno di residuo.",
-        "cause": ["Quota giornaliera calcolata dividendo per 30 invece che per 26.",
+        "regola": "Alla cessazione le ferie maturate e non godute si pagano con la quota giornaliera del CCNL per ogni "
+                  "giorno di residuo: 1/26 della retribuzione mensile, 1/22 nella Logistica con la settimana di 5 "
+                  "giorni.",
+        "cause": ["Quota giornaliera calcolata dividendo per 30 invece che per 26, o per 26 dove è 22.",
                   "Residuo ferie di fine rapporto non aggiornato con la maturazione dell'ultimo mese."],
         "limiti": ["Usa il residuo ferie del cedolino, che C05 controlla a parte. C05 conta la maturazione dell'intero "
                    "mese anche per chi lascia a metà: in quel caso il residuo va ricontrollato a mano.",
@@ -160,8 +181,11 @@ SCHEDE = {
     },
     "C14": {
         "regola": "Il preavviso, in giorni di calendario, è almeno quello del CCNL per livello, anni di servizio "
-                  "(fino a 5, dal 6° al 10°, oltre il 10°) e per chi recede: dimissioni o licenziamento.",
+                  "(fino a 5, dal 6° al 10°, oltre il 10°) e per chi recede: dimissioni o licenziamento. Metalmeccanico "
+                  "e Turismo hanno gli stessi termini per tutti e due; nella Logistica le dimissioni dell'impiegato "
+                  "hanno metà dei termini del licenziamento. Un mese conta 30 giorni (D29).",
         "cause": ["Tabella delle dimissioni usata per un licenziamento.",
+                  "Termini di un altro livello o di un altro CCNL.",
                   "Anni di servizio contati male, sulla soglia dei 5 o dei 10 anni."],
         "limiti": ["Controlla i giorni di preavviso, non l'importo dell'indennità sostitutiva (D18).",
                    "Non applica le anzianità convenzionali che il CCNL riconosce ad alcune categorie, né le regole "
@@ -172,22 +196,28 @@ SCHEDE = {
     "C15": {
         "regola": "L'indennità di malattia anticipata per conto dell'INPS è il 50% della retribuzione media globale "
                   "giornaliera per i giorni dal 4° al 20° dell'evento e il 66,66% dal 21° al 180°, domeniche comprese; "
-                  "la retribuzione media è quella del mese prima per 14/12, divisa per 30.",
+                  "la retribuzione media è quella del mese prima per le mensilità diviso 12, divisa per 30 (nel Turismo "
+                  "la quattordicesima senza scatti). Nei pubblici esercizi l'indennità è l'80% per tutto il periodo; "
+                  "gli impiegati dell'industria (Metalmeccanico) non l'hanno: paga tutto il datore di lavoro.",
         "cause": ["Base giornaliera calcolata dividendo per 26 invece che per 30, o senza i ratei di tredicesima e "
                   "quattordicesima.",
                   "Giorni contati dall'inizio del mese invece che dall'inizio dell'evento.",
-                  "Carenza indennizzata dall'INPS, o 66,66% applicato prima del 21° giorno."],
-        "limiti": ["Controlla l'indennità INPS, non l'integrazione dell'azienda: il CCNL la fissa sulla retribuzione "
-                   "netta, che richiede il calcolo fiscale (D21).",
+                  "Carenza indennizzata dall'INPS, o 66,66% applicato prima del 21° giorno.",
+                  "Percentuali generali applicate a un pubblico esercizio, o indennità anticipata a un impiegato "
+                  "dell'industria."],
+        "limiti": ["Controlla l'indennità INPS; l'integrazione dell'azienda è in C22.",
                    "Gli eventi iniziati prima del mese non sono controllati: la base sarebbe un cedolino che il "
                    "controllo non ha.",
-                   "Vale per gli impiegati del terziario; operai, pubblici esercizi e ricoveri hanno altre misure."],
+                   "Vale per gli impiegati (D30); operai e ricoveri hanno altre misure."],
     },
     "C16": {
-        "regola": "L'integrazione dei primi 3 giorni è dovuta per intero ai primi 2 eventi di malattia dell'anno, al "
-                  "66% al 3°, al 50% al 4°, e non più dal 5°; senza limiti per ricovero, prognosi iniziale di almeno "
-                  "12 giorni, terapie salvavita e malattie in gravidanza.",
+        "regola": "Terziario: i primi 3 giorni si pagano per intero ai primi 2 eventi di malattia dell'anno, al 66% al "
+                  "3°, al 50% al 4°, e non più dal 5°; senza limiti per ricovero, prognosi iniziale di almeno 12 "
+                  "giorni, terapie salvavita e malattie in gravidanza. Metalmeccanico: per intero, ma dal 4° evento "
+                  "dell'anno di non più di 5 giorni al 66% e dal 5° al 50%. Turismo: per intero solo se la malattia "
+                  "supera i 5 giorni. Logistica: per intero.",
         "cause": ["Eventi dell'anno non contati: carenza pagata anche dal quinto.",
+                  "Regola di un altro CCNL: nel Turismo, carenza non pagata a una malattia di più di 5 giorni.",
                   "Esenzione non registrata, e carenza negata a chi ne ha diritto."],
         "limiti": ["Controlla se la carenza è pagata quando serve, non l'importo: anche quello è sul netto.",
                    "Il numero dell'evento e l'esenzione vengono dal cedolino: una ricaduta conta come lo stesso evento, "
@@ -198,14 +228,17 @@ SCHEDE = {
                   "giornaliera del mese prima dell'inizio del congedo, per ogni giorno del mese.",
         "cause": ["Base senza i ratei di tredicesima e quattordicesima.",
                   "Integrazione dell'azienda al 100% registrata come indennità INPS."],
-        "limiti": ["Controlla la quota INPS: l'integrazione al 100% del netto per i primi cinque mesi è dell'azienda.",
+        "limiti": ["Controlla la quota INPS: l'integrazione al 100% del netto per i primi cinque mesi (Terziario) è in "
+                   "C22.",
                    "I congedi iniziati prima del mese non sono controllati, per la stessa ragione di C15."],
     },
     "C18": {
         "regola": "Il residuo dei permessi è il residuo del mese prima più un dodicesimo delle ore annue, meno le "
-                  "ore godute: 72 ore di riduzione d'orario (56 fino a 15 dipendenti) e 32 di ex festività, in "
-                  "proporzione al part-time; per chi è entrato dopo il 1° marzo 2011 la riduzione d'orario spetta al "
-                  "50% dopo 2 anni e al 100% dopo 4.",
+                  "ore godute, in proporzione al part-time. Terziario: 72 ore di riduzione d'orario (56 fino a 15 "
+                  "dipendenti) e 32 di ex festività; per chi è entrato dopo il 1° marzo 2011 la riduzione d'orario "
+                  "spetta al 50% dopo 2 anni e al 100% dopo 4. Metalmeccanico: 104 ore di PAR. Turismo: 104 ore, con "
+                  "la stessa regola dei 2 e 4 anni per chi è entrato dal 2018. Logistica: 40 ore più 32 di "
+                  "festività abolite.",
         "cause": ["Riduzione d'orario maturata per intero da un neoassunto.",
                   "Part-time che matura le ore di un tempo pieno.",
                   "Soglia dei 15 dipendenti sbagliata nella configurazione del cliente."],
@@ -241,6 +274,26 @@ SCHEDE = {
                    "Le mensilità aggiuntive pagate in un mese ordinario si tassano senza detrazioni: il controllo "
                    "vale per i mesi senza tredicesima o quattordicesima.",
                    "Addizionali regionale e comunale fuori dal controllo: si trattengono a rate sull'anno prima."],
+    },
+    "C22": {
+        "regola": "Nel mese di malattia la retribuzione dei giorni di assenza lascia il posto all'indennità INPS, alla "
+                  "carenza e all'integrazione del datore di lavoro, che segue il CCNL. Terziario: il netto del mese, "
+                  "prima delle altre trattenute, non sta sotto la quota garantita del netto di un mese normale: i "
+                  "giorni lavorati per intero, la carenza alla quota dovuta, il 75% dal 4° al 20° giorno, il 100% dal "
+                  "21°; nella maternità il 100%. Metalmeccanico e Logistica: indennità INPS più integrazione arrivano "
+                  "alla retribuzione intera dei giorni dopo la carenza. Turismo: nessuna integrazione oltre la "
+                  "carenza, e il controllo tace.",
+        "cause": ["Integrazione non pagata: il software ha registrato solo l'indennità INPS.",
+                  "Quote di un altro CCNL: il 75% del Terziario applicato nella Logistica, o l'80% che nel "
+                  "Metalmeccanico vale solo dopo i 122 giorni.",
+                  "Integrazione calcolata sul lordo dove il CCNL la vuole sul netto."],
+        "limiti": ["Il netto normale si calcola con contributi e IRPEF di un mese senza assenze (C03, C20): altre "
+                   "trattenute, addizionali e conguagli restano fuori (S12).",
+                   "Sul netto il controllo segnala solo un'integrazione in meno: chi paga di più non è un errore.",
+                   "Le quote valgono per i primi periodi: dopo 122-214 giorni (Metalmeccanico) o 3-5 mesi "
+                   "(Logistica) cambiano, e gli eventi lunghi vanno controllati a mano.",
+                   "La retribuzione tolta per l'assenza è in giorni di calendario (D31): un software a giorni "
+                   "lavorativi dà un netto diverso, che il controllo sul netto assorbe e quello sul lordo no."],
     },
     "C21": {
         "regola": "Alla cessazione il sostituto fa il conguaglio: imposta dell'anno sull'imponibile fiscale da "

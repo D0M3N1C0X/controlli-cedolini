@@ -11,9 +11,9 @@ const [{ cfg: CFG, ccnl: CCNL }, TESTI] = await Promise.all(
 
 const UI = {
   it: {
-    brand: "Controlli cedolini", eyebrow: "CCNL Terziario · prima dell'invio al cliente",
+    brand: "Controlli cedolini", eyebrow: "Quattro CCNL · prima dell'invio al cliente",
     title: "Controlla i cedolini del mese",
-    lead: "Carica l'export del tuo software paghe: ventuno controlli ricalcolano ogni voce dalle regole del contratto e ti dicono cosa correggere, prima che il cliente se ne accorga.",
+    lead: "Carica l'export del tuo software paghe: ventidue controlli ricalcolano ogni voce dalle regole del tuo CCNL (Terziario, Metalmeccanico, Turismo o Logistica) e ti dicono cosa correggere, prima che il cliente se ne accorga.",
     privacy: "I tuoi file restano su questo computer: i controlli girano in questa pagina e niente viene inviato. Puoi verificarlo staccando la rete dopo che la pagina si è aperta.",
     step1: "I tuoi file", step1sub: "File Excel (.xlsx) o CSV, così come escono dal software paghe.",
     dropMese: "Cedolini del mese", dropMeseSub: "Obbligatorio · trascinalo qui o tocca per sceglierlo",
@@ -27,7 +27,8 @@ const UI = {
     nonPresente: "— non presente —", facoltativa: "facoltativa",
     step3: "Le impostazioni", mese: "Mese da controllare", meseSub: "Preso dal file, se c'è la colonna del mese.",
     media: "Dipendenti medi nel semestre", mediaSub: "Decide CIGS (oltre 15) e FIS (oltre 5) a carico del dipendente.",
-    dipendenti: "Dipendenti in azienda", dipendentiSub: "Oltre 15, la riduzione d'orario è di 72 ore l'anno invece di 56.",
+    dipendenti: "Dipendenti in azienda", dipendentiSub: "Nel Terziario, oltre 15 la riduzione d'orario è di 72 ore l'anno invece di 56.",
+    ccnl: "CCNL", ccnlSub: "Il contratto dei cedolini: minimi, scatti, mensilità, preavviso, malattia e permessi.",
     soglia: "Variazione del netto da spiegare", sogliaSub: "0,20 vuol dire 20% in più o in meno del mese prima.",
     esegui: "Controlla i cedolini", step4: "Cosa correggere",
     filtroCliente: "Filtra per cliente", filtroControllo: "Filtra per controllo",
@@ -52,7 +53,7 @@ const UI = {
     eNumero: "C'è un valore non numerico in una colonna di importi: {e}.",
     fileFoglio: "{n} righe · foglio «{s}»", fileRighe: "{n} righe",
     xSegnalazioni: "Segnalazioni", xPerCliente: "Per cliente", xNovembre: "Novembre 2026", xParametri: "Parametri",
-    xMese: "Mese controllato", xMedia: "Dipendenti medi nel semestre", xDipendenti: "Dipendenti in azienda", xSoglia: "Soglia di variazione del netto",
+    xMese: "Mese controllato", xMedia: "Dipendenti medi nel semestre", xDipendenti: "Dipendenti in azienda", xCcnl: "CCNL", xSoglia: "Soglia di variazione del netto",
     xData: "Controllato il", xFonte: "Generato da controlli-cedolini",
     f_mese: "Mese", f_matricola: "Matricola", f_cliente: "Cliente", f_codice_fiscale: "Codice fiscale", f_livello: "Livello",
     f_data_assunzione: "Data di assunzione", f_part_time: "Percentuale di part-time", f_evento: "Evento del mese",
@@ -72,12 +73,17 @@ const UI = {
     f_permessi_goduti: "Permessi goduti (ore)", f_permessi_residuo: "Residuo permessi (ore)",
     f_fondo_tfr_prec: "Fondo TFR al 31/12", f_tfr_quote_anno: "Quote TFR dell'anno", f_imponibile_anno: "Imponibile dell'anno",
     f_tfr_liquidato: "TFR liquidato",
+    f_bonus_cuneo: "Somma del cuneo fiscale", f_trattamento_integrativo: "Trattamento integrativo",
+    f_imponibile_fiscale_anno: "All'uscita: imponibile fiscale da gennaio", f_giorni_lavoro_anno: "All'uscita: giorni di lavoro nell'anno",
+    f_ritenute_anno_prec: "All'uscita: IRPEF trattenuta nei mesi prima", f_cuneo_anno_prec: "All'uscita: cuneo erogato nei mesi prima",
+    f_ti_anno_prec: "All'uscita: trattamento integrativo dei mesi prima",
+    f_assenza_trattenuta: "Retribuzione tolta per l'assenza", f_integrazione_datore: "Integrazione del datore (malattia, maternità)",
     f_ritenute_1001: "Ritenute IRPEF (codice 1001)", f_contributi_dipendente: "Contributi dei dipendenti",
   },
   en: {
-    brand: "Payslip checks", eyebrow: "Italian CCNL Terziario · before payslips go to the client",
+    brand: "Payslip checks", eyebrow: "Four Italian CCNLs · before payslips go to the client",
     title: "Check this month's payslips",
-    lead: "Load the export from your payroll software: twenty-one checks recompute every item from the collective agreement's rules and tell you what to fix, before the client notices.",
+    lead: "Load the export from your payroll software: twenty-two checks recompute every item from your collective agreement's rules (retail, engineering, hospitality or logistics) and tell you what to fix, before the client notices.",
     privacy: "Your files stay on this computer: the checks run in this page and nothing is sent. You can confirm it by going offline once the page has opened.",
     step1: "Your files", step1sub: "Excel (.xlsx) or CSV files, as they come out of the payroll software.",
     dropMese: "This month's payslips", dropMeseSub: "Required · drop it here or tap to choose it",
@@ -91,7 +97,8 @@ const UI = {
     nonPresente: "— not in the file —", facoltativa: "optional",
     step3: "Settings", mese: "Month to check", meseSub: "Taken from the file when it has a month column.",
     media: "Average employees in the half-year", mediaSub: "Decides CIGS (over 15) and FIS (over 5) on the employee's side.",
-    dipendenti: "Employees today", dipendentiSub: "Over 15, the working-time reduction is 72 hours a year instead of 56.",
+    dipendenti: "Employees today", dipendentiSub: "In retail and services, over 15 the working-time reduction is 72 hours a year instead of 56.",
+    ccnl: "Collective agreement (CCNL)", ccnlSub: "The payslips' agreement: minimums, increments, monthly payments, notice, sickness and leave.",
     soglia: "Change in net pay to explain", sogliaSub: "0.20 means 20% above or below last month.",
     esegui: "Check the payslips", step4: "What to fix",
     filtroCliente: "Filter by client", filtroControllo: "Filter by check",
@@ -115,7 +122,7 @@ const UI = {
     eNumero: "A column of amounts has a value that is not a number: {e}.",
     fileFoglio: "{n} rows · sheet “{s}”", fileRighe: "{n} rows",
     xSegnalazioni: "Flags", xPerCliente: "By client", xNovembre: "November 2026", xParametri: "Settings",
-    xMese: "Month checked", xMedia: "Average employees in the half-year", xDipendenti: "Employees today", xSoglia: "Net pay change threshold",
+    xMese: "Month checked", xMedia: "Average employees in the half-year", xDipendenti: "Employees today", xCcnl: "CCNL", xSoglia: "Net pay change threshold",
     xData: "Checked on", xFonte: "Made with controlli-cedolini",
     f_mese: "Month", f_matricola: "Employee number", f_cliente: "Client", f_codice_fiscale: "Tax code", f_livello: "Grade",
     f_data_assunzione: "Hiring date", f_part_time: "Part-time share", f_evento: "Event this month",
@@ -135,6 +142,11 @@ const UI = {
     f_permessi_goduti: "Leave hours taken", f_permessi_residuo: "Leave hours balance",
     f_fondo_tfr_prec: "TFR fund at 31/12", f_tfr_quote_anno: "Year's TFR accruals", f_imponibile_anno: "Year's contribution base",
     f_tfr_liquidato: "TFR paid",
+    f_bonus_cuneo: "Tax-wedge payment", f_trattamento_integrativo: "Supplementary allowance",
+    f_imponibile_fiscale_anno: "At leaving: taxable pay since January", f_giorni_lavoro_anno: "At leaving: days worked in the year",
+    f_ritenute_anno_prec: "At leaving: tax withheld in earlier months", f_cuneo_anno_prec: "At leaving: tax-wedge paid in earlier months",
+    f_ti_anno_prec: "At leaving: allowance paid in earlier months",
+    f_assenza_trattenuta: "Pay taken off for the absence", f_integrazione_datore: "Employer's top-up (sickness, maternity)",
     f_ritenute_1001: "Income tax withheld (code 1001)", f_contributi_dipendente: "Employee contributions",
   },
 };
@@ -189,6 +201,15 @@ const CAMPI_CEDOLINI = [
   ["tfr_quote_anno", false, ["quote tfr anno", "tfr anno corrente", "tfr maturato anno"]],
   ["imponibile_anno", false, ["imponibile previdenziale anno", "imponibile anno"]],
   ["tfr_liquidato", false, ["tfr liquidato", "tfr lordo liquidato", "liquidazione tfr"]],
+  ["bonus_cuneo", false, ["somma cuneo", "cuneo fiscale", "bonus cuneo", "somma non imponibile cuneo"]],
+  ["trattamento_integrativo", false, ["trattamento integrativo", "ex bonus renzi", "tratt integrativo"]],
+  ["imponibile_fiscale_anno", false, ["imponibile fiscale anno", "imponibile irpef anno", "imponibile fiscale progressivo"]],
+  ["giorni_lavoro_anno", false, ["giorni lavoro anno", "giorni detrazione", "giorni lavoro"]],
+  ["ritenute_anno_prec", false, ["ritenute anno", "irpef trattenuta anno", "ritenute mesi precedenti"]],
+  ["cuneo_anno_prec", false, ["cuneo anno", "cuneo erogato anno", "cuneo mesi precedenti"]],
+  ["ti_anno_prec", false, ["trattamento integrativo anno", "ti erogato anno", "trattamento integrativo mesi precedenti"]],
+  ["assenza_trattenuta", false, ["trattenuta assenza", "assenza", "giorni non lavorati", "trattenuta malattia"]],
+  ["integrazione_datore", false, ["integrazione", "integrazione malattia", "integrazione azienda", "integrazione datore"]],
 ].map(([key, required, aliases]) => ({ key, required, aliases }));
 const CAMPI_F24 = [
   ["cliente", true, ["azienda", "ditta", "client"]],
@@ -209,6 +230,7 @@ let risultato = null;
 
 $("media").value = CFG.media_default;
 $("dipendenti").value = CFG.dipendenti_default;
+$("ccnl").value = CFG.ccnl_default;
 // i dati di esempio portano le posizioni INPS dei loro tre clienti; i file dell'utente usano i campi della pagina
 let esempio = false;
 $("soglia").value = CFG.soglia;
@@ -375,7 +397,7 @@ function controlla() {
     illeggibili = 0;
     const mese = $("mese").value;
     const cfg = { ...CFG, mese, soglia: +$("soglia").value, posizioni: esempio ? CFG.posizioni : {},
-      media_default: +$("media").value, dipendenti_default: +$("dipendenti").value };
+      media_default: +$("media").value, dipendenti_default: +$("dipendenti").value, ccnl_default: $("ccnl").value };
     const tutti = [...righe("mese", mese), ...(files.prima ? righe("prima", precedente(mese)) : [])];
     if (!tutti.length) throw new Error(t("eVuoto"));
     const corr = tutti.filter((r) => r.mese === mese);
@@ -478,7 +500,7 @@ $("scarica-xlsx").addEventListener("click", () => {
       return [t("clienteN", { c }), s.length, tot("aumento"), tot("assorbito"), tot("da_pagare")];
     })];
   const oggi = new Date().toISOString().slice(0, 10);
-  const parametri = [[t("xParametri"), ""], [t("xMese"), cfg.mese], ...(esempio ? [] : [[t("xMedia"), cfg.media_default], [t("xDipendenti"), cfg.dipendenti_default]]), [t("xSoglia"), cfg.soglia],
+  const parametri = [[t("xParametri"), ""], [t("xMese"), cfg.mese], ...(esempio ? [] : [[t("xMedia"), cfg.media_default], [t("xDipendenti"), cfg.dipendenti_default], [t("xCcnl"), cfg.ccnl_default]]), [t("xSoglia"), cfg.soglia],
     [t("xData"), oggi], [t("xFonte"), "https://github.com/D0M3N1C0X/controlli-cedolini"]];
   const bytes = writeXlsx([
     { name: t("xSegnalazioni"), rows: segnalazioni, widths: [12, 10, 28, 48, 10, 14, 14, 12, 48, 16, 12, 30] },

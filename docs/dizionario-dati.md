@@ -1,7 +1,7 @@
 # Dizionario dei dati
 
-I file in `data/`. Tutti sintetici tranne `ccnl_terziario.csv`, che riporta le tabelle del contratto (fonti in
-[fonti.md](fonti.md)). `tests/test_docs.py` fallisce se una colonna, un livello, un evento o un tipo di errore
+I file in `data/`. Tutti sintetici tranne le quattro tabelle `ccnl_*.csv`, che riportano le tabelle dei contratti
+(fonti in [fonti.md](fonti.md)). `tests/test_docs.py` fallisce se una colonna, un livello, un evento o un tipo di errore
 compare nei dati senza una voce qui.
 
 ## `data/ccnl_terziario.csv`: le tabelle del CCNL Terziario Confcommercio
@@ -31,14 +31,69 @@ Una riga per livello. Importi in euro al mese, a tempo pieno.
 | `6` | Sesto livello |
 | `7` | Settimo livello |
 
-## `data/dipendenti.csv`: l'anagrafica dei 119 dipendenti in forza ad agosto
+## `data/ccnl_metalmeccanico.csv`: i minimi del CCNL Metalmeccanico industria
+
+Una riga per livello, euro al mese a tempo pieno (F30). I controlli usano `minimo_2026_06`.
+
+| Colonna | Tipo | Significato |
+|---|---|---|
+| `minimo_2025_06` | euro | Minimo fino al 31 maggio 2026: minimo di giugno 2026 meno l'aumento |
+| `minimo_2026_06` | euro | Minimo dal 1° giugno 2026, in vigore a settembre |
+| `minimo_2027_06` | euro | Minimo dal 1° giugno 2027, salvo un adeguamento IPCA più alto |
+
+| Livello | Significato |
+|---|---|
+| `D1` | Primo livello della classificazione unica (nei dati d'esempio non c'è: operai, D30) |
+| `D2` | Secondo livello (non nei dati d'esempio) |
+| `C1` | Terzo livello |
+| `C2` | Quarto livello |
+| `C3` | Quinto livello |
+| `B1` | Sesto livello |
+| `B2` | Settimo livello |
+| `B3` | Ottavo livello |
+| `A1` | Nono livello, il più alto |
+
+## `data/ccnl_turismo.csv`: le retribuzioni del CCNL Turismo, pubblici esercizi (Fipe)
+
+Una riga per livello, euro al mese (F33). I controlli usano `totale_2026_06`.
+
+| Colonna | Tipo | Significato |
+|---|---|---|
+| `paga_base_2026_06` | euro | Paga base dal 1° giugno 2026 |
+| `totale_2025_06` | euro | Contingenza più paga base dal 1° giugno 2025, per gli errori inseriti |
+| `totale_2026_06` | euro | Contingenza più paga base dal 1° giugno 2026, in vigore a settembre |
+| `totale_2027_06` | euro | Contingenza più paga base dal 1° giugno 2027 |
+
+| Livello | Significato |
+|---|---|
+| `Qa` | Quadro A |
+| `Qb` | Quadro B |
+| `6s` | Sesto super |
+
+## `data/ccnl_logistica.csv`: i minimi del CCNL Logistica, trasporto merci e spedizione
+
+Una riga per livello, personale non viaggiante, euro al mese (F38). I controlli usano `totale_2026_01`.
+
+| Colonna | Tipo | Significato |
+|---|---|---|
+| `minimo_2026_01` | euro | Minimo conglobato dal 1° gennaio 2026, senza l'elemento perequativo (per gli errori inseriti) |
+| `epa_2026` | euro | Elemento perequativo (EPA) del 2026 |
+| `totale_2026_01` | euro | Minimo più EPA, in vigore a settembre |
+| `totale_2027_01` | euro | Minimo più EPA dal 1° gennaio 2027, quando l'EPA raddoppia |
+
+| Livello | Significato |
+|---|---|
+| `3S` | Terzo super |
+| `4J` | Quarto junior |
+
+## `data/dipendenti.csv`: l'anagrafica dei 177 dipendenti in forza ad agosto
 
 I tre assunti a settembre (B200, B201, B202) compaiono solo in `cedolini.csv`, con l'evento `assunzione`.
 
 | Colonna | Tipo | Significato |
 |---|---|---|
 | `matricola` | testo | Identificativo del dipendente: lettera del cliente e numero |
-| `cliente` | testo | `A`, `B` o `C` (descritti in `src/config.py`) |
+| `cliente` | testo | Da `A` a `F`, descritti in `src/config.py`: A, B e C con il CCNL Terziario, D Metalmeccanico industria, E Turismo (pubblici esercizi), F Logistica |
 | `codice_fiscale` | testo | Codice fiscale formalmente valido di una persona inventata, con comune estero (`Z...`) |
 | `sesso` | testo | `F` o `M`, serve solo a costruire il codice fiscale |
 | `livello` | testo | Il livello di inquadramento |
@@ -68,8 +123,8 @@ errori elencati in `errori_inseriti.csv`.
 | `scatti` | euro | Importo degli scatti |
 | `superminimo` | euro | Superminimo pagato nel mese |
 | `straordinari` | euro | Straordinari pagati nel mese |
-| `lordo` | euro | Totale delle voci di retribuzione |
-| `contributi_inps` | euro | Contributi a carico del dipendente: IVS, CIGS, quota FIS e l'1% sopra la prima fascia |
+| `lordo` | euro | Totale delle voci di retribuzione; nel mese di un'assenza, meno la retribuzione tolta e più indennità INPS, carenza e integrazione (D31) |
+| `contributi_inps` | euro | Contributi a carico del dipendente: IVS, CIGS, quota FIS e l'1% sopra la prima fascia, sul lordo senza le indennità INPS (F41) |
 | `imponibile_irpef` | euro | Lordo meno contributi |
 | `irpef` | euro | Ritenuta IRPEF del mese (C20); nel cedolino di uscita, il conguaglio (C21): negativa se è un rimborso |
 | `bonus_cuneo` | euro | Somma del cuneo fiscale erogata nel mese (L. 207/2024, art. 1 c. 4): non concorre al reddito; nel cedolino di uscita, la differenza di conguaglio |
@@ -82,7 +137,7 @@ errori elencati in `errori_inseriti.csv`.
 | `altre_trattenute` | euro | Trattenute sintetiche (1,5% dell'imponibile), al posto di addizionali e altre voci |
 | `netto` | euro | Imponibile meno IRPEF e altre trattenute |
 | `quota_tfr` | euro | Quota di TFR maturata nel mese |
-| `ferie_maturate` | giorni | Ferie maturate nel mese: 26 l'anno diviso 12 |
+| `ferie_maturate` | giorni | Ferie maturate nel mese: le ferie annue del CCNL diviso 12 (F04, F32) |
 | `ferie_godute` | giorni | Ferie godute nel mese |
 | `ferie_residuo` | giorni | Residuo ferie a fine mese |
 | `ratei_13` | intero | Dodicesimi di tredicesima maturati nell'anno, fino al mese compreso (F11) |
@@ -98,7 +153,7 @@ errori elencati in `errori_inseriti.csv`.
 | `malattia_evento_n` | intero | Numero dell'evento di malattia nell'anno solare (una ricaduta è lo stesso evento) |
 | `malattia_esente` | `true`/`false` | Ricovero, prognosi iniziale di almeno 12 giorni, terapie salvavita o gravidanza: niente limiti alla carenza (F16) |
 | `malattia_inps` | euro | Indennità di malattia anticipata per conto dell'INPS (F16, F17) |
-| `malattia_carenza` | euro | Integrazione dei primi 3 giorni pagata dall'azienda |
+| `malattia_carenza` | euro | I primi 3 giorni pagati dall'azienda, alla quota del CCNL (F16, F35, F37, F39) |
 | `maternita_dal` | data | Primo giorno del congedo di maternità; vuoto se nel mese non c'è |
 | `maternita_al` | data | Ultimo giorno previsto del congedo |
 | `maternita_inps` | euro | Indennità di maternità anticipata per conto dell'INPS (F18) |
@@ -109,6 +164,8 @@ errori elencati in `errori_inseriti.csv`.
 | `tfr_quote_anno` | euro | Quote di TFR lorde dell'anno, fino alla cessazione |
 | `imponibile_anno` | euro | Imponibile previdenziale dello stesso periodo, per lo 0,50% (F22) |
 | `tfr_liquidato` | euro | TFR lordo liquidato alla cessazione (F19-F22) |
+| `assenza_trattenuta` | euro | Nel mese di malattia o maternità, la retribuzione dei giorni di assenza tolta dal lordo (D31); vuoto se non c'è |
+| `integrazione_datore` | euro | Integrazione dell'indennità INPS pagata dall'azienda nel mese dell'assenza (C22) |
 
 | Evento | Significato |
 |---|---|
@@ -116,8 +173,8 @@ errori elencati in `errori_inseriti.csv`.
 | `straordinari` | Straordinari che spiegano un netto più alto |
 | `variazione part-time` | Cambio di percentuale di part-time, comunicato |
 | `cessazione` | Ultimo cedolino: con data, tipo e preavviso, le mensilità aggiuntive, le ferie non godute e il TFR |
-| `malattia` | Un evento di malattia nel mese, con l'indennità INPS e la carenza |
-| `maternità` | Inizio del congedo di maternità, con l'indennità INPS |
+| `malattia` | Un evento di malattia nel mese: retribuzione dei giorni tolta, indennità INPS, carenza e integrazione |
+| `maternità` | Inizio del congedo di maternità: retribuzione dei giorni tolta, indennità INPS e integrazione |
 
 ## `data/f24.csv`: le deleghe F24 di settembre 2026, una per cliente
 
@@ -153,7 +210,7 @@ Servono a misurare i controlli: ogni errore deve essere trovato, e nient'altro d
 | `anagrafica` | C10 | Livello o superminimo cambiati senza un evento |
 | `ratei` | C11 | Dodicesimi di tredicesima o quattordicesima che non corrispondono ai mesi di servizio |
 | `tredicesima` | C12 | Mensilità aggiuntiva pagata con i dodicesimi sbagliati |
-| `ferie_liquidate` | C13 | Ferie non godute pagate con un divisore diverso da 26 |
+| `ferie_liquidate` | C13 | Ferie non godute pagate con un divisore diverso da quello del CCNL |
 | `preavviso` | C14 | Preavviso più corto del minimo del CCNL |
 | `malattia` | C15 | Indennità di malattia INPS con la base giornaliera sbagliata |
 | `carenza` | C16 | Carenza pagata quando non è più dovuta |
@@ -162,3 +219,4 @@ Servono a misurare i controlli: ogni errore deve essere trovato, e nient'altro d
 | `tfr_liquidato` | C19 | TFR liquidato con il coefficiente, l'imposta o il contributo sbagliati |
 | `irpef` | C20 | Ritenuta con la tabella del 2025, ulteriore detrazione del cuneo non applicata, somma del cuneo non erogata |
 | `conguaglio` | C21 | Conguaglio alla cessazione con le detrazioni dell'anno intero, o non fatto |
+| `integrazione` | C22 | Integrazione del datore non pagata, o con le quote di un altro CCNL |

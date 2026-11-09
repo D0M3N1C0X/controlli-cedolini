@@ -1,96 +1,311 @@
 {
  "ccnl": {
-  "1": {
-   "altri_elementi": 0.0,
-   "contingenza": 537.52,
-   "minimo_2025_03": 2449.32,
-   "minimo_2025_11": 2504.06,
-   "minimo_2026_11": 2558.8,
-   "minimo_2027_02": 2621.36,
-   "paga_base": 1966.54,
-   "scatto": 24.84
+  "logistica": {
+   "1": {
+    "epa_2026": 36.67,
+    "minimo_2026_01": 2374.79,
+    "scatto": 29.44,
+    "totale_2026_01": 2411.46,
+    "totale_2027_01": 2448.13
+   },
+   "2": {
+    "epa_2026": 36.67,
+    "minimo_2026_01": 2181.55,
+    "scatto": 26.86,
+    "totale_2026_01": 2218.22,
+    "totale_2027_01": 2254.89
+   },
+   "3": {
+    "epa_2026": 30.0,
+    "minimo_2026_01": 1916.84,
+    "scatto": 24.27,
+    "totale_2026_01": 1946.84,
+    "totale_2027_01": 1976.84
+   },
+   "3S": {
+    "epa_2026": 30.0,
+    "minimo_2026_01": 1970.37,
+    "scatto": 24.79,
+    "totale_2026_01": 2000.37,
+    "totale_2027_01": 2030.37
+   },
+   "4": {
+    "epa_2026": 26.67,
+    "minimo_2026_01": 1823.56,
+    "scatto": 23.24,
+    "totale_2026_01": 1850.23,
+    "totale_2027_01": 1876.9
+   },
+   "4J": {
+    "epa_2026": 26.67,
+    "minimo_2026_01": 1776.25,
+    "scatto": 22.34,
+    "totale_2026_01": 1802.92,
+    "totale_2027_01": 1829.59
+   },
+   "5": {
+    "epa_2026": 23.33,
+    "minimo_2026_01": 1738.31,
+    "scatto": 22.21,
+    "totale_2026_01": 1761.64,
+    "totale_2027_01": 1784.97
+   },
+   "6": {
+    "epa_2026": 23.33,
+    "minimo_2026_01": 1625.41,
+    "scatto": 20.66,
+    "totale_2026_01": 1648.74,
+    "totale_2027_01": 1672.07
+   },
+   "Quadri": {
+    "epa_2026": 46.67,
+    "minimo_2026_01": 2528.31,
+    "scatto": 30.99,
+    "totale_2026_01": 2574.98,
+    "totale_2027_01": 2621.65
+   }
   },
-  "2": {
-   "altri_elementi": 0.0,
-   "contingenza": 532.54,
-   "minimo_2025_03": 2186.23,
-   "minimo_2025_11": 2233.58,
-   "minimo_2026_11": 2280.93,
-   "minimo_2027_02": 2335.04,
-   "paga_base": 1701.04,
-   "scatto": 22.83
+  "metalmeccanico": {
+   "A1": {
+    "minimo_2025_06": 2837.12,
+    "minimo_2026_06": 2907.01,
+    "minimo_2027_06": 2985.33,
+    "scatto": 40.96
+   },
+   "B1": {
+    "minimo_2025_06": 2313.34,
+    "minimo_2026_06": 2370.33,
+    "minimo_2027_06": 2434.19,
+    "scatto": 32.43
+   },
+   "B2": {
+    "minimo_2025_06": 2481.84,
+    "minimo_2026_06": 2542.98,
+    "minimo_2027_06": 2611.49,
+    "scatto": 36.41
+   },
+   "B3": {
+    "minimo_2025_06": 2770.74,
+    "minimo_2026_06": 2838.99,
+    "minimo_2027_06": 2915.48,
+    "scatto": 40.96
+   },
+   "C1": {
+    "minimo_2025_06": 1973.51,
+    "minimo_2026_06": 2022.12,
+    "minimo_2027_06": 2076.59,
+    "scatto": 25.05
+   },
+   "C2": {
+    "minimo_2025_06": 2015.24,
+    "minimo_2026_06": 2064.88,
+    "minimo_2027_06": 2120.52,
+    "scatto": 26.75
+   },
+   "C3": {
+    "minimo_2025_06": 2158.26,
+    "minimo_2026_06": 2211.43,
+    "minimo_2027_06": 2271.01,
+    "scatto": 29.64
+   },
+   "D1": {
+    "minimo_2025_06": 1742.03,
+    "minimo_2026_06": 1784.94,
+    "minimo_2027_06": 1833.02,
+    "scatto": 21.59
+   },
+   "D2": {
+    "minimo_2025_06": 1931.78,
+    "minimo_2026_06": 1979.37,
+    "minimo_2027_06": 2032.7,
+    "scatto": 25.05
+   }
   },
-  "3": {
-   "altri_elementi": 0.0,
-   "contingenza": 527.9,
-   "minimo_2025_03": 1941.37,
-   "minimo_2025_11": 1981.84,
-   "minimo_2026_11": 2022.31,
-   "minimo_2027_02": 2068.56,
-   "paga_base": 1453.94,
-   "scatto": 21.95
+  "terziario": {
+   "1": {
+    "altri_elementi": 0.0,
+    "contingenza": 537.52,
+    "minimo_2025_03": 2449.32,
+    "minimo_2025_11": 2504.06,
+    "minimo_2026_11": 2558.8,
+    "minimo_2027_02": 2621.36,
+    "paga_base": 1966.54,
+    "scatto": 24.84
+   },
+   "2": {
+    "altri_elementi": 0.0,
+    "contingenza": 532.54,
+    "minimo_2025_03": 2186.23,
+    "minimo_2025_11": 2233.58,
+    "minimo_2026_11": 2280.93,
+    "minimo_2027_02": 2335.04,
+    "paga_base": 1701.04,
+    "scatto": 22.83
+   },
+   "3": {
+    "altri_elementi": 0.0,
+    "contingenza": 527.9,
+    "minimo_2025_03": 1941.37,
+    "minimo_2025_11": 1981.84,
+    "minimo_2026_11": 2022.31,
+    "minimo_2027_02": 2068.56,
+    "paga_base": 1453.94,
+    "scatto": 21.95
+   },
+   "4": {
+    "altri_elementi": 0.0,
+    "contingenza": 524.22,
+    "minimo_2025_03": 1746.68,
+    "minimo_2025_11": 1781.68,
+    "minimo_2026_11": 1816.68,
+    "minimo_2027_02": 1856.68,
+    "paga_base": 1257.46,
+    "scatto": 20.66
+   },
+   "5": {
+    "altri_elementi": 0.0,
+    "contingenza": 521.94,
+    "minimo_2025_03": 1626.39,
+    "minimo_2025_11": 1658.01,
+    "minimo_2026_11": 1689.63,
+    "minimo_2027_02": 1725.77,
+    "paga_base": 1136.07,
+    "scatto": 20.3
+   },
+   "6": {
+    "altri_elementi": 0.0,
+    "contingenza": 519.76,
+    "minimo_2025_03": 1511.31,
+    "minimo_2025_11": 1539.7,
+    "minimo_2026_11": 1568.09,
+    "minimo_2027_02": 1600.53,
+    "paga_base": 1019.94,
+    "scatto": 19.73
+   },
+   "7": {
+    "altri_elementi": 5.16,
+    "contingenza": 517.51,
+    "minimo_2025_03": 1371.58,
+    "minimo_2025_11": 1395.89,
+    "minimo_2026_11": 1420.2,
+    "minimo_2027_02": 1447.98,
+    "paga_base": 873.22,
+    "scatto": 19.47
+   },
+   "Quadri": {
+    "altri_elementi": 260.76,
+    "contingenza": 540.37,
+    "minimo_2025_03": 2923.46,
+    "minimo_2025_11": 2984.22,
+    "minimo_2026_11": 3044.98,
+    "minimo_2027_02": 3114.42,
+    "paga_base": 2183.09,
+    "scatto": 25.46
+   }
   },
-  "4": {
-   "altri_elementi": 0.0,
-   "contingenza": 524.22,
-   "minimo_2025_03": 1746.68,
-   "minimo_2025_11": 1781.68,
-   "minimo_2026_11": 1816.68,
-   "minimo_2027_02": 1856.68,
-   "paga_base": 1257.46,
-   "scatto": 20.66
-  },
-  "5": {
-   "altri_elementi": 0.0,
-   "contingenza": 521.94,
-   "minimo_2025_03": 1626.39,
-   "minimo_2025_11": 1658.01,
-   "minimo_2026_11": 1689.63,
-   "minimo_2027_02": 1725.77,
-   "paga_base": 1136.07,
-   "scatto": 20.3
-  },
-  "6": {
-   "altri_elementi": 0.0,
-   "contingenza": 519.76,
-   "minimo_2025_03": 1511.31,
-   "minimo_2025_11": 1539.7,
-   "minimo_2026_11": 1568.09,
-   "minimo_2027_02": 1600.53,
-   "paga_base": 1019.94,
-   "scatto": 19.73
-  },
-  "7": {
-   "altri_elementi": 5.16,
-   "contingenza": 517.51,
-   "minimo_2025_03": 1371.58,
-   "minimo_2025_11": 1395.89,
-   "minimo_2026_11": 1420.2,
-   "minimo_2027_02": 1447.98,
-   "paga_base": 873.22,
-   "scatto": 19.47
-  },
-  "Quadri": {
-   "altri_elementi": 260.76,
-   "contingenza": 540.37,
-   "minimo_2025_03": 2923.46,
-   "minimo_2025_11": 2984.22,
-   "minimo_2026_11": 3044.98,
-   "minimo_2027_02": 3114.42,
-   "paga_base": 2183.09,
-   "scatto": 25.46
+  "turismo": {
+   "1": {
+    "contingenza": 536.71,
+    "paga_base_2026_06": 1570.97,
+    "scatto": 37.7,
+    "totale_2025_06": 2053.87,
+    "totale_2026_06": 2107.68,
+    "totale_2027_06": 2148.04
+   },
+   "2": {
+    "contingenza": 531.59,
+    "paga_base_2026_06": 1384.76,
+    "scatto": 36.15,
+    "totale_2025_06": 1868.92,
+    "totale_2026_06": 1916.35,
+    "totale_2027_06": 1951.92
+   },
+   "3": {
+    "contingenza": 528.26,
+    "paga_base_2026_06": 1272.47,
+    "scatto": 34.86,
+    "totale_2025_06": 1757.14,
+    "totale_2026_06": 1800.73,
+    "totale_2027_06": 1833.42
+   },
+   "4": {
+    "contingenza": 524.94,
+    "paga_base_2026_06": 1167.75,
+    "scatto": 33.05,
+    "totale_2025_06": 1652.69,
+    "totale_2026_06": 1692.69,
+    "totale_2027_06": 1722.69
+   },
+   "5": {
+    "contingenza": 522.37,
+    "paga_base_2026_06": 1057.72,
+    "scatto": 32.54,
+    "totale_2025_06": 1543.86,
+    "totale_2026_06": 1580.09,
+    "totale_2027_06": 1607.26
+   },
+   "6": {
+    "contingenza": 520.51,
+    "paga_base_2026_06": 971.06,
+    "scatto": 30.99,
+    "totale_2025_06": 1458.31,
+    "totale_2026_06": 1491.57,
+    "totale_2027_06": 1516.52
+   },
+   "6s": {
+    "contingenza": 520.64,
+    "paga_base_2026_06": 994.19,
+    "scatto": 31.25,
+    "totale_2025_06": 1480.77,
+    "totale_2026_06": 1514.83,
+    "totale_2027_06": 1540.37
+   },
+   "7": {
+    "contingenza": 518.45,
+    "paga_base_2026_06": 871.75,
+    "scatto": 30.47,
+    "totale_2025_06": 1360.34,
+    "totale_2026_06": 1390.2,
+    "totale_2027_06": 1412.59
+   },
+   "Qa": {
+    "contingenza": 542.7,
+    "paga_base_2026_06": 1920.26,
+    "scatto": 40.8,
+    "totale_2025_06": 2397.19,
+    "totale_2026_06": 2462.96,
+    "totale_2027_06": 2512.3
+   },
+   "Qb": {
+    "contingenza": 537.59,
+    "paga_base_2026_06": 1734.02,
+    "scatto": 39.25,
+    "totale_2025_06": 2212.22,
+    "totale_2026_06": 2271.61,
+    "totale_2027_06": 2316.16
+   }
   }
  },
  "cfg": {
   "aggiuntiva": 0.01,
   "aliquota": 0.0919,
   "carenza": 3,
+  "carenza_metalmeccanico": {
+   "dal_evento": 4,
+   "durata_max": 5,
+   "quote": [
+    0.66,
+    0.5
+   ]
+  },
   "carenza_percentuali": [
    1.0,
    1.0,
    0.66,
    0.5
   ],
+  "carenza_turismo_durata": 5,
+  "ccnl_default": "terziario",
   "cigs": 0.003,
   "cigs_soglia": 15,
   "colonna_minimo": "minimo_2025_11",
@@ -143,7 +358,12 @@
   "ex_festivita": 32,
   "f1": 20,
   "f2": 180,
-  "ferie_annue": 26,
+  "ferie": [
+   [
+    0,
+    26
+   ]
+  ],
   "fis_fino_a_5": 0.005,
   "fis_oltre_5": 0.008,
   "fis_quota": 3,
@@ -157,7 +377,16 @@
   "giorni_anno": 365,
   "giorni_mese_intero": 15,
   "imposta_tfr": 0.17,
+  "integrazione": {
+   "base": "netto",
+   "quote": [
+    0.75,
+    1.0
+   ]
+  },
+  "malattia_inps": true,
   "maternita": 0.8,
+  "maternita_netto": true,
   "media_default": 20.0,
   "mensilita": 14,
   "mese": "2026-09",
@@ -166,16 +395,40 @@
   "p2": 0.6666,
   "posizioni": {
    "A": {
+    "ccnl": "terziario",
     "dipendenti": 18,
+    "fis": true,
     "media_semestre": 14.5
    },
    "B": {
+    "ccnl": "terziario",
     "dipendenti": 74,
+    "fis": true,
     "media_semestre": 74.0
    },
    "C": {
+    "ccnl": "terziario",
     "dipendenti": 27,
+    "fis": true,
     "media_semestre": 27.0
+   },
+   "D": {
+    "ccnl": "metalmeccanico",
+    "dipendenti": 22,
+    "fis": false,
+    "media_semestre": 22.0
+   },
+   "E": {
+    "ccnl": "turismo",
+    "dipendenti": 16,
+    "fis": true,
+    "media_semestre": 16.0
+   },
+   "F": {
+    "ccnl": "logistica",
+    "dipendenti": 20,
+    "fis": true,
+    "media_semestre": 19.0
    }
   },
   "preavviso": {
@@ -266,6 +519,532 @@
   },
   "prima_fascia": 4685.0,
   "prossima_tranche": "2026-11-01",
+  "quattordicesima_senza_scatti": false,
+  "regola_carenza": "terziario",
+  "regole": {
+   "logistica": {
+    "colonna_minimo": "totale_2026_01",
+    "colonna_minimo_prossimo": "totale_2027_01",
+    "divisore_giornaliero": 22,
+    "ex_festivita": 32,
+    "ferie": [
+     [
+      0,
+      22
+     ]
+    ],
+    "giorni_mese_intero": 16,
+    "integrazione": {
+     "base": "lordo",
+     "quote": [
+      1.0,
+      1.0
+     ]
+    },
+    "malattia_inps": true,
+    "maternita_netto": false,
+    "mensilita": 14,
+    "p1": 0.5,
+    "p2": 0.6666,
+    "preavviso": {
+     "dimissioni": {
+      "1": [
+       37.5,
+       52.5,
+       67.5
+      ],
+      "2": [
+       22.5,
+       30.0,
+       37.5
+      ],
+      "3": [
+       15.0,
+       22.5,
+       30.0
+      ],
+      "3S": [
+       15.0,
+       22.5,
+       30.0
+      ],
+      "4": [
+       15.0,
+       22.5,
+       30.0
+      ],
+      "4J": [
+       15.0,
+       22.5,
+       30.0
+      ],
+      "5": [
+       15.0,
+       22.5,
+       30.0
+      ],
+      "6": [
+       15.0,
+       22.5,
+       30.0
+      ],
+      "Quadri": [
+       37.5,
+       52.5,
+       67.5
+      ]
+     },
+     "licenziamento": {
+      "1": [
+       75,
+       105,
+       135
+      ],
+      "2": [
+       45,
+       60,
+       75
+      ],
+      "3": [
+       30,
+       45,
+       60
+      ],
+      "3S": [
+       30,
+       45,
+       60
+      ],
+      "4": [
+       30,
+       45,
+       60
+      ],
+      "4J": [
+       30,
+       45,
+       60
+      ],
+      "5": [
+       30,
+       45,
+       60
+      ],
+      "6": [
+       30,
+       45,
+       60
+      ],
+      "Quadri": [
+       75,
+       105,
+       135
+      ]
+     }
+    },
+    "quattordicesima_senza_scatti": false,
+    "regola_carenza": "logistica",
+    "rol_fino_a_15": 40,
+    "rol_nuovi_assunti": null,
+    "rol_oltre_15": 40,
+    "scatti_anni": 2,
+    "scatti_max": 5,
+    "somma_frazioni": false,
+    "tranche_ccnl": "2027-01-01"
+   },
+   "metalmeccanico": {
+    "colonna_minimo": "minimo_2026_06",
+    "colonna_minimo_prossimo": "minimo_2027_06",
+    "divisore_giornaliero": 26,
+    "ex_festivita": 32,
+    "ferie": [
+     [
+      0,
+      24
+     ],
+     [
+      10,
+      25
+     ],
+     [
+      18,
+      30
+     ]
+    ],
+    "giorni_mese_intero": 16,
+    "integrazione": {
+     "base": "lordo",
+     "quote": [
+      1.0,
+      1.0
+     ]
+    },
+    "malattia_inps": false,
+    "maternita_netto": false,
+    "mensilita": 13,
+    "p1": 0.5,
+    "p2": 0.6666,
+    "preavviso": {
+     "dimissioni": {
+      "A1": [
+       60,
+       90,
+       120
+      ],
+      "B1": [
+       45,
+       60,
+       75
+      ],
+      "B2": [
+       60,
+       90,
+       120
+      ],
+      "B3": [
+       60,
+       90,
+       120
+      ],
+      "C1": [
+       10,
+       20,
+       30
+      ],
+      "C2": [
+       45,
+       60,
+       75
+      ],
+      "C3": [
+       45,
+       60,
+       75
+      ],
+      "D1": [
+       10,
+       20,
+       30
+      ],
+      "D2": [
+       10,
+       20,
+       30
+      ]
+     },
+     "licenziamento": {
+      "A1": [
+       60,
+       90,
+       120
+      ],
+      "B1": [
+       45,
+       60,
+       75
+      ],
+      "B2": [
+       60,
+       90,
+       120
+      ],
+      "B3": [
+       60,
+       90,
+       120
+      ],
+      "C1": [
+       10,
+       20,
+       30
+      ],
+      "C2": [
+       45,
+       60,
+       75
+      ],
+      "C3": [
+       45,
+       60,
+       75
+      ],
+      "D1": [
+       10,
+       20,
+       30
+      ],
+      "D2": [
+       10,
+       20,
+       30
+      ]
+     }
+    },
+    "quattordicesima_senza_scatti": false,
+    "regola_carenza": "metalmeccanico",
+    "rol_fino_a_15": 72,
+    "rol_nuovi_assunti": null,
+    "rol_oltre_15": 72,
+    "scatti_anni": 2,
+    "scatti_max": 5,
+    "somma_frazioni": false,
+    "tranche_ccnl": "2027-06-01"
+   },
+   "terziario": {
+    "colonna_minimo": "minimo_2025_11",
+    "colonna_minimo_prossimo": "minimo_2026_11",
+    "divisore_giornaliero": 26,
+    "ex_festivita": 32,
+    "ferie": [
+     [
+      0,
+      26
+     ]
+    ],
+    "giorni_mese_intero": 15,
+    "integrazione": {
+     "base": "netto",
+     "quote": [
+      0.75,
+      1.0
+     ]
+    },
+    "malattia_inps": true,
+    "maternita_netto": true,
+    "mensilita": 14,
+    "p1": 0.5,
+    "p2": 0.6666,
+    "preavviso": {
+     "dimissioni": {
+      "1": [
+       45,
+       60,
+       90
+      ],
+      "2": [
+       20,
+       30,
+       45
+      ],
+      "3": [
+       20,
+       30,
+       45
+      ],
+      "4": [
+       15,
+       20,
+       30
+      ],
+      "5": [
+       15,
+       20,
+       30
+      ],
+      "6": [
+       10,
+       15,
+       15
+      ],
+      "7": [
+       10,
+       15,
+       15
+      ],
+      "Quadri": [
+       45,
+       60,
+       90
+      ]
+     },
+     "licenziamento": {
+      "1": [
+       60,
+       90,
+       120
+      ],
+      "2": [
+       30,
+       45,
+       60
+      ],
+      "3": [
+       30,
+       45,
+       60
+      ],
+      "4": [
+       20,
+       30,
+       45
+      ],
+      "5": [
+       20,
+       30,
+       45
+      ],
+      "6": [
+       15,
+       20,
+       20
+      ],
+      "7": [
+       15,
+       20,
+       20
+      ],
+      "Quadri": [
+       60,
+       90,
+       120
+      ]
+     }
+    },
+    "quattordicesima_senza_scatti": false,
+    "regola_carenza": "terziario",
+    "rol_fino_a_15": 56,
+    "rol_nuovi_assunti": "2011-03-01",
+    "rol_oltre_15": 72,
+    "scatti_anni": 3,
+    "scatti_max": 10,
+    "somma_frazioni": false,
+    "tranche_ccnl": "2026-11-01"
+   },
+   "turismo": {
+    "colonna_minimo": "totale_2026_06",
+    "colonna_minimo_prossimo": "totale_2027_06",
+    "divisore_giornaliero": 26,
+    "ex_festivita": 32,
+    "ferie": [
+     [
+      0,
+      26
+     ]
+    ],
+    "giorni_mese_intero": 15,
+    "integrazione": null,
+    "malattia_inps": true,
+    "maternita_netto": true,
+    "mensilita": 14,
+    "p1": 0.8,
+    "p2": 0.8,
+    "preavviso": {
+     "dimissioni": {
+      "1": [
+       60,
+       90,
+       120
+      ],
+      "2": [
+       30,
+       45,
+       60
+      ],
+      "3": [
+       30,
+       45,
+       60
+      ],
+      "4": [
+       20,
+       30,
+       45
+      ],
+      "5": [
+       20,
+       30,
+       45
+      ],
+      "6": [
+       15,
+       20,
+       20
+      ],
+      "6s": [
+       15,
+       20,
+       20
+      ],
+      "7": [
+       15,
+       20,
+       20
+      ],
+      "Qa": [
+       120,
+       150,
+       180
+      ],
+      "Qb": [
+       120,
+       150,
+       180
+      ]
+     },
+     "licenziamento": {
+      "1": [
+       60,
+       90,
+       120
+      ],
+      "2": [
+       30,
+       45,
+       60
+      ],
+      "3": [
+       30,
+       45,
+       60
+      ],
+      "4": [
+       20,
+       30,
+       45
+      ],
+      "5": [
+       20,
+       30,
+       45
+      ],
+      "6": [
+       15,
+       20,
+       20
+      ],
+      "6s": [
+       15,
+       20,
+       20
+      ],
+      "7": [
+       15,
+       20,
+       20
+      ],
+      "Qa": [
+       120,
+       150,
+       180
+      ],
+      "Qb": [
+       120,
+       150,
+       180
+      ]
+     }
+    },
+    "quattordicesima_senza_scatti": true,
+    "regola_carenza": "turismo",
+    "rol_fino_a_15": 72,
+    "rol_nuovi_assunti": "2017-12-31",
+    "rol_oltre_15": 72,
+    "scatti_anni": 4,
+    "scatti_max": 6,
+    "somma_frazioni": true,
+    "tranche_ccnl": "2027-06-01"
+   }
+  },
   "rol_fino_a_15": 56,
   "rol_nuovi_assunti": "2011-03-01",
   "rol_oltre_15": 72,
@@ -287,11 +1066,13 @@
   "scatti_anni": 3,
   "scatti_max": 10,
   "soglia": 0.2,
+  "somma_frazioni": false,
   "tfr_fisso": 1.5,
   "tfr_quota": 0.75,
   "tolleranza": 0.01,
   "tolleranza_ferie": 0.01,
   "tolleranza_ore": 0.01,
+  "tranche_ccnl": "2026-11-01",
   "trattamento_integrativo": {
    "importo": 1200.0,
    "riduzione_capienza": 75.0,

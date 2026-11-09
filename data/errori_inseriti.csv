@@ -47,4 +47,22 @@ B191,B,inps,retribuzione oltre 4.685 €: contributo aggiuntivo dell'1% non trat
 B041,B,irpef,ritenuta con lo scaglione del 35% del 2025 invece che del 33% del 2026
 C097,C,irpef,ulteriore detrazione del cuneo fiscale (1.000 € l'anno) non applicata
 B030,B,irpef,somma del cuneo fiscale non erogata a un reddito sotto i 20.000 €
+B081,B,integrazione,integrazione del datore di lavoro non pagata: il netto resta sotto il 75% garantito
+D308,D,minimo,minimo fermo a prima di giugno 2026: l'aumento IPCA e del rinnovo non applicato
+D302,D,scatto,scatti contati ogni tre anni come nel Terziario: nel Metalmeccanico sono biennali
+D301,D,ratei,mese di assunzione con 15 giorni di servizio contato: nel Metalmeccanico ne servono più di 15
+D303,D,ferie,oltre 10 anni di servizio: il giorno di ferie in più non maturato
+D315,D,malattia,"indennità INPS anticipata a un impiegato dell'industria, che non ne ha diritto"
+D318,D,integrazione,"malattia pagata all'80%, la quota dopo i 122 giorni, dal primo giorno"
+D305,D,preavviso,licenziamento di un B2-A1 con 1 mese e 15 giorni di preavviso: il minimo è 2 mesi
+E337,E,minimo,retribuzione ferma alla tranche di giugno 2025
+E330,E,malattia,indennità INPS al 50% come negli altri settori: nei pubblici esercizi è l'80%
+E336,E,carenza,"malattia di 7 giorni: i primi 3 non pagati, ma oltre i 5 giorni il datore li deve"
+E335,E,tredicesima,quattordicesima liquidata con gli scatti: nel Turismo la base li esclude
+E323,E,permessi,assunto nel 2023: matura 104 ore l'anno invece di 68 (32 più metà della riduzione)
+F351,F,minimo,minimo senza l'elemento perequativo (EPA) del rinnovo
+F341,F,minimo,minimo senza l'elemento perequativo (EPA) del rinnovo
+F357,F,integrazione,"integrazione al 75% dal 4° al 20° giorno, come nel Terziario: qui è il 100%"
+F358,F,preavviso,"dimissioni con 15 giorni di preavviso, quelli dei livelli più bassi"
+F356,F,ferie_liquidate,ferie non godute pagate a 1/26: con la settimana di 5 giorni la quota è 1/22
 ,C,f24,"F24 con 212,40 € di ritenute in meno dei cedolini"
