@@ -91,10 +91,31 @@ lette l'8 novembre 2026. Primaria. Retribuzione mensile = contingenza + paga bas
 (La stessa tabella ha anche i valori di giugno 2024 e una tabella a parte per la ristorazione collettiva, art. 1 c. 1
 par. II.)
 
-Ancora da trovare: scatti (gli [allegati](https://www.fipe.it/wp-content/uploads/2025/02/allegati-CCNL-2024.pdf)
-hanno solo la norma transitoria dell'allegato F; la tabella in vigore è nel testo, che Fipe pubblica come scansione:
-[rinnovo 2024](https://www.fipe.it/wp-content/uploads/2018/03/Rinnovo-Contratto-CCNL-2024.pdf)), mensilità,
-preavviso, malattia e integrazione, permessi.
+**Testo integrale:** CCNL 8 febbraio 2018, testo definitivo depositato al CNEL (codice H05Y, accordo 103827),
+scaricato dall'[archivio dei contratti](https://archiviocontratti.cnel.it/) l'8-9 novembre 2026 (282 pagine,
+leggibile). Primaria. Il [rinnovo del 5 giugno 2024](https://www.fipe.it/wp-content/uploads/2018/03/Rinnovo-Contratto-CCNL-2024.pdf)
+(scansione) cambia minimi, alcune regole su tredicesima e quattordicesima nei congedi, non le regole sotto.
+
+- **Scatti** (art. 182): **sei scatti quadriennali**, dal mese dopo il compimento del quadriennio, cifra fissa per
+  livello: A 40,80; B 39,25; 1 37,70; 2 36,15; 3 34,86; 4 33,05; 5 32,54; 6s 31,25; 6 30,99; 7 30,47. Al nuovo
+  scatto anche quelli già maturati si ricalcolano al valore del livello attuale.
+- **Tredicesima** (art. 183) e **quattordicesima** (art. 184, periodo 1° luglio - 30 giugno, esclusi gli scatti):
+  le frazioni di mese si **sommano** e danno un rateo ogni 30 giorni di calendario, più uno per il resto di almeno 15
+  giorni (né "mese intero dal 15" come il Terziario né "oltre 15" come Metalmeccanico e Logistica).
+- **Preavviso** (art. 208), uguale per licenziamento e dimissioni:
+  | Livelli | fino a 5 anni | da 5 a 10 | oltre 10 |
+  |---|---|---|---|
+  | A e B | 4 mesi | 5 mesi | 6 mesi |
+  | 1 | 2 mesi | 3 mesi | 4 mesi |
+  | 2 e 3 | 1 mese | 45 giorni | 2 mesi |
+  | 4 e 5 | 20 giorni | 30 giorni | 45 giorni |
+  | 6S, 6 e 7 | 15 giorni | 20 giorni | 20 giorni |
+- **Malattia** (art. 190): l'INPS paga l'**80%** (il settore versa l'aliquota aggiuntiva dello 0,77%), anticipato dal
+  datore di lavoro; il datore paga la normale retribuzione per i primi tre giorni **solo se la malattia supera i 5
+  giorni**; nessun'altra integrazione. Conservazione del posto: 180 giorni nell'anno solare (art. 194). Gli
+  stabilimenti balneari hanno regole proprie (art. 250).
+- **Riduzione dell'orario** (art. 114): 104 ore l'anno, comprese le 32 di ex festività; per gli assunti dal 1° gennaio
+  2018: 32 ore nei primi due anni, +36 dopo due anni, tutte e 104 dopo quattro.
 
 ## Logistica, trasporto merci e spedizione (Confetra e altre / Filt, Fit, Uiltrasporti)
 
