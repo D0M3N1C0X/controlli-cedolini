@@ -196,7 +196,8 @@ def maternita_mese(r: dict, base: dict, dal: date, inps: float | None = None) ->
     r.update({"maternita_dal": dal.isoformat(), "maternita_al": al.isoformat(), "maternita_inps": _eur(importo),
               "assenza_trattenuta": _eur(R.trattenuta_assenza(mensile, R.giorni_assenza(dal, al, C.MESE), C.MESE)),
               "evento": "maternità"})
-    return chiudi_assenza(r, R.quota_netto_garantita(C.MESE, k), None if k == "terziario" else 0.0)
+    q = R.quota_netto_garantita(C.MESE, k)
+    return chiudi_assenza(r, q, None if q is not None else 0.0)
 
 
 def cessazione(r: dict, tipo: str, uscita: date, errore: str = "", preavviso: float | None = None) -> dict:

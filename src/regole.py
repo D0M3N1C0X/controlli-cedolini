@@ -365,12 +365,12 @@ def quota_netto_garantita(mese: str, ccnl: str = T, malattia: tuple | None = Non
     (Terziario, F16, F18): i giorni lavorati per intero, i giorni di carenza alla quota dovuta, quelli dal 4° al 20°
     al 75%, dal 21° al 100%; i giorni di maternità al 100%, come quelli lavorati. `malattia` è (dal, al). None se il
     CCNL non integra sul netto."""
+    G = giorni_del_mese(mese)
+    if not malattia:
+        return G / G if regola(ccnl)["maternita_netto"] else None
     g = regola(ccnl)["integrazione"]
     if g is None or g["base"] != "netto":
         return None
-    G = giorni_del_mese(mese)
-    if not malattia:
-        return G / G
     n0, n1, n2 = giorni_malattia(*malattia, mese, ccnl)
     q1, q2 = g["quote"]
     # nello stesso ordine della formula del foglio

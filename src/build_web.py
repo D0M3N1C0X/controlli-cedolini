@@ -35,7 +35,8 @@ def regole(k: str) -> dict:
             "malattia_inps": g["malattia_inps"], "p1": g["malattia_fasce"][0][1], "p2": g["malattia_fasce"][1][1],
             "regola_carenza": g["carenza"],
             "integrazione": None if g["integrazione"] is None else {"base": g["integrazione"]["base"],
-                                                                    "quote": list(g["integrazione"]["quote"])}}
+                                                                    "quote": list(g["integrazione"]["quote"])},
+            "maternita_netto": g["maternita_netto"]}
 
 
 def cfg() -> dict:

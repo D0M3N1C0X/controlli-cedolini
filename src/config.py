@@ -134,7 +134,8 @@ GIORNI_ANNO = 365
 # "minimo_prec" quella della tranche prima (per gli errori inseriti), "minimo_prossimo" la prossima tranche.
 # Integrazione della malattia: "netto" = il netto del mese non sta sotto la quota garantita del netto normale;
 # "lordo" = indennità INPS più integrazione arrivano alla retribuzione dei giorni di malattia; None = nessuna.
-# "quote" = quota garantita dal 4° al 20° giorno e dal 21° al 180°.
+# "quote" = quota garantita dal 4° al 20° giorno e dal 21° al 180°. "maternita_netto": il CCNL integra il congedo di
+# maternità fino al 100% del netto (Terziario F18, Turismo F37); negli altri due non è stato verificato (D32).
 _PREAVVISO_TERZIARIO = PREAVVISO
 _metal = {**{lv: (60, 90, 120) for lv in ("B2", "B3", "A1")}, **{lv: (45, 60, 75) for lv in ("C2", "C3", "B1")},
           **{lv: (10, 20, 30) for lv in ("D1", "D2", "C1")}}
@@ -153,7 +154,7 @@ CCNL = {
         "rol": {"fino_a_15": 56, "oltre_15": 72}, "ex_festivita": 32, "rol_nuovi_assunti": "2011-03-01",
         "preavviso": _PREAVVISO_TERZIARIO,
         "malattia_inps": True, "malattia_fasce": ((20, 0.5), (180, 0.6666)), "carenza": "terziario",
-        "integrazione": {"base": "netto", "quote": (0.75, 1.0)},
+        "integrazione": {"base": "netto", "quote": (0.75, 1.0)}, "maternita_netto": True,
     },
     "metalmeccanico": {
         "nome": "Metalmeccanico industria (Federmeccanica-Assistal)", "tabella": DATA / "ccnl_metalmeccanico.csv",
@@ -168,7 +169,7 @@ CCNL = {
         "preavviso": {"dimissioni": _metal, "licenziamento": _metal},
         # gli impiegati dell'industria non hanno l'indennità INPS: la malattia è tutta a carico del datore (F35)
         "malattia_inps": False, "malattia_fasce": ((20, 0.5), (180, 0.6666)), "carenza": "metalmeccanico",
-        "integrazione": {"base": "lordo", "quote": (1.0, 1.0)},
+        "integrazione": {"base": "lordo", "quote": (1.0, 1.0)}, "maternita_netto": False,
     },
     "turismo": {
         "nome": "Turismo, pubblici esercizi (Fipe)", "tabella": DATA / "ccnl_turismo.csv",
@@ -180,7 +181,7 @@ CCNL = {
         "rol": {"fino_a_15": 72, "oltre_15": 72}, "ex_festivita": 32, "rol_nuovi_assunti": "2017-12-31",
         "preavviso": {"dimissioni": _turismo, "licenziamento": _turismo},
         "malattia_inps": True, "malattia_fasce": ((20, 0.8), (180, 0.8)), "carenza": "turismo",
-        "integrazione": None,
+        "integrazione": None, "maternita_netto": True,
     },
     "logistica": {
         "nome": "Logistica, trasporto merci e spedizione (Confetra)", "tabella": DATA / "ccnl_logistica.csv",
@@ -194,7 +195,7 @@ CCNL = {
         "preavviso": {"dimissioni": {lv: tuple(g / 2 for g in t) for lv, t in _log_lic.items()},
                       "licenziamento": _log_lic},
         "malattia_inps": True, "malattia_fasce": ((20, 0.5), (180, 0.6666)), "carenza": "logistica",
-        "integrazione": {"base": "lordo", "quote": (1.0, 1.0)},
+        "integrazione": {"base": "lordo", "quote": (1.0, 1.0)}, "maternita_netto": False,
     },
 }
 # Carenza (F16, F35, F37, F39): la quota dei primi 3 giorni che il datore di lavoro paga. Terziario: per numero

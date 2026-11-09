@@ -386,6 +386,7 @@
   },
   "malattia_inps": true,
   "maternita": 0.8,
+  "maternita_netto": true,
   "media_default": 20.0,
   "mensilita": 14,
   "mese": "2026-09",
@@ -541,6 +542,7 @@
      ]
     },
     "malattia_inps": true,
+    "maternita_netto": false,
     "mensilita": 14,
     "p1": 0.5,
     "p2": 0.6666,
@@ -678,6 +680,7 @@
      ]
     },
     "malattia_inps": false,
+    "maternita_netto": false,
     "mensilita": 13,
     "p1": 0.5,
     "p2": 0.6666,
@@ -807,6 +810,7 @@
      ]
     },
     "malattia_inps": true,
+    "maternita_netto": true,
     "mensilita": 14,
     "p1": 0.5,
     "p2": 0.6666,
@@ -920,6 +924,7 @@
     "giorni_mese_intero": 15,
     "integrazione": null,
     "malattia_inps": true,
+    "maternita_netto": true,
     "mensilita": 14,
     "p1": 0.8,
     "p2": 0.8,

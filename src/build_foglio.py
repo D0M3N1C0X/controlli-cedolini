@@ -52,7 +52,8 @@ REGOLE = [("mensilita", "Mensilità", "0"), ("scatti_max", "Scatti massimi", "0"
           ("malattia_inps", "Indennità INPS di malattia (1 = sì)", "0"), ("p1", "INPS dal 4° al 20° giorno", "0.00%"),
           ("p2", "INPS dal 21° al 180° giorno", "0.00%"), ("carenza", "Regola della carenza", None),
           ("integrazione", "Integrazione della malattia: su", None), ("q1", "Garantito dal 4° al 20°", "0%"),
-          ("q2", "Garantito dal 21°", "0%"), ("prossima_tranche", "Prossima tranche", "DD/MM/YYYY")]
+          ("q2", "Garantito dal 21°", "0%"), ("maternita_netto", "Maternità integrata al 100% del netto (1 = sì)", "0"),
+          ("prossima_tranche", "Prossima tranche", "DD/MM/YYYY")]
 
 
 def regole_ccnl(k: str) -> dict:
@@ -70,7 +71,8 @@ def regole_ccnl(k: str) -> dict:
             "rol_data": date.fromisoformat(g["rol_nuovi_assunti"]) if g["rol_nuovi_assunti"] else None,
             "malattia_inps": int(g["malattia_inps"]), "p1": g["malattia_fasce"][0][1],
             "p2": g["malattia_fasce"][1][1], "carenza": g["carenza"], "integrazione": integ["base"],
-            "q1": integ["quote"][0], "q2": integ["quote"][1], "prossima_tranche": g["prossima_tranche"]}
+            "q1": integ["quote"][0], "q2": integ["quote"][1], "maternita_netto": int(g["maternita_netto"]),
+            "prossima_tranche": g["prossima_tranche"]}
 RIGHE = 250          # righe con le formule già pronte nei fogli Mese, Mese precedente e Novembre 2026
 REPO = "https://github.com/D0M3N1C0X/controlli-cedolini"
 
@@ -682,13 +684,14 @@ class Foglio:
             mat = f"AND(BW{i}<>\"\",BY{i}<>\"\",CG{i}<>\"\",BW{i}>={mese})"
             gg = f"DAY({fine_mese})"
             assenti = f"MAX(0,MIN(BR{i},{fine_mese})-MAX(BQ{i},{mese})+1)"
-            put(ws, f"DY{i}", g(f'IF({base}<>"netto","",IF({in_mese},({gg}-{assenti}+N(CI{i})*N(CN{i})'
-                                f'+N(CJ{i})*{rg("q1")}+N(CK{i})*{rg("q2")})/{gg},{gg}/{gg}))'), fmt="0.0000%")
+            put(ws, f"DY{i}", g(f'IF({in_mese},IF({base}<>"netto","",({gg}-{assenti}+N(CI{i})*N(CN{i})'
+                                f'+N(CJ{i})*{rg("q1")}+N(CK{i})*{rg("q2")})/{gg}),'
+                                f'IF({rg("maternita_netto")}=1,{gg}/{gg},""))'), fmt="0.0000%")
             put(ws, f"DZ{i}", g(f'IF(DY{i}="","",ROUND(DX{i}*DY{i},2))'), fmt=NUM2)
             put(ws, f"EA{i}", g(f"ROUND(S{i}+R{i},2)"), fmt=NUM2)
             put(ws, f"EB{i}", g(f'IF(AND({base}="lordo",{in_mese}),ROUND(MAX(0,BF{i}*(N(CJ{i})*{rg("q1")}'
                                 f'+N(CK{i})*{rg("q2")})/{gg}-N(BU{i})),2),"")'), fmt=NUM2)
-            put(ws, f"EC{i}", g(f'IF(OR(AND(NOT({in_mese}),NOT({mat})),DS{i}=""),"OK",IF({base}="netto",'
+            put(ws, f"EC{i}", g(f'IF(OR(AND(NOT({in_mese}),NOT({mat})),DS{i}=""),"OK",IF(DY{i}<>"",'
                                 f'IF(EA{i}<DZ{i}-{tol},"ERRORE","OK"),IF(AND({base}="lordo",{in_mese}),'
                                 f'IF(N(DT{i})<EB{i}-{tol},"ERRORE","OK"),"OK")))'))
         prec_by = {p.matricola: p for p in self.o["precedente"].itertuples(index=False)}

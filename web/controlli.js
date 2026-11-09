@@ -310,10 +310,10 @@ export function nettoNormale(mensile, cliente, cfg) {
 }
 // sul netto (Terziario): la parte del netto normale che il mese con l'assenza deve almeno dare
 export function quotaNettoGarantita(mese, cfg, malattia = null, quotaCarenza = 0) {
+  const G = giorniDelMese(mese);
+  if (!malattia) return cfg.maternita_netto ? G / G : null;      // la maternità, dove il CCNL la integra al 100%
   const g = cfg.integrazione;
   if (!g || g.base !== "netto") return null;
-  const G = giorniDelMese(mese);
-  if (!malattia) return G / G;
   const [n0, n1, n2] = giorniMalattia(malattia[0], malattia[1], mese, cfg);
   const [q1, q2] = g.quote;
   return (G - sovrapposti(malattia[0], malattia[1], primoDelMese(mese), ultimoDelMese(mese)) + n0 * quotaCarenza
