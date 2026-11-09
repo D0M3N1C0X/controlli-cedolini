@@ -20,29 +20,46 @@ VOCI = ["tabellare", "scatti", "superminimo", "straordinari", "lordo", "contribu
         "ferie_godute", "permessi_residuo", "permessi_goduti"]
 
 
+def regole(k: str) -> dict:
+    """Le regole di un CCNL con i nomi che usa web/controlli.js: sopra i parametri comuni, per ogni riga."""
+    g = C.CCNL[k]
+    return {"colonna_minimo": g["minimo"], "colonna_minimo_prossimo": g["minimo_prossimo"],
+            "tranche_ccnl": g["prossima_tranche"].isoformat(), "scatti_max": g["scatti_max"],
+            "scatti_anni": g["scatti_anni"], "mensilita": g["mensilita"],
+            "quattordicesima_senza_scatti": g["quattordicesima_senza_scatti"],
+            "giorni_mese_intero": g["giorni_mese_intero"], "somma_frazioni": g["somma_frazioni"],
+            "ferie": [list(f) for f in g["ferie"]], "divisore_giornaliero": g["divisore_giornaliero"],
+            "rol_fino_a_15": g["rol"]["fino_a_15"], "rol_oltre_15": g["rol"]["oltre_15"],
+            "ex_festivita": g["ex_festivita"], "rol_nuovi_assunti": g["rol_nuovi_assunti"],
+            "preavviso": {tipo: {lv: list(v) for lv, v in t.items()} for tipo, t in g["preavviso"].items()},
+            "malattia_inps": g["malattia_inps"], "p1": g["malattia_fasce"][0][1], "p2": g["malattia_fasce"][1][1],
+            "regola_carenza": g["carenza"],
+            "integrazione": None if g["integrazione"] is None else {"base": g["integrazione"]["base"],
+                                                                    "quote": list(g["integrazione"]["quote"])}}
+
+
 def cfg() -> dict:
-    return {"mese": C.MESE, "mese_precedente": C.MESE_PRECEDENTE, "colonna_minimo": C.COLONNA_MINIMO,
-            "colonna_minimo_prossimo": C.COLONNA_MINIMO_PROSSIMO, "aliquota": C.ALIQUOTA_DIPENDENTE,
-            "divisore_tfr": C.DIVISORE_TFR, "mensilita": C.MENSILITA, "ferie_annue": C.FERIE_ANNUE,
+    return {**regole(R.T),          # il Terziario anche al primo livello, per chi chiama le funzioni senza un cliente
+            "regole": {k: regole(k) for k in C.CCNL}, "ccnl_default": R.T,
+            "mese": C.MESE, "mese_precedente": C.MESE_PRECEDENTE, "aliquota": C.ALIQUOTA_DIPENDENTE,
+            "divisore_tfr": C.DIVISORE_TFR,
             "soglia": C.SOGLIA_VARIAZIONE, "tolleranza": C.TOLLERANZA, "tolleranza_ferie": C.TOLLERANZA_FERIE,
-            "scatti_max": C.SCATTI_MAX, "scatti_anni": C.SCATTI_ANNI, "giorni_mese_intero": C.GIORNI_MESE_INTERO,
-            "divisore_giornaliero": C.DIVISORE_GIORNALIERO, "prossima_tranche": C.PROSSIMA_TRANCHE.isoformat(),
-            "preavviso": {tipo: {lv: list(g) for lv, g in t.items()} for tipo, t in C.PREAVVISO.items()},
-            # contributi per posizione INPS (F14, F15): l'esempio ha le sue; per i file dell'utente valgono i campi
-            # della pagina, che partono da questi valori
-            "posizioni": {c: {"media_semestre": v["media_semestre"], "dipendenti": v["dipendenti"]}
-                          for c, v in C.CLIENTI.items()},
+            "prossima_tranche": C.PROSSIMA_TRANCHE.isoformat(),
+            # contributi per posizione INPS (F14, F15) e CCNL: l'esempio ha i suoi clienti; per i file dell'utente
+            # valgono i campi della pagina, che partono da questi valori
+            "posizioni": {c: {"media_semestre": v["media_semestre"], "dipendenti": v["dipendenti"],
+                              "ccnl": v["ccnl"], "fis": v.get("fis", True)} for c, v in C.CLIENTI.items()},
             "media_default": 20.0, "dipendenti_default": 20,
+            "carenza_metalmeccanico": {**C.CARENZA_METALMECCANICO, "quote": list(C.CARENZA_METALMECCANICO["quote"])},
+            "carenza_turismo_durata": C.CARENZA_TURISMO_DURATA,
             "cigs": C.CIGS_DIPENDENTE, "cigs_soglia": C.CIGS_SOGLIA, "fis_fino_a_5": C.FIS_ALIQUOTA["fino_a_5"],
             "fis_oltre_5": C.FIS_ALIQUOTA["oltre_5"], "fis_soglia": C.FIS_SOGLIA, "fis_quota": C.FIS_QUOTA_DIPENDENTE,
             "aggiuntiva": C.ALIQUOTA_AGGIUNTIVA, "prima_fascia": C.PRIMA_FASCIA_MENSILE,
             # assenze e permessi (F16-F18, F23)
             "divisore_rmgg": C.DIVISORE_RMGG, "carenza": C.MALATTIA_CARENZA, "f1": C.MALATTIA_FASCE[0][0],
-            "p1": C.MALATTIA_FASCE[0][1], "f2": C.MALATTIA_FASCE[1][0], "p2": C.MALATTIA_FASCE[1][1],
+            "f2": C.MALATTIA_FASCE[1][0],
             "maternita": C.MATERNITA_PERCENTUALE, "carenza_percentuali": list(C.CARENZA_PERCENTUALI),
-            "rol_fino_a_15": C.ROL_ORE["fino_a_15"], "rol_oltre_15": C.ROL_ORE["oltre_15"], "rol_soglia": C.ROL_SOGLIA,
-            "ex_festivita": C.EX_FESTIVITA_ORE, "rol_nuovi_assunti": C.ROL_NUOVI_ASSUNTI,
-            "tolleranza_ore": C.TOLLERANZA_ORE,
+            "rol_soglia": C.ROL_SOGLIA, "tolleranza_ore": C.TOLLERANZA_ORE,
             # TFR alla cessazione (F19-F22)
             "tfr_fisso": C.TFR_TASSO_FISSO, "tfr_quota": C.TFR_QUOTA_INFLAZIONE, "foi_dicembre": C.FOI_DICEMBRE,
             "foi_raccordo": C.FOI_RACCORDO, "foi_mesi": C.FOI_MESI, "imposta_tfr": C.IMPOSTA_SOSTITUTIVA_TFR,
@@ -55,8 +72,8 @@ def cfg() -> dict:
 
 
 def ccnl() -> dict:
-    t = R.tabella()
-    return {lv: {k: float(v) for k, v in row.items()} for lv, row in t.iterrows()}
+    """Le tabelle dei quattro CCNL: CCNL, livello, colonna."""
+    return {k: {lv: {c: float(v) for c, v in row.items()} for lv, row in R.tabella(k).iterrows()} for k in C.CCNL}
 
 
 def write_templates(rows: int = 2) -> None:
@@ -132,6 +149,7 @@ def write_vectors(n: int = 8, seed: int = 11) -> int:
             x.loc[i, voce] = v
             patch.append([int(i), voce, v])
         eventi = [(k, v) for k in x.index for v in ("malattia_inps", "malattia_carenza", "maternita_inps",
+                                                    "assenza_trattenuta", "integrazione_datore",
                                                     "tfr_liquidato", "imponibile_fiscale_anno", "ritenute_anno_prec",
                                                     "cuneo_anno_prec", "ti_anno_prec") if x.loc[k, v] != ""]
         for _ in range(rng.randint(1, 4)):                         # indennità, carenza e TFR, anche a mezzo centesimo

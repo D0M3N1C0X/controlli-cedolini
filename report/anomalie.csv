@@ -5,10 +5,15 @@ B044,B,C01,Minimo tabellare,2233.58,2186.23,-47.35,alta
 B052,B,C01,Minimo tabellare,1658.01,1626.39,-31.62,alta
 B064,B,C01,Minimo tabellare,1395.89,1371.58,-24.31,alta
 B082,B,C01,Minimo tabellare,1395.89,1371.58,-24.31,alta
+D308,D,C01,Minimo tabellare,1658.57,1618.7,-39.87,alta
+E337,E,C01,Minimo tabellare,1916.35,1868.92,-47.43,alta
+F341,F,C01,Minimo tabellare,1460.13,1437.63,-22.50,alta
+F351,F,C01,Minimo tabellare,1387.67,1367.67,-20.00,alta
 A007,A,C02,Scatti di anzianità,49.68,24.84,-24.84,alta
 A016,A,C02,Scatti di anzianità,61.98,41.32,-20.66,alta
 B025,B,C02,Scatti di anzianità,38.94,19.47,-19.47,alta
 B047,B,C02,Scatti di anzianità,24.84,0.0,-24.84,alta
+D302,D,C02,Scatti di anzianità,59.28,29.64,-29.64,alta
 A009,A,C03,Contributi INPS,159.63,164.69,5.06,alta
 B053,B,C03,Contributi INPS,86.93,81.88,-5.05,alta
 B087,B,C03,Contributi INPS,133.37,125.63,-7.74,alta
@@ -20,11 +25,12 @@ C093,C,C04,Quota TFR,175.06,171.27,-3.79,media
 A015,A,C05,Residuo ferie,29.6064,27.4397,-2.17,media
 B058,B,C05,Residuo ferie,20.478,18.3113,-2.17,media
 C099,C,C05,Residuo ferie,12.5839,10.4172,-2.17,media
+D303,D,C05,Residuo ferie,14.688,14.6047,-0.08,media
 A005,A,C06,Quadratura,1336.88,1374.38,37.50,alta
 C107,C,C06,Quadratura,1224.71,1324.71,100.00,alta
 A008,A,C07,Variazione del netto,1637.54,2095.61,458.07,media
 B020,B,C07,Variazione del netto,2021.13,2487.65,466.52,media
-,C,C08,Riconciliazione F24,3608.6,3396.2,-212.40,alta
+,C,C08,Riconciliazione F24,3510.18,3297.78,-212.40,alta
 B040,B,C09,Codice fiscale,valido,CPTFPV79H01Z105A,,alta
 B070,B,C09,Codice fiscale,valido,FZTSLD68R18Z151A,,alta
 B061,B,C10,Anagrafica,livello 4,livello 5,,alta
@@ -32,14 +38,23 @@ C108,C,C10,Anagrafica,superminimo 50,superminimo 0,,alta
 A011,A,C11,Ratei 13ª e 14ª,13ª 9; 14ª 3,13ª 9; 14ª 9,,media
 B034,B,C11,Ratei 13ª e 14ª,13ª 7; 14ª 3,13ª 8; 14ª 3,,media
 B092,B,C11,Ratei 13ª e 14ª,13ª 9; 14ª 3,13ª 8; 14ª 3,,media
+D301,D,C11,Ratei 13ª e 14ª,13ª 5; 14ª 0,13ª 6; 14ª 0,,media
 B062,B,C12,Tredicesima e quattordicesima pagate,470.59,1411.76,941.17,alta
+E335,E,C12,Tredicesima e quattordicesima pagate,317.38,335.97,18.59,alta
 B027,B,C13,Ferie non godute,1980.46,1716.4,-264.06,alta
+F356,F,C13,Ferie non godute,1406.78,1190.35,-216.43,alta
 B076,B,C14,Preavviso,20.0,10.0,-10.00,alta
+D305,D,C14,Preavviso,60.0,45.0,-15.00,alta
+F358,F,C14,Preavviso,37.5,15.0,-22.50,alta
 B080,B,C15,Indennità di malattia INPS,682.94,675.46,-7.48,alta
-B026,B,C16,Carenza di malattia,non dovuta,151.65,,media
+D315,D,C15,Indennità di malattia INPS,0.0,473.0,473.00,alta
+E330,E,C15,Indennità di malattia INPS,815.94,509.96,-305.98,alta
+B026,B,C16,Carenza di malattia,non dovuta,131.43,,media
+E336,E,C16,Carenza di malattia,100%,0.0,,media
 C095,C,C17,Indennità di maternità INPS,1005.12,861.6,-143.52,alta
 A017,A,C18,Permessi ROL ed ex festività,33.1577,39.8244,6.67,media
 C103,C,C18,Permessi ROL ed ex festività,51.7529,53.9196,2.17,media
+E323,E,C18,Permessi ROL ed ex festività,58.3061,61.3061,3.00,media
 B027,B,C19,TFR liquidato,23446.76,23604.31,157.55,alta
 B038,B,C19,TFR liquidato,6314.85,6465.86,151.01,alta
 B051,B,C19,TFR liquidato,11694.38,11743.95,49.57,alta
@@ -48,3 +63,6 @@ B041,B,C20,IRPEF del mese,373.68,375.21,1.53,alta
 C097,C,C20,IRPEF del mese,71.85,155.18,83.33,alta
 B027,B,C21,Conguaglio IRPEF alla cessazione,1194.7,444.85,-749.85,alta
 B038,B,C21,Conguaglio IRPEF alla cessazione,1000.65,710.99,-289.66,alta
+B081,B,C22,Integrazione del datore di lavoro,1452.51,1452.13,-0.38,alta
+D318,D,C22,Integrazione del datore di lavoro,978.05,782.44,-195.61,alta
+F357,F,C22,Integrazione del datore di lavoro,585.84,273.57,-312.27,alta

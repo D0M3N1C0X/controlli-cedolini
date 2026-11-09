@@ -8,7 +8,7 @@
   },
   "C02": {
    "nome": "Scatti di anzianità",
-   "descrizione": "Importo degli scatti diverso da quelli maturati dalla data di assunzione",
+   "descrizione": "Importo degli scatti diverso da quelli maturati dalla data di assunzione, con periodo e numero massimo del CCNL",
    "cosa_fare": "Inserire lo scatto maturato e verificare la data di decorrenza",
    "priorita": "alta"
   },
@@ -20,13 +20,13 @@
   },
   "C04": {
    "nome": "Quota TFR",
-   "descrizione": "Rateo TFR diverso da retribuzione ordinaria × 14 / 13,5 / 12",
+   "descrizione": "Rateo TFR diverso da retribuzione ordinaria × mensilità del CCNL / 13,5 / 12",
    "cosa_fare": "Ricalcolare il rateo includendo scatti e superminimo",
    "priorita": "media"
   },
   "C05": {
    "nome": "Residuo ferie",
-   "descrizione": "Residuo diverso da residuo del mese prima + maturate - godute",
+   "descrizione": "Residuo diverso da residuo del mese prima + maturate - godute, con le ferie annue del CCNL",
    "cosa_fare": "Riallineare il residuo: maturazione del mese non registrata",
    "priorita": "media"
   },
@@ -62,7 +62,7 @@
   },
   "C11": {
    "nome": "Ratei 13ª e 14ª",
-   "descrizione": "Dodicesimi maturati diversi dai mesi di servizio nel periodo (frazione di 15 giorni intera)",
+   "descrizione": "Dodicesimi maturati diversi dai mesi di servizio nel periodo, con la regola del CCNL per la frazione di mese",
    "cosa_fare": "Ricontare i dodicesimi dalla data di assunzione e correggere i ratei prima della tredicesima di dicembre",
    "priorita": "media"
   },
@@ -74,8 +74,8 @@
   },
   "C13": {
    "nome": "Ferie non godute",
-   "descrizione": "Alla cessazione, ferie residue pagate diversamente da 1/26 della retribuzione mensile al giorno",
-   "cosa_fare": "Ricalcolare le ferie non godute a 1/26 della retribuzione mensile per giorno e regolare la differenza: pagarla se manca, recuperarla se è in più",
+   "descrizione": "Alla cessazione, ferie residue pagate diversamente dalla quota giornaliera del CCNL (1/26 della retribuzione mensile, 1/22 nella Logistica)",
+   "cosa_fare": "Ricalcolare le ferie non godute con la quota giornaliera del CCNL (1/26 della retribuzione mensile, 1/22 nella Logistica) e regolare la differenza: pagarla se manca, recuperarla se è in più",
    "priorita": "alta"
   },
   "C14": {
@@ -86,14 +86,14 @@
   },
   "C15": {
    "nome": "Indennità di malattia INPS",
-   "descrizione": "Indennità anticipata diversa dal 50% (4°-20° giorno) e 66,66% (21°-180°) della retribuzione media giornaliera del mese prima",
-   "cosa_fare": "Ricalcolare l'indennità sulla retribuzione del mese prima × 14/12 / 30, al 50% dal 4° al 20° giorno e al 66,66% dopo, e correggere il conguaglio con l'INPS nel flusso UniEmens",
+   "descrizione": "Indennità anticipata diversa dal 50% (4°-20° giorno) e 66,66% (21°-180°) della retribuzione media giornaliera del mese prima; 80% nei pubblici esercizi, nessuna per gli impiegati dell'industria",
+   "cosa_fare": "Ricalcolare l'indennità sulla retribuzione del mese prima × mensilità / 12 / 30, al 50% dal 4° al 20° giorno e al 66,66% dopo (80% nei pubblici esercizi; niente per gli impiegati dell'industria), e correggere il conguaglio con l'INPS nel flusso UniEmens",
    "priorita": "alta"
   },
   "C16": {
    "nome": "Carenza di malattia",
-   "descrizione": "Integrazione dei primi 3 giorni pagata dal 5° evento dell'anno, o non pagata quando è dovuta",
-   "cosa_fare": "Contare gli eventi di malattia dell'anno: dal quinto la carenza non si paga, salvo ricovero, prognosi di almeno 12 giorni, terapie salvavita o gravidanza; se è dovuta e manca, pagarla",
+   "descrizione": "Primi 3 giorni pagati quando il CCNL non li deve, o non pagati quando li deve",
+   "cosa_fare": "Applicare la regola del CCNL. Terziario: dal quinto evento dell'anno la carenza non si paga, salvo ricovero, prognosi di almeno 12 giorni, terapie salvavita o gravidanza. Metalmeccanico: dal quarto evento breve il 66%, poi il 50%. Turismo: si paga se la malattia supera i 5 giorni. Se è dovuta e manca, pagarla",
    "priorita": "media"
   },
   "C17": {
@@ -105,7 +105,7 @@
   "C18": {
    "nome": "Permessi ROL ed ex festività",
    "descrizione": "Residuo ore diverso da residuo del mese prima + maturate - godute, con la maturazione del CCNL",
-   "cosa_fare": "Rifare la maturazione dei permessi: 72 o 56 ore di riduzione d'orario secondo i dipendenti, più 32 di ex festività, in proporzione al part-time e con la regola dei 2 e 4 anni per chi è entrato dopo marzo 2011",
+   "cosa_fare": "Rifare la maturazione dei permessi con le ore del CCNL (Terziario 72 o 56 di riduzione d'orario più 32 di ex festività; Metalmeccanico e Turismo 104; Logistica 72), in proporzione al part-time e con la regola dei nuovi assunti dove c'è",
    "priorita": "media"
   },
   "C19": {
@@ -125,6 +125,12 @@
    "descrizione": "Imposta dell'anno, detrazioni e trattamento integrativo rapportati ai giorni di lavoro, meno quanto già trattenuto o erogato: il cedolino di uscita porta una differenza diversa",
    "cosa_fare": "Rifare il conguaglio: imposta dell'anno sull'imponibile da gennaio, detrazioni e trattamento integrativo rapportati ai giorni di lavoro, meno quanto trattenuto o erogato; consegnare il conteggio con la CU",
    "priorita": "alta"
+  },
+  "C22": {
+   "nome": "Integrazione del datore di lavoro",
+   "descrizione": "Nel mese di malattia o maternità, integrazione sotto quella del CCNL: sul netto nel Terziario (il netto non sta sotto la quota garantita del netto normale), sul lordo nel Metalmeccanico e nella Logistica",
+   "cosa_fare": "Ricalcolare l'integrazione con la regola del CCNL (Terziario: il netto non sotto il 75% dal 4° al 20° giorno e il 100% dopo; Metalmeccanico e Logistica: la retribuzione intera meno l'indennità INPS) e pagare la differenza nel mese dopo",
+   "priorita": "alta"
   }
  },
  "en": {
@@ -136,7 +142,7 @@
   },
   "C02": {
    "nome": "Seniority increments",
-   "descrizione": "Seniority increments different from those earned since the hiring date",
+   "descrizione": "Seniority increments different from those earned since the hiring date, with the CCNL's period and maximum",
    "cosa_fare": "Add the increment earned and check the date it starts from",
    "priorita": "high"
   },
@@ -148,13 +154,13 @@
   },
   "C04": {
    "nome": "Severance accrual (TFR)",
-   "descrizione": "Monthly TFR accrual different from ordinary pay × 14 / 13.5 / 12",
+   "descrizione": "Monthly TFR accrual different from ordinary pay × the CCNL's monthly payments / 13.5 / 12",
    "cosa_fare": "Recompute the accrual including increments and the individual supplement",
    "priorita": "medium"
   },
   "C05": {
    "nome": "Holiday balance",
-   "descrizione": "Balance different from last month's balance + days accrued − days taken",
+   "descrizione": "Balance different from last month's balance + days accrued − days taken, with the CCNL's yearly holiday",
    "cosa_fare": "Realign the balance: this month's accrual was not recorded",
    "priorita": "medium"
   },
@@ -190,7 +196,7 @@
   },
   "C11": {
    "nome": "13th and 14th month accruals",
-   "descrizione": "Twelfths earned different from the months of service in the period (15 days count as a month)",
+   "descrizione": "Twelfths earned different from the months of service in the period, with the CCNL's rule for part months",
    "cosa_fare": "Recount the twelfths from the hiring date and correct the accruals before December's 13th month",
    "priorita": "medium"
   },
@@ -202,8 +208,8 @@
   },
   "C13": {
    "nome": "Untaken holiday",
-   "descrizione": "Untaken holiday paid at leaving different from monthly pay / 26 × days left",
-   "cosa_fare": "Recompute untaken holiday at 1/26 of monthly pay per day and settle the difference: pay it if short, recover it if overpaid",
+   "descrizione": "Untaken holiday paid at leaving different from the CCNL's daily rate (1/26 of monthly pay, 1/22 in Logistics) × days left",
+   "cosa_fare": "Recompute untaken holiday at the CCNL's daily rate (1/26 of monthly pay, 1/22 in Logistics) and settle the difference: pay it if short, recover it if overpaid",
    "priorita": "high"
   },
   "C14": {
@@ -214,14 +220,14 @@
   },
   "C15": {
    "nome": "INPS sick pay",
-   "descrizione": "Sick pay advanced for INPS different from 50% (days 4-20) and 66.66% (days 21-180) of last month's average daily pay",
-   "cosa_fare": "Recompute on last month's pay × 14/12 / 30, at 50% from day 4 to 20 and 66.66% after, and correct the offset in the UniEmens return",
+   "descrizione": "Sick pay advanced for INPS different from 50% (days 4-20) and 66.66% (days 21-180) of last month's average daily pay; 80% in bars and restaurants, none for white-collar staff in industry",
+   "cosa_fare": "Recompute on last month's pay × monthly payments / 12 / 30, at 50% from day 4 to 20 and 66.66% after (80% in bars and restaurants; nothing for white-collar staff in industry), and correct the offset in the UniEmens return",
    "priorita": "high"
   },
   "C16": {
    "nome": "Sick-leave waiting days",
-   "descrizione": "The first 3 days topped up from the 5th sickness of the year, or not topped up when they are due",
-   "cosa_fare": "Count the year's sicknesses: from the fifth the waiting days are not paid, unless hospital, a first prognosis of 12 days or more, life-saving treatment or pregnancy; if due and missing, pay them",
+   "descrizione": "The first 3 days paid when the CCNL does not owe them, or not paid when it does",
+   "cosa_fare": "Apply the CCNL's rule. Retail and services: from the fifth sickness of the year the waiting days are not paid, unless hospital, a first prognosis of 12 days or more, life-saving treatment or pregnancy. Engineering: from the fourth short sickness 66%, then 50%. Hospitality: paid if the sickness lasts more than 5 days. If due and missing, pay them",
    "priorita": "medium"
   },
   "C17": {
@@ -233,7 +239,7 @@
   "C18": {
    "nome": "Paid leave hours (ROL and former holidays)",
    "descrizione": "Hours balance different from last month's + hours accrued − hours taken, with the CCNL accrual",
-   "cosa_fare": "Redo the accrual: 72 or 56 hours of working-time reduction by headcount, plus 32 of former holidays, pro rata for part-time, with the 2- and 4-year rule for staff hired after March 2011",
+   "cosa_fare": "Redo the accrual with the CCNL's hours (retail and services 72 or 56 of working-time reduction plus 32 of former holidays; engineering and hospitality 104; logistics 72), pro rata for part-time and with the new-hire rule where there is one",
    "priorita": "medium"
   },
   "C19": {
@@ -252,6 +258,12 @@
    "nome": "Income tax adjustment at leaving",
    "descrizione": "The year's tax, with credits and supplementary allowance in proportion to the days worked, less what was withheld or paid: the leaver's payslip carries a different difference",
    "cosa_fare": "Redo the adjustment: the year's tax on taxable pay since January, credits and allowance for the days worked, less what was already withheld or paid; hand the workings over with the CU",
+   "priorita": "high"
+  },
+  "C22": {
+   "nome": "Employer's top-up",
+   "descrizione": "In a month of sickness or maternity, a top-up below the CCNL's: on net pay in retail and services (net not below the guaranteed share of normal net), on gross in engineering and logistics",
+   "cosa_fare": "Recompute the top-up with the CCNL's rule (retail and services: net not below 75% from day 4 to 20 and 100% after; engineering and logistics: full pay less the INPS benefit) and pay the difference next month",
    "priorita": "high"
   }
  }

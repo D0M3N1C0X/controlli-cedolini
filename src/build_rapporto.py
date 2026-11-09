@@ -24,25 +24,31 @@ COSA_FARE = {
     "C11": "Ricontare i dodicesimi dalla data di assunzione e correggere i ratei prima della tredicesima di dicembre",
     "C12": "Ricalcolare la mensilità con i dodicesimi giusti, da gennaio per la tredicesima e da luglio per la "
            "quattordicesima, e regolare la differenza: pagarla se manca, recuperarla se è stata pagata in più",
-    "C13": "Ricalcolare le ferie non godute a 1/26 della retribuzione mensile per giorno e regolare la differenza: "
-           "pagarla se manca, recuperarla se è in più",
+    "C13": "Ricalcolare le ferie non godute con la quota giornaliera del CCNL (1/26 della retribuzione mensile, 1/22 "
+           "nella Logistica) e regolare la differenza: pagarla se manca, recuperarla se è in più",
     "C14": "Verificare la data della lettera. Licenziamento: i giorni di preavviso non lavorati si pagano come "
            "indennità sostitutiva. Dimissioni: il preavviso non dato si può trattenere come indennità a carico "
            "del dipendente",
-    "C15": "Ricalcolare l'indennità sulla retribuzione del mese prima × 14/12 / 30, al 50% dal 4° al 20° giorno e al "
-           "66,66% dopo, e correggere il conguaglio con l'INPS nel flusso UniEmens",
-    "C16": "Contare gli eventi di malattia dell'anno: dal quinto la carenza non si paga, salvo ricovero, prognosi "
-           "di almeno 12 giorni, terapie salvavita o gravidanza; se è dovuta e manca, pagarla",
+    "C15": "Ricalcolare l'indennità sulla retribuzione del mese prima × mensilità / 12 / 30, al 50% dal 4° al 20° "
+           "giorno e al 66,66% dopo (80% nei pubblici esercizi; niente per gli impiegati dell'industria), e "
+           "correggere il conguaglio con l'INPS nel flusso UniEmens",
+    "C16": "Applicare la regola del CCNL. Terziario: dal quinto evento dell'anno la carenza non si paga, salvo "
+           "ricovero, prognosi di almeno 12 giorni, terapie salvavita o gravidanza. Metalmeccanico: dal quarto evento "
+           "breve il 66%, poi il 50%. Turismo: si paga se la malattia supera i 5 giorni. Se è dovuta e manca, pagarla",
     "C17": "Ricalcolare l'indennità all'80% della retribuzione media giornaliera, ratei compresi, e correggere il "
            "conguaglio con l'INPS; l'integrazione al 100% resta a carico dell'azienda",
-    "C18": "Rifare la maturazione dei permessi: 72 o 56 ore di riduzione d'orario secondo i dipendenti, più 32 di ex "
-           "festività, in proporzione al part-time e con la regola dei 2 e 4 anni per chi è entrato dopo marzo 2011",
+    "C18": "Rifare la maturazione dei permessi con le ore del CCNL (Terziario 72 o 56 di riduzione d'orario più 32 "
+           "di ex festività; Metalmeccanico e Turismo 104; Logistica 72), in proporzione al part-time e con la regola "
+           "dei nuovi assunti dove c'è",
     "C19": "Rifare il conteggio: coefficiente ISTAT del mese giusto (dal 15 in poi conta il mese), imposta "
            "sostitutiva del 17% sulla rivalutazione, 0,50% tolto dalle quote dell'anno; regolare la differenza",
     "C20": "Controllare la tabella IRPEF del software (33% sul secondo scaglione dal 2026), l'ulteriore detrazione e "
            "la somma del cuneo fiscale, il trattamento integrativo; rifare la ritenuta e correggere nel mese dopo",
     "C21": "Rifare il conguaglio: imposta dell'anno sull'imponibile da gennaio, detrazioni e trattamento integrativo "
            "rapportati ai giorni di lavoro, meno quanto trattenuto o erogato; consegnare il conteggio con la CU",
+    "C22": "Ricalcolare l'integrazione con la regola del CCNL (Terziario: il netto non sotto il 75% dal 4° al 20° "
+           "giorno e il 100% dopo; Metalmeccanico e Logistica: la retribuzione intera meno l'indennità INPS) e pagare "
+           "la differenza nel mese dopo",
 }
 
 
@@ -94,14 +100,14 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add = L.append
     add("# Controlli sui cedolini di settembre 2026")
     add("")
-    add(f"**Perimetro:** {f['clienti']} clienti con il CCNL Terziario Confcommercio, {f['cedolini']} cedolini di "
-        f"settembre confrontati con quelli di agosto e con gli F24")
-    add("**Dati:** Clienti e dipendenti inventati, con errori inseriti apposta; minimi e scatti del CCNL reali, con le "
+    add(f"**Perimetro:** {f['clienti']} clienti con quattro CCNL (Terziario, Metalmeccanico industria, Turismo e "
+        f"Logistica), {f['cedolini']} cedolini di settembre confrontati con quelli di agosto e con gli F24")
+    add("**Dati:** Clienti e dipendenti inventati, con errori inseriti apposta; minimi, scatti e regole dei CCNL reali, con le "
         "fonti in [docs/fonti.md](../docs/fonti.md)")
     add("**Strumenti:** Uno script Python, lo stesso controllo in un [foglio di calcolo](../deliverables/foglio_controllo_cedolini.xlsx) "
         "e uno [strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) dove i file restano sul computer")
     add("")
-    add("> Ventuno controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano "
+    add("> Ventidue controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano "
         "ogni voce dalle regole del contratto e dell'INPS, o la confrontano con il mese prima e con l'F24: "
         "non serve sapere come l'ha calcolata il software paghe. "
         "Non è consulenza del lavoro.")
@@ -110,12 +116,13 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add("")
     add(f"- **{f['segnalazioni']} segnalazioni: {f['cedolini_segnalati']} cedolini e {f['f24_segnalati']} F24**, {f['alta']} ad alta priorità; "
         + ", ".join(f"cliente {c} {k}" for c, k in f["per_cliente"].items()) + ".")
-    add(f"- **{f['sotto_minimo']} dipendenti sono pagati sotto il minimo:** il tabellare è fermo alla tranche di marzo 2025. Mancano "
-        f"{euro(f['arretrati_minimo'])} al mese in tutto, più gli arretrati da novembre 2025.")
+    add(f"- **{f['sotto_minimo']} dipendenti sono pagati sotto il minimo:** il tabellare è fermo alla tranche precedente "
+        f"del loro CCNL, o senza l'elemento perequativo nella Logistica. Mancano {euro(f['arretrati_minimo'])} al mese "
+        "in tutto, più gli arretrati dalla tranche mancata.")
     add(f"- **L'F24 del cliente C ha {euro(-f['f24_c'])} di ritenute in meno** della somma dei cedolini: va integrato "
         "prima della scadenza del versamento.")
-    add(f"- **Dal 1° novembre 2026 i minimi salgono:** {euro(f['nov_aumento'])} al mese per {f['nov_dipendenti']} "
-        f"dipendenti. Il superminimo assorbibile ne copre {euro(f['nov_assorbito'])} in {f['nov_assorbimenti']} casi; "
+    add(f"- **Dal 1° novembre 2026 i minimi del Terziario salgono:** {euro(f['nov_aumento'])} al mese per "
+        f"{f['nov_dipendenti']} dipendenti. Il superminimo assorbibile ne copre {euro(f['nov_assorbito'])} in {f['nov_assorbimenti']} casi; "
         f"restano {euro(f['nov_da_pagare'])} al mese, {euro(f['nov_annuo'], 0)} l'anno su 14 mensilità.")
     add(f"- **I controlli trovano ogni alterazione sopra il centesimo:** tutte le {num(f['prove_sopra'], 0)} delle "
         f"{num(f['prove'], 0)} prove casuali che superano il centesimo (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).")
@@ -159,13 +166,15 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
               [[r.cliente, euro(r.ritenute_1001), euro(r.irpef), euro(r.diff_ritenute), euro(r.contributi_dipendente),
                 euro(r.contributi_inps), euro(r.diff_contributi)] for r in rec.itertuples(index=False)], "lrrrrrr"))
     add("")
-    add("*Le ritenute IRPEF dei dati sintetici non sono calcolate con le regole fiscali: servono solo a mostrare la "
-        "riconciliazione.*")
+    add("*Le ritenute dei cedolini seguono le regole IRPEF 2026, che C20 ricalcola: qui conta che la delega porti la "
+        "loro somma.*")
     add("")
 
     add("## 3. La tranche del 1° novembre 2026")
     add("")
-    add("Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e di nuovo a febbraio 2027. "
+    add("Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e di nuovo a febbraio 2027; "
+        "gli altri tre CCNL hanno la prossima tranche nel 2027 (Logistica a gennaio, Metalmeccanico e Turismo a "
+        "giugno), e i loro clienti non sono in questa tabella. "
         "Per ogni dipendente: l'aumento del livello, riproporzionato al part-time; quanto ne assorbe il superminimo, "
         "se la lettera di assunzione lo dice assorbibile; quanto resta da pagare.")
     add("")
@@ -212,7 +221,8 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
             "variazione": "variazioni del netto", "codice_fiscale": "codice fiscale", "anagrafica": "anagrafica",
             "ratei": "ratei", "tredicesima": "mensilità aggiuntive", "ferie_liquidate": "ferie non godute",
             "preavviso": "preavviso", "tfr_liquidato": "TFR liquidato", "malattia": "malattia", "carenza": "carenza",
-            "maternita": "maternità", "permessi": "permessi", "irpef": "IRPEF del mese", "conguaglio": "conguaglio"}
+            "maternita": "maternità", "permessi": "permessi", "irpef": "IRPEF del mese", "conguaglio": "conguaglio",
+            "integrazione": "integrazione del datore"}
     uscita = {"tredicesima", "ferie_liquidate", "preavviso", "tfr_liquidato", "conguaglio"}
     visti = ", ".join(nomi[t] for t in pt.loc[(pt["trovati_statistico"] > 0) & ~pt["tipo"].isin(uscita), "tipo"])
     add(f"*Il rilevatore confronta ogni cedolino con quelli dello stesso cliente, perché posizioni INPS diverse non "
@@ -248,12 +258,14 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add("")
     add("- **Due motori, una risposta.** Gli stessi controlli sono in Python e in formule nel foglio; il foglio "
         "Riconciliazione confronta ogni formula con Python, e la CI ricalcola il foglio con LibreOffice.")
-    add("- **Contributi semplificati.** Un'aliquota a carico del dipendente (9,19%) per tutti, senza FIS, CIGS e "
-        "contributo aggiuntivo dell'1%: in uso reale l'aliquota viene dalla posizione INPS del cliente.")
+    add("- **Contributi per posizione.** L'aliquota a carico del dipendente viene dalla media del semestre e dal "
+        "settore del cliente (Parametri): va presa dalla sua posizione INPS, non stimata.")
     add("- **Scatti al livello attuale.** Il CCNL non rivaluta gli scatti già maturati con il passaggio di livello: chi "
         "ha cambiato livello va controllato a mano.")
-    add("- **Un CCNL, un mese.** Malattia, permessi, conguagli e il TFR pagato all'uscita non sono controllati; "
-        "di chi esce si controllano ratei, mensilità aggiuntive, ferie non godute e preavviso (C11–C14).")
+    add("- **Quattro CCNL, impiegati.** Ogni cliente ha il suo contratto; nei dati d'esempio ci sono solo impiegati: "
+        "operai e personale viaggiante hanno altre regole di malattia e preavviso e non sono controllati.")
+    add("- **Un mese alla volta.** Ogni controllo guarda il mese e quello prima: le quote di malattia valgono per i "
+        "primi periodi, e un evento lungo va ricontato a mano (C22).")
     add("")
     C.REPORT.mkdir(exist_ok=True)
     (C.REPORT / "rapporto.md").write_text("\n".join(L) + "\n", encoding="utf-8")

@@ -285,7 +285,7 @@ def convert(md: str) -> str:
             continue
         if line.startswith("# "):
             out.append('<header class="masthead"><p class="eyebrow">Rapporto di controllo '
-                       "&middot; CCNL Terziario Confcommercio</p>"
+                       "&middot; CCNL Terziario, Metalmeccanico, Turismo e Logistica</p>"
                        f"<h1>{inline(line[2:])}</h1>")
             out.append("__CLOSE_MASTHEAD__")
             continue

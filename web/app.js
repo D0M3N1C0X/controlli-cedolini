@@ -27,7 +27,8 @@ const UI = {
     nonPresente: "— non presente —", facoltativa: "facoltativa",
     step3: "Le impostazioni", mese: "Mese da controllare", meseSub: "Preso dal file, se c'è la colonna del mese.",
     media: "Dipendenti medi nel semestre", mediaSub: "Decide CIGS (oltre 15) e FIS (oltre 5) a carico del dipendente.",
-    dipendenti: "Dipendenti in azienda", dipendentiSub: "Oltre 15, la riduzione d'orario è di 72 ore l'anno invece di 56.",
+    dipendenti: "Dipendenti in azienda", dipendentiSub: "Nel Terziario, oltre 15 la riduzione d'orario è di 72 ore l'anno invece di 56.",
+    ccnl: "CCNL", ccnlSub: "Il contratto dei cedolini: minimi, scatti, mensilità, preavviso, malattia e permessi.",
     soglia: "Variazione del netto da spiegare", sogliaSub: "0,20 vuol dire 20% in più o in meno del mese prima.",
     esegui: "Controlla i cedolini", step4: "Cosa correggere",
     filtroCliente: "Filtra per cliente", filtroControllo: "Filtra per controllo",
@@ -52,7 +53,7 @@ const UI = {
     eNumero: "C'è un valore non numerico in una colonna di importi: {e}.",
     fileFoglio: "{n} righe · foglio «{s}»", fileRighe: "{n} righe",
     xSegnalazioni: "Segnalazioni", xPerCliente: "Per cliente", xNovembre: "Novembre 2026", xParametri: "Parametri",
-    xMese: "Mese controllato", xMedia: "Dipendenti medi nel semestre", xDipendenti: "Dipendenti in azienda", xSoglia: "Soglia di variazione del netto",
+    xMese: "Mese controllato", xMedia: "Dipendenti medi nel semestre", xDipendenti: "Dipendenti in azienda", xCcnl: "CCNL", xSoglia: "Soglia di variazione del netto",
     xData: "Controllato il", xFonte: "Generato da controlli-cedolini",
     f_mese: "Mese", f_matricola: "Matricola", f_cliente: "Cliente", f_codice_fiscale: "Codice fiscale", f_livello: "Livello",
     f_data_assunzione: "Data di assunzione", f_part_time: "Percentuale di part-time", f_evento: "Evento del mese",
@@ -91,7 +92,8 @@ const UI = {
     nonPresente: "— not in the file —", facoltativa: "optional",
     step3: "Settings", mese: "Month to check", meseSub: "Taken from the file when it has a month column.",
     media: "Average employees in the half-year", mediaSub: "Decides CIGS (over 15) and FIS (over 5) on the employee's side.",
-    dipendenti: "Employees today", dipendentiSub: "Over 15, the working-time reduction is 72 hours a year instead of 56.",
+    dipendenti: "Employees today", dipendentiSub: "In retail and services, over 15 the working-time reduction is 72 hours a year instead of 56.",
+    ccnl: "Collective agreement (CCNL)", ccnlSub: "The payslips' agreement: minimums, increments, monthly payments, notice, sickness and leave.",
     soglia: "Change in net pay to explain", sogliaSub: "0.20 means 20% above or below last month.",
     esegui: "Check the payslips", step4: "What to fix",
     filtroCliente: "Filter by client", filtroControllo: "Filter by check",
@@ -115,7 +117,7 @@ const UI = {
     eNumero: "A column of amounts has a value that is not a number: {e}.",
     fileFoglio: "{n} rows · sheet “{s}”", fileRighe: "{n} rows",
     xSegnalazioni: "Flags", xPerCliente: "By client", xNovembre: "November 2026", xParametri: "Settings",
-    xMese: "Month checked", xMedia: "Average employees in the half-year", xDipendenti: "Employees today", xSoglia: "Net pay change threshold",
+    xMese: "Month checked", xMedia: "Average employees in the half-year", xDipendenti: "Employees today", xCcnl: "CCNL", xSoglia: "Net pay change threshold",
     xData: "Checked on", xFonte: "Made with controlli-cedolini",
     f_mese: "Month", f_matricola: "Employee number", f_cliente: "Client", f_codice_fiscale: "Tax code", f_livello: "Grade",
     f_data_assunzione: "Hiring date", f_part_time: "Part-time share", f_evento: "Event this month",
@@ -209,6 +211,7 @@ let risultato = null;
 
 $("media").value = CFG.media_default;
 $("dipendenti").value = CFG.dipendenti_default;
+$("ccnl").value = CFG.ccnl_default;
 // i dati di esempio portano le posizioni INPS dei loro tre clienti; i file dell'utente usano i campi della pagina
 let esempio = false;
 $("soglia").value = CFG.soglia;
@@ -375,7 +378,7 @@ function controlla() {
     illeggibili = 0;
     const mese = $("mese").value;
     const cfg = { ...CFG, mese, soglia: +$("soglia").value, posizioni: esempio ? CFG.posizioni : {},
-      media_default: +$("media").value, dipendenti_default: +$("dipendenti").value };
+      media_default: +$("media").value, dipendenti_default: +$("dipendenti").value, ccnl_default: $("ccnl").value };
     const tutti = [...righe("mese", mese), ...(files.prima ? righe("prima", precedente(mese)) : [])];
     if (!tutti.length) throw new Error(t("eVuoto"));
     const corr = tutti.filter((r) => r.mese === mese);
@@ -478,7 +481,7 @@ $("scarica-xlsx").addEventListener("click", () => {
       return [t("clienteN", { c }), s.length, tot("aumento"), tot("assorbito"), tot("da_pagare")];
     })];
   const oggi = new Date().toISOString().slice(0, 10);
-  const parametri = [[t("xParametri"), ""], [t("xMese"), cfg.mese], ...(esempio ? [] : [[t("xMedia"), cfg.media_default], [t("xDipendenti"), cfg.dipendenti_default]]), [t("xSoglia"), cfg.soglia],
+  const parametri = [[t("xParametri"), ""], [t("xMese"), cfg.mese], ...(esempio ? [] : [[t("xMedia"), cfg.media_default], [t("xDipendenti"), cfg.dipendenti_default], [t("xCcnl"), cfg.ccnl_default]]), [t("xSoglia"), cfg.soglia],
     [t("xData"), oggi], [t("xFonte"), "https://github.com/D0M3N1C0X/controlli-cedolini"]];
   const bytes = writeXlsx([
     { name: t("xSegnalazioni"), rows: segnalazioni, widths: [12, 10, 28, 48, 10, 14, 14, 12, 48, 16, 12, 30] },

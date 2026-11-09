@@ -8,6 +8,7 @@ straordinari dichiarati, un passaggio a part-time.
     python src/genera.py
 """
 import calendar
+import math
 import random
 from datetime import date, timedelta
 
@@ -16,16 +17,24 @@ import pandas as pd
 import codice_fiscale
 import config as C
 import regole as R
-from controlli import ASSENZE, CONGUAGLIO, TFR_USCITA
+from controlli import ASSENZE, CONGUAGLIO, INTEGRAZIONE, TFR_USCITA
 
-LIVELLI = ["Quadri", "1", "2", "3", "4", "5", "6", "7"]
-PESI_LIVELLO = [1, 3, 8, 18, 34, 20, 10, 6]
+LIVELLI = C.CCNL["terziario"]["livelli"]
+PESI_LIVELLO = C.CCNL["terziario"]["pesi"]
+
+
+def ccnl(r) -> str:
+    return R.ccnl_cliente(r["cliente"])
+
+
+def mensilita(r) -> int:
+    return R.regola(ccnl(r))["mensilita"]
 
 
 def fisco(r: dict, **kw) -> dict:
     """Dall'imponibile fiscale: ritenuta IRPEF del mese, somma del cuneo, trattamento integrativo (C20), altre
     trattenute e netto. `kw` passa a R.irpef_mese, per gli errori inseriti."""
-    r.update(R.irpef_mese(r["imponibile_irpef"], **kw))
+    r.update(R.irpef_mese(r["imponibile_irpef"], mensilita(r), **kw))
     return netto(r)
 
 
@@ -36,10 +45,11 @@ def netto(r: dict) -> dict:
     return r
 
 
-def anagrafica(rng: random.Random) -> pd.DataFrame:
+def anagrafica(rng: random.Random, clienti=C.CLIENTI_V1, n: int = 0) -> pd.DataFrame:
     rows = []
-    n = 0
-    for cliente, info in C.CLIENTI.items():
+    for cliente in clienti:
+        info = C.CLIENTI[cliente]
+        g = R.regola(info["ccnl"])
         for _ in range(info["dipendenti"]):
             n += 1
             donna = rng.random() < 0.52
@@ -47,8 +57,9 @@ def anagrafica(rng: random.Random) -> pd.DataFrame:
             assunzione = date(rng.randint(max(nascita.year + 19, 1995), 2026), rng.randint(1, 12), rng.randint(1, 28))
             if assunzione > date(2026, 7, 31):
                 assunzione = date(rng.randint(2012, 2025), rng.randint(1, 12), rng.randint(1, 28))
-            livello = rng.choices(LIVELLI, PESI_LIVELLO)[0]
-            pt = rng.choices([1.0, 0.75, 0.5], [70, 20, 10])[0] if livello not in ("Quadri", "1") else 1.0
+            livello = rng.choices(g["livelli"], g["pesi"])[0]
+            pt = (rng.choices([1.0, 0.75, 0.5], [70, 20, 10])[0]
+                  if livello not in ("Quadri", "Qa", "Qb", "1", "A1", "B3") else 1.0)
             superminimo = R.centesimi(rng.choice([0, 0, 0, 50, 80, 120, 150, 200, 300]) * pt)
             rows.append({"matricola": f"{cliente}{n:03d}", "cliente": cliente,
                          "codice_fiscale": codice_fiscale.sintetico(rng, nascita, donna),
@@ -56,6 +67,8 @@ def anagrafica(rng: random.Random) -> pd.DataFrame:
                          "data_assunzione": assunzione.isoformat(), "part_time": pt, "superminimo": superminimo,
                          "superminimo_assorbibile": rng.random() < 0.7})
     a = pd.DataFrame(rows)
+    if clienti != C.CLIENTI_V1:
+        return a
     # casi che il mese di settembre deve contenere: trienni compiuti ad agosto 2026 (scatto da settembre)
     for i in rng.sample(range(len(a)), 9):
         y = rng.choice([2023, 2020, 2017])
@@ -68,29 +81,30 @@ def cedolino(d: pd.Series, mese: str, rng: random.Random, residuo_prec: float, s
              permessi_goduti: float = 0.0) -> dict:
     pt = d["part_time"] if part_time is None else part_time
     assunzione = date.fromisoformat(d["data_assunzione"])
-    n = R.scatti_maturati(assunzione, mese)
-    tab = R.tabellare(d["livello"], pt)
-    sc = R.scatti_importo(d["livello"], n, pt)
+    k = ccnl(d)
+    n = R.scatti_maturati(assunzione, mese, k)
+    tab = R.tabellare(d["livello"], pt, ccnl=k)
+    sc = R.scatti_importo(d["livello"], n, pt, k)
     ordinaria = R.centesimi(tab + sc + d["superminimo"])
     lordo = R.centesimi(ordinaria + straordinari)
-    inps = R.contributi(lordo, R.media_cliente(d["cliente"]))
-    permessi = R.permessi_mese(assunzione, mese, C.CLIENTI[d["cliente"]]["dipendenti"], pt)
+    inps = R.contributi_cliente(lordo, d["cliente"])
+    permessi = R.permessi_mese(assunzione, mese, C.CLIENTI[d["cliente"]]["dipendenti"], pt, k)
     imponibile = R.centesimi(lordo - inps)
-    maturate = R.ferie_mese()
+    maturate = R.ferie_mese(k, R.anni_di_servizio(assunzione, R.ultimo_del_mese(mese)))
     return fisco({"mese": mese, "matricola": d["matricola"], "cliente": d["cliente"],
                   "codice_fiscale": d["codice_fiscale"],
             "livello": d["livello"], "data_assunzione": d["data_assunzione"], "part_time": pt,
             "superminimo_assorbibile": d["superminimo_assorbibile"], "evento": "",
             "tabellare": tab, "scatti_n": n, "scatti": sc, "superminimo": d["superminimo"],
             "straordinari": straordinari, "lordo": lordo, "contributi_inps": inps, "imponibile_irpef": imponibile,
-            "quota_tfr": R.quota_tfr(ordinaria), "ferie_maturate": maturate, "ferie_godute": ferie_godute,
+            "quota_tfr": R.quota_tfr(ordinaria, sc, k), "ferie_maturate": maturate, "ferie_godute": ferie_godute,
             "ferie_residuo": round(residuo_prec + maturate - ferie_godute, 4),
-            "ratei_13": R.ratei_13(assunzione, mese), "ratei_14": R.ratei_14(assunzione, mese),
+            "ratei_13": R.ratei_13(assunzione, mese, k), "ratei_14": R.ratei_14(assunzione, mese, k),
             # voci della cessazione: vuote finché il dipendente resta
             "data_cessazione": "", "tipo_cessazione": "", "preavviso_giorni": "", "tredicesima": "",
             "quattordicesima": "", "ferie_liquidate": "",
             # assenze del mese, TFR e conguaglio alla cessazione: vuoti se non ci sono
-            **{c: "" for c in ASSENZE + TFR_USCITA + CONGUAGLIO},
+            **{c: "" for c in ASSENZE + TFR_USCITA + CONGUAGLIO + INTEGRAZIONE},
             "permessi_maturati": permessi, "permessi_goduti": permessi_goduti,
             "permessi_residuo": round(permessi_prec + permessi - permessi_goduti, 4)})
 
@@ -99,16 +113,327 @@ def _importo(v) -> float:
     return 0.0 if v in ("", None) or (isinstance(v, float) and v != v) else float(v)
 
 
+# voci che entrano nel lordo, con il segno: le mensilità e le ferie pagate all'uscita, e le voci del mese con
+# un'assenza (v2.2): via la retribuzione dei giorni di assenza, dentro indennità INPS, carenza e integrazione
+VOCI_LORDO = (("tredicesima", 1), ("quattordicesima", 1), ("ferie_liquidate", 1), ("assenza_trattenuta", -1),
+              ("malattia_inps", 1), ("malattia_carenza", 1), ("maternita_inps", 1), ("integrazione_datore", 1))
+INDENNITA_INPS = ("malattia_inps", "maternita_inps")       # non sono imponibile previdenziale (F41)
+
+
 def ricalcola(r: dict) -> dict:
     """Dopo una modifica a monte, rifà a cascata le voci che il software paghe deriverebbe."""
     ordinaria = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
-    r["lordo"] = R.centesimi(ordinaria + r["straordinari"] + sum(_importo(r.get(k)) for k in
-                                                                 ("tredicesima", "quattordicesima", "ferie_liquidate")))
-    r["contributi_inps"] = R.contributi(r["lordo"], R.media_cliente(r["cliente"]))
+    r["lordo"] = R.centesimi(ordinaria + r["straordinari"] + sum(s * _importo(r.get(k)) for k, s in VOCI_LORDO))
+    previdenziale = R.centesimi(r["lordo"] - sum(_importo(r.get(k)) for k in INDENNITA_INPS))
+    r["contributi_inps"] = R.contributi_cliente(previdenziale, r["cliente"])
     r["imponibile_irpef"] = R.centesimi(r["lordo"] - r["contributi_inps"])
     fisco(r)
-    r["quota_tfr"] = R.quota_tfr(ordinaria)
+    r["quota_tfr"] = R.quota_tfr(ordinaria, r["scatti"], ccnl(r))
     return r
+
+
+def _eur(x: float) -> str:
+    return f"{x:.2f}"
+
+
+def chiudi_assenza(r: dict, quota_netto: float | None, integrazione: float | None = None) -> dict:
+    """Integrazione del datore di lavoro e ricalcolo del cedolino del mese con un'assenza. Sul netto (Terziario): la
+    più piccola integrazione, al centesimo, che porta il netto prima delle altre trattenute alla quota garantita del
+    netto normale; sul lordo (Metalmeccanico, Logistica) quella delle regole; `integrazione` la impone (errori)."""
+    if integrazione is None and quota_netto is not None:
+        mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
+        obiettivo = R.netto_garantito(mensile, r["cliente"], quota_netto)
+        prova = lambda cent: ricalcola({**r, "integrazione_datore": _eur(cent / 100)})   # noqa: E731
+        lo, hi = 0, int(mensile * 100) + 1
+        while lo < hi:
+            mid = (lo + hi) // 2
+            t = prova(mid)
+            if t["netto"] + t["altre_trattenute"] >= obiettivo:
+                hi = mid
+            else:
+                lo = mid + 1
+        integrazione = lo / 100
+    r["integrazione_datore"] = _eur(integrazione or 0.0)
+    return ricalcola(r)
+
+
+def malattia_mese(r: dict, base: dict, dal: date, al: date, evento_n: int, esente: bool = False,
+                  inps: float | None = None, carenza: float | None = None, integrazione: float | None = None,
+                  quota_lorda: tuple | None = None) -> dict:
+    """Il cedolino del mese con una malattia (C15, C16, C22): via la retribuzione dei giorni di assenza, dentro
+    l'indennità INPS sulla retribuzione del mese prima (`base`), la carenza alla quota del CCNL e l'integrazione del
+    datore. `inps`, `carenza`, `integrazione` e `quota_lorda` (quote sbagliate dell'integrazione lorda) servono agli
+    errori inseriti."""
+    k = ccnl(r)
+    mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
+    base_ret = R.centesimi(base["tabellare"] + base["scatti"] + base["superminimo"])
+    n_car, n1, n2 = R.giorni_malattia(dal, al, C.MESE, k)
+    quota = R.carenza_percentuale(evento_n, esente, k, (al - dal).days + 1)
+    dovuta_inps = R.indennita_malattia(base_ret, dal, al, C.MESE, base["scatti"], k) if inps is None else inps
+    r.update({"malattia_dal": dal.isoformat(), "malattia_al": al.isoformat(), "malattia_evento_n": str(evento_n),
+              "malattia_esente": "true" if esente else "false", "malattia_inps": _eur(dovuta_inps),
+              "malattia_carenza": _eur(R.importo_carenza(mensile, n_car, quota, C.MESE) if carenza is None
+                                       else carenza),
+              "assenza_trattenuta": _eur(R.trattenuta_assenza(mensile, R.giorni_assenza(dal, al, C.MESE), C.MESE)),
+              "evento": "malattia"})
+    if integrazione is None and quota_lorda is not None:
+        q1, q2 = quota_lorda
+        integrazione = R.centesimi(max(0.0, mensile * (n1 * q1 + n2 * q2) / R.giorni_del_mese(C.MESE)
+                                       - dovuta_inps))
+    if integrazione is None:
+        integrazione = R.integrazione_lorda(mensile, dovuta_inps, dal, al, C.MESE, k)
+    return chiudi_assenza(r, R.quota_netto_garantita(C.MESE, k, (dal, al), quota), integrazione)
+
+
+def maternita_mese(r: dict, base: dict, dal: date, inps: float | None = None) -> dict:
+    """Il cedolino del mese di congedo di maternità: via la retribuzione dei giorni, dentro l'indennità INPS all'80%
+    e, nel Terziario, l'integrazione fino al 100% del netto (F18)."""
+    k = ccnl(r)
+    al = dal + timedelta(days=149)                       # cinque mesi di congedo obbligatorio
+    mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
+    base_ret = R.centesimi(base["tabellare"] + base["scatti"] + base["superminimo"])
+    importo = R.indennita_maternita(base_ret, dal, al, C.MESE, base["scatti"], k) if inps is None else inps
+    r.update({"maternita_dal": dal.isoformat(), "maternita_al": al.isoformat(), "maternita_inps": _eur(importo),
+              "assenza_trattenuta": _eur(R.trattenuta_assenza(mensile, R.giorni_assenza(dal, al, C.MESE), C.MESE)),
+              "evento": "maternità"})
+    return chiudi_assenza(r, R.quota_netto_garantita(C.MESE, k), None if k == "terziario" else 0.0)
+
+
+def cessazione(r: dict, tipo: str, uscita: date, errore: str = "", preavviso: float | None = None) -> dict:
+    """Il cedolino di chi lascia (C11-C14): ratei fino all'uscita, tredicesima e quattordicesima, ferie non godute e
+    preavviso del CCNL. `errore` e `preavviso` servono agli errori inseriti."""
+    k = ccnl(r)
+    assunzione = date.fromisoformat(r["data_assunzione"])
+    mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
+    n13, n14 = R.ratei_al(assunzione, C.MESE, uscita, k)
+    minimo = math.ceil(R.preavviso_minimo(tipo, r["livello"], assunzione, uscita, k))
+    base14 = R.base_quattordicesima(mensile, r["scatti"], k)
+    r.update({"evento": "cessazione", "data_cessazione": uscita.isoformat(), "tipo_cessazione": tipo,
+              "ratei_13": n13, "ratei_14": n14,
+              "preavviso_giorni": minimo if preavviso is None else preavviso,
+              "tredicesima": R.mensilita_aggiuntiva(mensile, n13),
+              "quattordicesima": R.mensilita_aggiuntiva(base14, n14) if R.ha_quattordicesima(k) else "",
+              "ferie_liquidate": R.ferie_non_godute(mensile, r["ferie_residuo"], k)})
+    if errore == "ferie":
+        r["ferie_liquidate"] = R.centesimi(mensile / 30 * r["ferie_residuo"])
+    elif errore == "ferie_26":
+        r["ferie_liquidate"] = R.centesimi(mensile / C.DIVISORE_GIORNALIERO * r["ferie_residuo"])
+    elif errore == "quattordicesima":
+        r["quattordicesima"] = R.mensilita_aggiuntiva(mensile, n13)
+    elif errore == "quattordicesima_scatti":
+        r["quattordicesima"] = R.mensilita_aggiuntiva(mensile, n14)
+    elif errore == "preavviso":
+        r["preavviso_giorni"] = minimo // 2
+    return ricalcola(r)
+
+
+def tfr_uscita(r: dict, rng2: random.Random, errore: str = "") -> tuple[list, str]:
+    """TFR alla cessazione (C19): fondo al 31 dicembre 2025, quote del 2026 fino all'uscita e imponibile dello stesso
+    periodo; poi il TFR liquidato con la rivalutazione ISTAT. `errore` per gli errori inseriti."""
+    assunto, uscita = date.fromisoformat(r["data_assunzione"]), date.fromisoformat(r["data_cessazione"])
+    mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
+    anni = R.anni_di_servizio(assunto, date(2025, 12, 31))
+    mesi = R.dodicesimi_alla_cessazione(assunto, uscita, date(2026, 1, 1), ccnl(r))
+    fondo = R.centesimi(mensile * mensilita(r) / C.DIVISORE_TFR * anni * rng2.uniform(0.96, 1.08))
+    quote, imponibile = R.centesimi(r["quota_tfr"] * mesi), R.centesimi(r["lordo"] * mesi)
+    liquidato = R.tfr_liquidato(fondo, quote, imponibile, uscita)
+    nota = ""
+    if errore == "coefficiente":       # il coefficiente del mese di uscita anche se si esce prima del 15
+        c = R.coefficiente_tfr(date(uscita.year, uscita.month, 15))
+        riv = R.centesimi(fondo * c / 100)
+        liquidato = R.centesimi(fondo + riv - R.centesimi(riv * C.IMPOSTA_SOSTITUTIVA_TFR) + quote
+                                - R.centesimi(imponibile * C.CONTRIBUTO_TFR))
+        nota = "uscita prima del 15 rivalutata con il coefficiente del mese di uscita invece che del mese prima"
+    elif errore == "imposta":           # rivalutazione lorda: imposta sostitutiva non tolta
+        riv = R.centesimi(fondo * R.coefficiente_tfr(uscita) / 100)
+        liquidato = R.centesimi(fondo + riv + quote - R.centesimi(imponibile * C.CONTRIBUTO_TFR))
+        nota = "rivalutazione liquidata senza togliere l'imposta sostitutiva del 17%"
+    elif errore == "contributo":        # quote dell'anno senza lo 0,50%
+        riv = R.centesimi(fondo * R.coefficiente_tfr(uscita) / 100)
+        liquidato = R.centesimi(fondo + riv - R.centesimi(riv * C.IMPOSTA_SOSTITUTIVA_TFR) + quote)
+        nota = "quote dell'anno senza togliere il contributo dello 0,50% dell'imponibile"
+    return [f"{fondo:.2f}", f"{quote:.2f}", f"{imponibile:.2f}", f"{liquidato:.2f}"], nota
+
+
+def conguaglio_uscita(r: dict, agosto: dict, errore: str = "") -> tuple[dict, str]:
+    """Conguaglio IRPEF alla cessazione (C21): l'imponibile da gennaio, i giorni di lavoro e quanto già trattenuto o
+    erogato nei mesi prima (ogni mese come agosto, con le regole di C20); il cedolino di uscita porta la differenza."""
+    inizio_anno = date(R.primo_del_mese(C.MESE).year, 1, 1)
+    assunto, uscita = date.fromisoformat(r["data_assunzione"]), date.fromisoformat(r["data_cessazione"])
+    dal = max(assunto, inizio_anno)
+    mesi_prec = (R.primo_del_mese(C.MESE).month - dal.month) if dal.year == inizio_anno.year else 0
+    g = R.irpef_mese(agosto["imponibile_irpef"], mensilita(r))
+    prec = {k: R.centesimi(g[k] * mesi_prec) for k in ("irpef", "bonus_cuneo", "trattamento_integrativo")}
+    imp_anno = R.centesimi(agosto["imponibile_irpef"] * mesi_prec + r["imponibile_irpef"])
+    giorni = (uscita - dal).days + 1
+    if errore == "non_fatto":
+        r.update(R.irpef_mese(r["imponibile_irpef"], mensilita(r)))
+        nota = "conguaglio non fatto alla cessazione: ritenuta calcolata come in un mese qualsiasi"
+    else:
+        c = R.conguaglio_cessazione(imp_anno, giorni, prec["irpef"], prec["bonus_cuneo"],
+                                    prec["trattamento_integrativo"], rapporta=errore != "detrazioni")
+        r.update({k: c[k] for k in ("irpef", "bonus_cuneo", "trattamento_integrativo")})
+        nota = "conguaglio con le detrazioni dell'anno intero invece che rapportate ai giorni di lavoro"
+    r.update(dict(zip(CONGUAGLIO, [f"{imp_anno:.2f}", str(giorni), f"{prec['irpef']:.2f}",
+                                   f"{prec['bonus_cuneo']:.2f}", f"{prec['trattamento_integrativo']:.2f}"],
+                      strict=True)))
+    return netto(r), nota
+
+
+def clienti_v22(errori: list) -> tuple[list, pd.DataFrame, pd.DataFrame]:
+    """I clienti D, E e F (v2.2), uno per CCNL, con un generatore a parte: i dati dei clienti A-C non cambiano. Per
+    ogni CCNL gli errori tipici di chi applica le regole di un altro contratto, e casi corretti che non vanno
+    segnalati."""
+    rng = random.Random(C.SEED + 2)
+    a = anagrafica(rng, ("D", "E", "F"), n=300)
+    speciali = {          # casi che settembre deve contenere
+        "D": [("2026-04-16", "C2"),       # 15 giorni di servizio ad aprile: nel Metalmeccanico il mese non conta
+              ("2022-05-10", "C3"),       # due bienni compiuti: con la regola triennale del Terziario sarebbe uno
+              ("2012-03-10", "B1"),       # oltre 10 anni: un giorno di ferie in più
+              ("2024-08-05", "B2")],      # biennio compiuto ad agosto: scatto da settembre
+        "E": [("2023-03-01", "4"),        # assunto dopo il 2018, da 3 anni: metà della riduzione d'orario
+              ("2026-07-20", "5")],       # entra a luglio, esce il 10 settembre: le frazioni si sommano
+        "F": [("2025-02-03", "2")],
+    }
+    for cliente, casi in speciali.items():
+        righe = a.index[a["cliente"] == cliente]
+        for k, (data, livello) in enumerate(casi):
+            a.loc[righe[k], ["data_assunzione", "livello", "part_time"]] = [data, livello, 1.0]
+    ago, sett = [], []
+    for _, d in a.iterrows():
+        residuo = round(rng.uniform(12, 30), 4)
+        g_ago = min(rng.choice([0, 5, 10]), int(residuo))
+        p_res = round(rng.uniform(8, 50), 4)
+        if d["data_assunzione"] >= "2026-07-01":       # entrato a luglio: un mese di ferie e permessi maturati
+            residuo, g_ago, p_res = R.ferie_mese(R.ccnl_cliente(d["cliente"])), 0, 0.0
+        nuovo = d["data_assunzione"] >= "2026-08-01"
+        ago.append(cedolino(d, C.MESE_PRECEDENTE, rng, residuo, ferie_godute=g_ago, permessi_prec=p_res,
+                            permessi_goduti=rng.choice([0, 0, 4])))
+        sett.append(cedolino(d, C.MESE, rng, 0.0 if nuovo else ago[-1]["ferie_residuo"],
+                             ferie_godute=rng.choice([0, 0, 1, 2]), permessi_prec=ago[-1]["permessi_residuo"],
+                             permessi_goduti=rng.choice([0, 0, 0, 4])))
+    S = pd.DataFrame(sett)
+    for col in ASSENZE + TFR_USCITA + CONGUAGLIO + INTEGRAZIONE + ["data_cessazione", "tipo_cessazione",
+                                                                    "preavviso_giorni", "tredicesima",
+                                                                    "quattordicesima", "ferie_liquidate"]:
+        S[col] = S[col].astype(object)
+    idx = list(S.index)
+    rng.shuffle(idx)
+    # i casi speciali hanno già il loro ruolo: non li prende nessun altro errore
+    usati: set = {S.loc[i, "matricola"] for i in S.index
+                  if any(S.loc[i, "data_assunzione"] == d for casi in speciali.values() for d, _ in casi)}
+
+    def prendi(cliente: str, cond=lambda r: True) -> int:
+        for i in idx:
+            r = S.loc[i]
+            if r["cliente"] == cliente and r["matricola"] not in usati and r["evento"] == "" and cond(r):
+                usati.add(r["matricola"])
+                return i
+        raise RuntimeError(f"dati insufficienti per il cliente {cliente}")
+
+    def per_data(data: str) -> int:
+        return int(S.index[S["data_assunzione"] == data][0])
+
+    def registra(i, tipo, nota) -> None:
+        errori.append({"matricola": S.loc[i, "matricola"], "cliente": S.loc[i, "cliente"], "tipo": tipo,
+                       "nota": nota})
+
+    inizio = R.primo_del_mese(C.MESE)
+    giorno = lambda g: date(inizio.year, inizio.month, g)       # noqa: E731
+    fine_mese = R.ultimo_del_mese(C.MESE)
+    rifai = lambda i, r: S.loc.__setitem__(i, pd.Series(ricalcola(r)))     # noqa: E731
+
+    def malattia(i, dal, al, evento_n, **kw) -> None:
+        S.loc[i] = pd.Series(malattia_mese(S.loc[i].to_dict(), ago[i], giorno(dal), giorno(al), evento_n, **kw))
+
+    def esce(i, tipo, uscita=fine_mese, errore="", preavviso=None) -> None:
+        S.loc[i] = pd.Series(cessazione(S.loc[i].to_dict(), tipo, uscita, errore, preavviso))
+
+    # D · Metalmeccanico industria, solo impiegati
+    i = prendi("D")
+    r = S.loc[i].to_dict()
+    r["tabellare"] = R.tabellare(r["livello"], r["part_time"], "minimo_2025_06", "metalmeccanico")
+    rifai(i, r)
+    registra(i, "minimo", "minimo fermo a prima di giugno 2026: l'aumento IPCA e del rinnovo non applicato")
+    i = per_data("2022-05-10")
+    r = S.loc[i].to_dict()
+    r["scatti_n"] = R.scatti_maturati(date(2022, 5, 10), C.MESE, "terziario")
+    r["scatti"] = R.scatti_importo(r["livello"], r["scatti_n"], r["part_time"], "metalmeccanico")
+    rifai(i, r)
+    registra(i, "scatto", "scatti contati ogni tre anni come nel Terziario: nel Metalmeccanico sono biennali")
+    i = per_data("2026-04-16")
+    S.loc[i, "ratei_13"] += 1
+    registra(i, "ratei", "mese di assunzione con 15 giorni di servizio contato: nel Metalmeccanico ne servono più di 15")
+    i = per_data("2012-03-10")
+    sbagliate = round(24 / 12, 4)
+    S.loc[i, "ferie_residuo"] = round(S.loc[i, "ferie_residuo"] - S.loc[i, "ferie_maturate"] + sbagliate, 4)
+    S.loc[i, "ferie_maturate"] = sbagliate
+    registra(i, "ferie", "oltre 10 anni di servizio: il giorno di ferie in più non maturato")
+    malattia(prendi("D"), 7, 12, 1)                                  # 6 giorni, primo evento: tutto al datore
+    i = prendi("D")
+    base = R.centesimi(ago[i]["tabellare"] + ago[i]["scatti"] + ago[i]["superminimo"])
+    inps = R.indennita_malattia(base, giorno(14), giorno(25), C.MESE, ccnl="terziario")
+    malattia(i, 14, 25, 2, inps=inps)
+    registra(i, "malattia", "indennità INPS anticipata a un impiegato dell'industria, che non ne ha diritto")
+    i = prendi("D")
+    malattia(i, 3, 17, 1, quota_lorda=(0.8, 0.8))
+    registra(i, "integrazione", "malattia pagata all'80%, la quota dopo i 122 giorni, dal primo giorno")
+    esce(prendi("D"), "dimissioni")
+    i = prendi("D", lambda r: r["livello"] in ("B2", "B3", "A1")
+               and R.anni_di_servizio(date.fromisoformat(r["data_assunzione"]), fine_mese) < 5)
+    esce(i, "licenziamento", preavviso=45)
+    registra(i, "preavviso", "licenziamento di un B2-A1 con 1 mese e 15 giorni di preavviso: il minimo è 2 mesi")
+
+    # E · Turismo, pubblici esercizi
+    i = prendi("E")
+    r = S.loc[i].to_dict()
+    r["tabellare"] = R.tabellare(r["livello"], r["part_time"], "totale_2025_06", "turismo")
+    rifai(i, r)
+    registra(i, "minimo", "retribuzione ferma alla tranche di giugno 2025")
+    malattia(prendi("E"), 2, 11, 1)                                  # 10 giorni: carenza pagata, INPS all'80%
+    i = prendi("E")
+    base = R.centesimi(ago[i]["tabellare"] + ago[i]["scatti"] + ago[i]["superminimo"])
+    _, n1, n2 = R.giorni_malattia(giorno(15), giorno(28), C.MESE, "turismo")
+    g = R.rmgg(base, ago[i]["scatti"], "turismo")
+    malattia(i, 15, 28, 1, inps=R.centesimi(g * 0.5 * n1 + g * 0.6666 * n2))
+    registra(i, "malattia", "indennità INPS al 50% come negli altri settori: nei pubblici esercizi è l'80%")
+    i = prendi("E")
+    malattia(i, 21, 27, 2, carenza=0.0)
+    registra(i, "carenza", "malattia di 7 giorni: i primi 3 non pagati, ma oltre i 5 giorni il datore li deve")
+    i = prendi("E", lambda r: r["scatti"] > 0 and r["ferie_residuo"] > 1)
+    esce(i, "dimissioni", errore="quattordicesima_scatti")
+    registra(i, "tredicesima", "quattordicesima liquidata con gli scatti: nel Turismo la base li esclude")
+    esce(per_data("2026-07-20"), "dimissioni", uscita=giorno(10))    # le frazioni di luglio e settembre si sommano
+    i = per_data("2023-03-01")
+    r = S.loc[i]
+    pieni = round((72 + 32) / 12, 4)
+    S.loc[i, "permessi_residuo"] = round(r["permessi_residuo"] - r["permessi_maturati"] + pieni, 4)
+    S.loc[i, "permessi_maturati"] = pieni
+    registra(i, "permessi", "assunto nel 2023: matura 104 ore l'anno invece di 68 (32 più metà della riduzione)")
+
+    # F · Logistica, trasporto merci e spedizione
+    for _ in range(2):
+        i = prendi("F")
+        r = S.loc[i].to_dict()
+        r["tabellare"] = R.tabellare(r["livello"], r["part_time"], "minimo_2026_01", "logistica")
+        rifai(i, r)
+        registra(i, "minimo", "minimo senza l'elemento perequativo (EPA) del rinnovo")
+    malattia(prendi("F"), 9, 18, 1)                                  # integrazione fino al 100% del lordo
+    i = prendi("F")
+    malattia(i, 1, 24, 2, quota_lorda=(0.75, 1.0))
+    registra(i, "integrazione", "integrazione al 75% dal 4° al 20° giorno, come nel Terziario: qui è il 100%")
+    i = prendi("F", lambda r: r["livello"] in ("Quadri", "1", "2"))
+    esce(i, "dimissioni", preavviso=15)
+    registra(i, "preavviso", "dimissioni con 15 giorni di preavviso, quelli dei livelli più bassi")
+    i = prendi("F", lambda r: r["ferie_residuo"] > 2)
+    esce(i, "licenziamento", errore="ferie_26")
+    registra(i, "ferie_liquidate", "ferie non godute pagate a 1/26: con la settimana di 5 giorni la quota è 1/22")
+
+    for i in S.index[S["evento"] == "cessazione"]:
+        S.loc[i, TFR_USCITA], _ = tfr_uscita(S.loc[i].to_dict(), rng)
+        r, _ = conguaglio_uscita(S.loc[i].to_dict(), ago[i])
+        S.loc[i] = pd.Series(r)
+    return ago, S, a
 
 
 def main() -> None:
@@ -266,24 +591,7 @@ def main() -> None:
         S[col] = S[col].astype(object)
 
     def cessa(i, tipo: str, errore: str = "", giorno: date | None = None) -> None:
-        r = S.loc[i].to_dict()
-        assunzione = date.fromisoformat(r["data_assunzione"])
-        mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
-        uscita = giorno or fine_mese
-        n13, n14 = R.ratei_al(assunzione, C.MESE, uscita)
-        minimo = R.preavviso_minimo(tipo, r["livello"], assunzione, uscita)
-        r.update({"evento": "cessazione", "data_cessazione": uscita.isoformat(), "tipo_cessazione": tipo,
-                  "ratei_13": n13, "ratei_14": n14,
-                  "preavviso_giorni": minimo, "tredicesima": R.mensilita_aggiuntiva(mensile, n13),
-                  "quattordicesima": R.mensilita_aggiuntiva(mensile, n14),
-                  "ferie_liquidate": R.ferie_non_godute(mensile, r["ferie_residuo"])})
-        if errore == "ferie":
-            r["ferie_liquidate"] = R.centesimi(mensile / 30 * r["ferie_residuo"])
-        elif errore == "quattordicesima":
-            r["quattordicesima"] = R.mensilita_aggiuntiva(mensile, n13)
-        elif errore == "preavviso":
-            r["preavviso_giorni"] = minimo // 2
-        S.loc[i] = pd.Series(ricalcola(r))
+        S.loc[i] = pd.Series(cessazione(S.loc[i].to_dict(), tipo, giorno or fine_mese, errore))
 
     pieno = lambda r: libero(r) and r["ferie_residuo"] > 1 and r["ratei_14"] != r["ratei_13"]
     cessa(prendi(pieno), "dimissioni")
@@ -300,37 +608,17 @@ def main() -> None:
     # un'uscita corretta a metà mese, prima del 15: l'ultimo mese non matura né tredicesima né quattordicesima
     cessa(prendi(pieno), "licenziamento", giorno=date(fine_mese.year, fine_mese.month, 10))
 
-    for col in ASSENZE + TFR_USCITA:
+    for col in ASSENZE + TFR_USCITA + INTEGRAZIONE:
         S[col] = S[col].astype(object)
 
     # TFR alla cessazione (C19): fondo al 31 dicembre 2025, quote del 2026 fino all'uscita e imponibile dello stesso
     # periodo; poi il TFR liquidato con la rivalutazione ISTAT. Tre uscite con un errore ciascuna.
     altri_errori = iter(["imposta", "contributo"])
     for i in S.index[S["evento"] == "cessazione"]:
-        r = S.loc[i]
-        assunto, uscita = date.fromisoformat(r["data_assunzione"]), date.fromisoformat(r["data_cessazione"])
-        mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
-        anni = R.anni_di_servizio(assunto, date(2025, 12, 31))
-        mesi = R.dodicesimi_alla_cessazione(assunto, uscita, date(2026, 1, 1))
-        fondo = R.centesimi(mensile * C.MENSILITA / C.DIVISORE_TFR * anni * rng2.uniform(0.96, 1.08))
-        quote, imponibile = R.centesimi(r["quota_tfr"] * mesi), R.centesimi(r["lordo"] * mesi)
-        liquidato = R.tfr_liquidato(fondo, quote, imponibile, uscita)
+        uscita = date.fromisoformat(S.loc[i, "data_cessazione"])
         errore = "coefficiente" if uscita.day < 15 else next(altri_errori, "")
-        if errore == "coefficiente":       # il coefficiente del mese di uscita anche se si esce prima del 15
-            c = R.coefficiente_tfr(date(uscita.year, uscita.month, 15))
-            riv = R.centesimi(fondo * c / 100)
-            liquidato = R.centesimi(fondo + riv - R.centesimi(riv * C.IMPOSTA_SOSTITUTIVA_TFR) + quote
-                                    - R.centesimi(imponibile * C.CONTRIBUTO_TFR))
-            nota = "uscita prima del 15 rivalutata con il coefficiente del mese di uscita invece che del mese prima"
-        elif errore == "imposta":           # rivalutazione lorda: imposta sostitutiva non tolta
-            riv = R.centesimi(fondo * R.coefficiente_tfr(uscita) / 100)
-            liquidato = R.centesimi(fondo + riv + quote - R.centesimi(imponibile * C.CONTRIBUTO_TFR))
-            nota = "rivalutazione liquidata senza togliere l'imposta sostitutiva del 17%"
-        elif errore == "contributo":        # quote dell'anno senza lo 0,50%
-            riv = R.centesimi(fondo * R.coefficiente_tfr(uscita) / 100)
-            liquidato = R.centesimi(fondo + riv - R.centesimi(riv * C.IMPOSTA_SOSTITUTIVA_TFR) + quote)
-            nota = "quote dell'anno senza togliere il contributo dello 0,50% dell'imponibile"
-        S.loc[i, TFR_USCITA] = [f"{fondo:.2f}", f"{quote:.2f}", f"{imponibile:.2f}", f"{liquidato:.2f}"]
+        valori, nota = tfr_uscita(S.loc[i].to_dict(), rng2, errore)
+        S.loc[i, TFR_USCITA] = valori
         if errore:
             registra(i, "tfr_liquidato", nota)
 
@@ -340,58 +628,28 @@ def main() -> None:
     for col in CONGUAGLIO:
         S[col] = S[col].astype(object)
     errori_conguaglio = iter(["detrazioni", "non_fatto"])
-    inizio_anno = date(R.primo_del_mese(C.MESE).year, 1, 1)
     for i in S.index[S["evento"] == "cessazione"]:
-        r = S.loc[i].to_dict()
-        assunto, uscita = date.fromisoformat(r["data_assunzione"]), date.fromisoformat(r["data_cessazione"])
-        dal = max(assunto, inizio_anno)
-        mesi_prec = (R.primo_del_mese(C.MESE).month - dal.month) if dal.year == inizio_anno.year else 0
-        g = R.irpef_mese(ago[i]["imponibile_irpef"])
-        prec = {k: R.centesimi(g[k] * mesi_prec) for k in ("irpef", "bonus_cuneo", "trattamento_integrativo")}
-        imp_anno = R.centesimi(ago[i]["imponibile_irpef"] * mesi_prec + r["imponibile_irpef"])
-        giorni = (uscita - dal).days + 1
         errore = next(errori_conguaglio, "")
-        if errore == "non_fatto":
-            r.update(R.irpef_mese(r["imponibile_irpef"]))
-            nota = "conguaglio non fatto alla cessazione: ritenuta calcolata come in un mese qualsiasi"
-        else:
-            c = R.conguaglio_cessazione(imp_anno, giorni, prec["irpef"], prec["bonus_cuneo"],
-                                        prec["trattamento_integrativo"], rapporta=errore != "detrazioni")
-            r.update({k: c[k] for k in ("irpef", "bonus_cuneo", "trattamento_integrativo")})
-            nota = "conguaglio con le detrazioni dell'anno intero invece che rapportate ai giorni di lavoro"
-        r.update(dict(zip(CONGUAGLIO, [f"{imp_anno:.2f}", str(giorni), f"{prec['irpef']:.2f}",
-                                       f"{prec['bonus_cuneo']:.2f}", f"{prec['trattamento_integrativo']:.2f}"],
-                          strict=True)))
-        S.loc[i] = pd.Series(netto(r))
+        r, nota = conguaglio_uscita(S.loc[i].to_dict(), ago[i], errore)
+        S.loc[i] = pd.Series(r)
         if errore:
             registra(i, "conguaglio", nota)
 
-    # Assenze di settembre (C15-C17). La base è la retribuzione di agosto; le indennità sono voci a parte.
+    # Assenze di settembre (C15-C17, C22). La base dell'indennità INPS è la retribuzione di agosto; nel mese la
+    # retribuzione dei giorni di assenza lascia il posto a indennità, carenza e integrazione del datore di lavoro.
     inizio = R.primo_del_mese(C.MESE)
+    giorno = lambda g: date(inizio.year, inizio.month, g)       # noqa: E731
 
     def base_agosto(i) -> float:
         g = ago[i]
         return R.centesimi(g["tabellare"] + g["scatti"] + g["superminimo"])
 
-    def malattia(i, dal: int, al: int, evento_n: int, esente: bool = False, inps: float | None = None,
-                 carenza: float | None = None) -> None:
-        d0, d1 = date(inizio.year, inizio.month, dal), date(inizio.year, inizio.month, al)
-        n_car, _, _ = R.giorni_malattia(d0, d1, C.MESE)
-        quota = R.carenza_percentuale(evento_n, esente)
-        giornaliera = R.centesimi(base_agosto(i) / C.DIVISORE_GIORNALIERO)
-        dovuta = R.centesimi(giornaliera * n_car * quota)
-        dovuta_inps = R.indennita_malattia(base_agosto(i), d0, d1, C.MESE) if inps is None else inps
-        S.loc[i, ASSENZE[:6]] = [d0.isoformat(), d1.isoformat(), str(evento_n), "true" if esente else "false",
-                                 f"{dovuta_inps:.2f}",
-                                 f"{dovuta if carenza is None else carenza:.2f}"]
-        S.loc[i, "evento"] = "malattia"
+    def malattia(i, dal: int, al: int, evento_n: int, esente: bool = False, **kw) -> None:
+        S.loc[i] = pd.Series(malattia_mese(S.loc[i].to_dict(), ago[i], giorno(dal), giorno(al), evento_n, esente,
+                                           **kw))
 
     def maternita(i, dal: int, inps: float | None = None) -> None:
-        d0 = date(inizio.year, inizio.month, dal)
-        d1 = d0 + timedelta(days=149)                       # cinque mesi di congedo obbligatorio
-        importo = R.indennita_maternita(base_agosto(i), d0, d1, C.MESE) if inps is None else inps
-        S.loc[i, ASSENZE[6:]] = [d0.isoformat(), d1.isoformat(), f"{importo:.2f}"]
-        S.loc[i, "evento"] = "maternità"
+        S.loc[i] = pd.Series(maternita_mese(S.loc[i].to_dict(), ago[i], giorno(dal), inps))
 
     n_originali = len(ago)             # i dipendenti con il cedolino di agosto, che dà la base
     originali = lambda r: libero(r) and r.name < n_originali
@@ -399,13 +657,13 @@ def main() -> None:
     malattia(prendi(originali), 14, 18, 5)                         # quinto evento: niente carenza
     malattia(prendi(originali), 7, 20, 6, esente=True)             # prognosi di 14 giorni: carenza dovuta
     i = prendi(originali)
-    d0, d1 = date(inizio.year, inizio.month, 2), date(inizio.year, inizio.month, 25)
+    d0, d1 = giorno(2), giorno(25)
     sbagliata = R.centesimi(base_agosto(i) / 26) * 0.5 * R.giorni_malattia(d0, d1, C.MESE)[1] \
         + R.centesimi(base_agosto(i) / 26) * 0.6666 * R.giorni_malattia(d0, d1, C.MESE)[2]
     malattia(i, 2, 25, 2, inps=R.centesimi(sbagliata))
     registra(i, "malattia", "indennità INPS calcolata su 1/26 della retribuzione invece che × 14/12 / 30")
     i = prendi(originali)
-    malattia(i, 10, 16, 5, carenza=R.centesimi(base_agosto(i) / C.DIVISORE_GIORNALIERO * 3 * 0.5))
+    malattia(i, 10, 16, 5, carenza=R.importo_carenza(base_agosto(i), 3, 0.5, C.MESE))
     registra(i, "carenza", "carenza pagata al quinto evento dell'anno, quando non è più dovuta")
     i = prendi(lambda r: originali(r) and S.loc[r.name, "codice_fiscale"][9] in "4567")      # una lavoratrice
     maternita(i, 1)
@@ -465,7 +723,15 @@ def main() -> None:
     S.loc[i] = pd.Series(netto(r))
     registra(i, "irpef", "somma del cuneo fiscale non erogata a un reddito sotto i 20.000 €")
 
-    S = pd.concat([S, pd.DataFrame(nuovi)], ignore_index=True)
+    # Integrazione del datore di lavoro (C22): in fondo, per non cambiare i casi già presenti
+    i = prendi(originali)
+    malattia(i, 8, 19, 2, integrazione=0.0)
+    registra(i, "integrazione", "integrazione del datore di lavoro non pagata: il netto resta sotto il 75% garantito")
+
+    ago2, S2, a2 = clienti_v22(errori)
+    S = pd.concat([S, pd.DataFrame(nuovi), S2], ignore_index=True)
+    ago += ago2
+    a = pd.concat([a, a2], ignore_index=True)
     ced = pd.concat([pd.DataFrame(ago), S], ignore_index=True)
     for col in ("scatti_n", "ratei_13", "ratei_14"):
         ced[col] = ced[col].astype(int)

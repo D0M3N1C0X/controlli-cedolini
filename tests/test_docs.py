@@ -16,14 +16,16 @@ def righe(path) -> list[dict]:
 
 
 def test_ogni_colonna_ha_una_voce() -> None:
-    for path in (C.CCNL, C.DIPENDENTI, C.CEDOLINI, C.F24, C.ERRORI):
+    tabelle = tuple(g["tabella"] for g in C.CCNL.values())
+    for path in (*tabelle, C.DIPENDENTI, C.CEDOLINI, C.F24, C.ERRORI):
         with path.open(encoding="utf-8") as f:
             colonne = next(csv.reader(f))
         assert [c for c in colonne if not descritto(c)] == [], path.name
 
 
 def test_ogni_livello_evento_e_tipo_ha_una_voce() -> None:
-    nomi = ({r["livello"] for r in righe(C.CCNL)} | {r["evento"] for r in righe(C.CEDOLINI) if r["evento"]}
+    livelli = {r["livello"] for g in C.CCNL.values() for r in righe(g["tabella"])}
+    nomi = (livelli | {r["evento"] for r in righe(C.CEDOLINI) if r["evento"]}
             | {r["tipo"] for r in righe(C.ERRORI)})
     assert sorted(n for n in nomi if not descritto(n)) == []
 
