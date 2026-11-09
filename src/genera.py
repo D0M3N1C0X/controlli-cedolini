@@ -364,7 +364,8 @@ def clienti_v22(errori: list) -> tuple[list, pd.DataFrame, pd.DataFrame]:
     registra(i, "scatto", "scatti contati ogni tre anni come nel Terziario: nel Metalmeccanico sono biennali")
     i = per_data("2026-04-16")
     S.loc[i, "ratei_13"] += 1
-    registra(i, "ratei", "mese di assunzione con 15 giorni di servizio contato: nel Metalmeccanico ne servono più di 15")
+    registra(i, "ratei", "mese di assunzione con 15 giorni di servizio contato: nel Metalmeccanico ne servono "
+             "più di 15")
     i = per_data("2012-03-10")
     sbagliate = round(24 / 12, 4)
     S.loc[i, "ferie_residuo"] = round(S.loc[i, "ferie_residuo"] - S.loc[i, "ferie_maturate"] + sbagliate, 4)

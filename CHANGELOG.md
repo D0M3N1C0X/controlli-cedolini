@@ -5,6 +5,40 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
 
 ## [Non rilasciato]
 
+## [2.2.0] - 2026-11-09
+
+### Aggiunto
+
+- **Tre CCNL in più, uno per cliente:** Metalmeccanico industria (Federmeccanica-Assistal, cliente D), Turismo,
+  pubblici esercizi (Fipe, cliente E), Logistica, trasporto merci e spedizione (Confetra, cliente F), con le tabelle
+  dei minimi e le regole lette nei testi delle parti firmatarie e all'archivio CNEL (F30-F40). Per ciascuno: minimi,
+  scatti (periodo e numero), mensilità, regola della frazione di mese per i ratei, quattordicesima senza scatti nel
+  Turismo, ferie, permessi, preavviso, quota giornaliera, indennità INPS di malattia e carenza.
+- **C22 Integrazione del datore di lavoro:** nel mese di malattia o maternità, sul netto nel Terziario (il netto non
+  sta sotto la quota garantita del netto normale, con contributi e IRPEF di C03 e C20) e nella maternità del Turismo;
+  sul lordo nel Metalmeccanico e nella Logistica (D33).
+- Diciotto errori inseriti nei clienti nuovi, quasi tutti regole di un altro contratto applicate per sbaglio, e uno
+  nel Terziario (integrazione non pagata). Trovati 67 su 67, senza falsi allarmi.
+- Foglio: tabella unica dei quattro CCNL con chiave `ccnl|livello`, una riga di regole per CCNL, il CCNL di ogni
+  cliente nei Parametri; colonne DS-EC; 1.682 valori riconciliati (erano 983). Strumento nel browser: la scelta del
+  CCNL per i file dell'utente e le stesse regole, verificate su 3.909 valori (erano 2.898).
+
+### Cambiato
+
+- **Il mese di un'assenza è un cedolino vero:** la retribuzione dei giorni assenti si toglie in giorni di calendario;
+  indennità INPS, carenza e integrazione entrano nel lordo; l'imponibile contributivo esclude le indennità INPS (F41,
+  D31). Prima le indennità erano voci a parte sopra la retribuzione piena (D22, superata).
+- La carenza si paga sulla stessa misura giornaliera della retribuzione tolta (mensile / giorni del mese).
+- Un'impresa industriale non versa al FIS (F31): l'aliquota del cliente D è IVS più CIGS.
+- La tranche di novembre 2026 riguarda solo i clienti del Terziario; gli altri CCNL hanno la prossima nel 2027.
+
+### Corretto
+
+- **Strumento nel browser:** la pagina non aveva i campi delle colonne IRPEF della v2.1 (somma del cuneo, trattamento
+  integrativo, dati del conguaglio), e le scartava leggendo il file: C20 e C21 tacevano, e il netto atteso di C06 non
+  sommava il cuneo. I campi ci sono, con quelli nuovi della v2.2, e un test verifica che ogni colonna di
+  `cedolini.csv` abbia il suo campo. Il controllo del JavaScript non lo vedeva perché passa i dati senza la pagina.
+
 ## [2.1.0] - 2026-11-08
 
 ### Aggiunto

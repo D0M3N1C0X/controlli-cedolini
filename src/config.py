@@ -139,8 +139,9 @@ GIORNI_ANNO = 365
 _PREAVVISO_TERZIARIO = PREAVVISO
 _metal = {**{lv: (60, 90, 120) for lv in ("B2", "B3", "A1")}, **{lv: (45, 60, 75) for lv in ("C2", "C3", "B1")},
           **{lv: (10, 20, 30) for lv in ("D1", "D2", "C1")}}
-_turismo = {**{lv: (120, 150, 180) for lv in ("Qa", "Qb")}, "1": (60, 90, 120), **{lv: (30, 45, 60) for lv in ("2", "3")},
-            **{lv: (20, 30, 45) for lv in ("4", "5")}, **{lv: (15, 20, 20) for lv in ("6s", "6", "7")}}
+_turismo = {**{lv: (120, 150, 180) for lv in ("Qa", "Qb")}, "1": (60, 90, 120),
+            **{lv: (30, 45, 60) for lv in ("2", "3")}, **{lv: (20, 30, 45) for lv in ("4", "5")},
+            **{lv: (15, 20, 20) for lv in ("6s", "6", "7")}}
 _log_lic = {**{lv: (75, 105, 135) for lv in ("Quadri", "1")}, "2": (45, 60, 75),
             **{lv: (30, 45, 60) for lv in ("3S", "3", "4", "4J", "5", "6")}}
 CCNL = {

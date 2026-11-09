@@ -11,7 +11,6 @@ import pandas as pd
 
 import config as C
 
-
 T = "terziario"
 _TABELLE: dict = {}
 

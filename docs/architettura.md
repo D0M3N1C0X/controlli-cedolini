@@ -1,6 +1,6 @@
 # Architettura: una regola, tre motori
 
-Gli stessi ventuno controlli esistono tre volte, per tre modi di lavorare: uno script Python, un foglio di calcolo con
+Gli stessi ventidue controlli esistono tre volte, per tre modi di lavorare: uno script Python, un foglio di calcolo con
 formule vive e una pagina web che gira solo nel browser. Il rischio di avere tre copie è che divergano. Questa
 pagina spiega come restano uguali, e come si cambia qualcosa senza romperle.
 
@@ -8,7 +8,7 @@ pagina spiega come restano uguali, e come si cambia qualcosa senza romperle.
 
 ```mermaid
 flowchart LR
-    T["data/ccnl_terziario.csv<br>minimi e scatti"] --> R["src/regole.py<br>le regole, una volta"]
+    T["data/ccnl_*.csv<br>minimi e scatti dei quattro CCNL"] --> R["src/regole.py<br>le regole, una volta"]
     P["src/config.py<br>parametri e soglie"] --> R
     G["src/genera.py<br>dati sintetici ed errori registrati"] --> D["data/cedolini.csv<br>data/f24.csv"]
     R --> K["src/controlli.py<br>C01-C21 e valutazione"]
@@ -58,9 +58,13 @@ dati, README, confronto con il browser); per il foglio conta la riconciliazione,
 
 ## Come si aggiorna il contratto
 
-A ogni rinnovo del CCNL:
+A ogni rinnovo di un CCNL:
 
-1. ricostruire `data/ccnl_terziario.csv` dalla fonte primaria (oggi la circolare Confcommercio, F01 in
+1. ricostruire la sua tabella in `data/` dalla fonte primaria (F01 per il Terziario, F30, F33 e F38 per gli altri, in
    [fonti.md](fonti.md)), con la data della tranche in una colonna nuova;
-2. spostare `COLONNA_MINIMO` e `COLONNA_MINIMO_PROSSIMO` in `src/config.py`;
+2. spostare `minimo`, `minimo_prec`, `minimo_prossimo` e `prossima_tranche` del contratto in `config.CCNL`;
 3. rifare tutto e lasciare che i test dicano cosa è cambiato.
+
+Per un CCNL nuovo: una tabella in `data/`, una voce in `config.CCNL` con le regole che cambiano (la struttura è la
+stessa dei quattro che ci sono) e il CCNL del cliente in `config.CLIENTI`. Foglio e strumento nel browser leggono le
+regole da lì: se una regola nuova non entra nella struttura, va scritta nei tre motori (D28).

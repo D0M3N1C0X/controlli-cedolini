@@ -1,7 +1,8 @@
-# Ricerca per i nuovi CCNL (in corso)
+# Ricerca per i nuovi CCNL (v2.2)
 
-Appunti di lavoro per la v2.2: Metalmeccanico industria, Turismo / pubblici esercizi, Logistica e trasporto merci.
-Ogni dato con la sua fonte; quando un dato entra nel codice passa in [docs/fonti.md](../fonti.md).
+Appunti di lavoro della v2.2, conservati come traccia della ricerca: Metalmeccanico industria, Turismo / pubblici esercizi, Logistica e trasporto merci.
+Ogni dato con la sua fonte; i dati entrati nel codice sono in [docs/fonti.md](../fonti.md) (F30-F41), le scelte in
+[docs/decisioni.md](../decisioni.md) (D28-D34).
 
 ## Metalmeccanico industria (Federmeccanica-Assistal / Fim, Fiom, Uilm)
 

@@ -1,6 +1,7 @@
 # Guida operativa: il controllo dei cedolini, ogni mese
 
-La procedura per un team paghe che elabora cedolini del CCNL Terziario per più clienti e vuole fermare gli
+La procedura per un team paghe che elabora cedolini per più clienti, ognuno con il suo CCNL (Terziario,
+Metalmeccanico industria, Turismo pubblici esercizi, Logistica), e vuole fermare gli
 errori **prima** che arrivino al cliente. Funziona con lo [strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/)
 o con il [foglio di controllo](../deliverables/foglio_controllo_cedolini.xlsx): la logica è la stessa, i risultati
 anche. Cosa controlla ogni controllo è nel [catalogo](catalogo-controlli.md).
@@ -29,7 +30,9 @@ anche. Cosa controlla ogni controllo è nel [catalogo](catalogo-controlli.md).
 **0. I parametri del cliente.** Nel foglio Parametri, o nella pagina dello strumento:
 
 - l'**aliquota INPS** a carico del dipendente, dalla posizione del cliente (9,19% è solo il valore generale);
-- i **minimi** in vigore, dalla tabella del CCNL (`data/ccnl_terziario.csv`, fonte in [fonti.md](fonti.md));
+- il **CCNL** del cliente: decide minimi, scatti, mensilità, ferie, permessi, preavviso, malattia e integrazione
+  (tabelle in `data/ccnl_*.csv`, fonti in [fonti.md](fonti.md));
+- se il cliente **versa al FIS**: un'impresa industriale no, ha la CIGO;
 - per la tranche di novembre, quali **superminimi sono assorbibili**: lo dice la lettera di assunzione, non il
   software.
 

@@ -24,8 +24,8 @@ CONTROLLI = {
             "Contributo a carico del dipendente diverso da imponibile arrotondato all'euro × aliquota della posizione "
             "(IVS, CIGS, FIS), più l'1% oltre la prima fascia pensionabile", "alta"),
     "C04": ("Quota TFR", "Rateo TFR diverso da retribuzione ordinaria × mensilità del CCNL / 13,5 / 12", "media"),
-    "C05": ("Residuo ferie", "Residuo diverso da residuo del mese prima + maturate - godute, con le ferie annue del CCNL",
-            "media"),
+    "C05": ("Residuo ferie",
+            "Residuo diverso da residuo del mese prima + maturate - godute, con le ferie annue del CCNL", "media"),
     "C06": ("Quadratura", "Lordo diverso dalla somma delle voci, o netto diverso da lordo meno trattenute", "alta"),
     "C07": ("Variazione del netto",
             "Netto oltre il 20% sopra o sotto il mese prima, senza un evento che lo spieghi", "media"),
@@ -99,8 +99,8 @@ def _num(m: pd.DataFrame, c: str) -> pd.Series:
 
 
 def carica() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    ced = pd.read_csv(C.CEDOLINI, dtype={"livello": str, "evento": str,
-                                         **{c: str for c in CESSAZIONE + ASSENZE + TFR_USCITA + CONGUAGLIO + INTEGRAZIONE}},
+    testo = CESSAZIONE + ASSENZE + TFR_USCITA + CONGUAGLIO + INTEGRAZIONE
+    ced = pd.read_csv(C.CEDOLINI, dtype={"livello": str, "evento": str, **{c: str for c in testo}},
                       keep_default_na=False)
     return (ced[ced["mese"] == C.MESE].reset_index(drop=True), ced[ced["mese"] == C.MESE_PRECEDENTE],
             pd.read_csv(C.F24))
