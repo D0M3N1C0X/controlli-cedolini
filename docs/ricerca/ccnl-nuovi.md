@@ -151,3 +151,30 @@ Dal 1.1.2027 l'EPA raddoppia (es. Quadri 93,34), dal 1.6.2027 sale ancora (Quadr
 - **Malattia** (Parte speciale, Sezione prima, art. 63): **intera retribuzione globale mensile** per 3 mesi e metà
   per altri 5 (fino a 5 anni di anzianità), 5 mesi e metà per altri 7 (oltre 5); il trattamento **integra
   l'indennità INPS per differenza** (c. 13): un'integrazione sul lordo, non sul netto. Comporto 245 / 365 giorni.
+
+## Cosa cambia tra i quattro CCNL, per i controlli
+
+| Regola | Terziario | Metalmeccanico | Turismo (Fipe) | Logistica |
+|---|---|---|---|---|
+| Minimo | tabellare per livello | minimo per livello (D1-A1) | contingenza + paga base | minimo conglobato + EPA |
+| Ultima tranche prima di settembre 2026 | novembre 2025 | giugno 2026 | giugno 2026 | gennaio 2026 |
+| Scatti | 10 triennali | 5 biennali | 6 quadriennali, ricalcolati al livello attuale | 5 biennali, al livello di maturazione |
+| Mensilità | 14 | 13 | 14 (la 14ª senza scatti) | 14 |
+| Frazione di mese per i ratei | almeno 15 giorni | oltre 15 giorni | somma dei giorni: un rateo ogni 30, più il resto ≥ 15 | oltre 15 giorni |
+| Preavviso | giorni, per tipo | mesi, uguale per tipo | mesi/giorni, uguale per tipo | impiegati: mesi, dimissioni a metà |
+| Malattia INPS | 50% / 66,66% | 50% / 66,66% | **80%** | 50% / 66,66% |
+| Integrazione del datore | fino al 75% / 100% del **netto** | fino al 100% del **netto** (122/153/214 giorni) | solo i 3 giorni di carenza, se la malattia supera 5 giorni | fino al 100% del **lordo** (3 o 5 mesi), poi 50% |
+| Carenza | 100/100/66/50/0% per evento | 66% al 4°, 50% dal 5° evento ≤ 5 giorni | 100% se la malattia supera 5 giorni | coperta dall'integrazione |
+| Permessi | ROL 72/56 + 32 | PAR 104 ore | 104 ore (assunti dal 2018: 32, poi 68, poi 104) | da verificare |
+
+## Piano della v2.2
+
+1. Un CCNL per cliente: tre clienti nuovi (D Metalmeccanico, E Turismo, F Logistica) con la loro tabella dei minimi
+   in `data/` e le regole in `config.CCNL[...]`; le funzioni di `regole.py` prendono il CCNL dal cliente.
+2. Assenze con la retribuzione ridotta: nel mese di malattia o maternità la retribuzione dei giorni non lavorati
+   lascia il posto all'indennità INPS e all'integrazione del datore, come in un cedolino vero.
+3. C22 Integrazione del datore: per ogni CCNL la sua regola, lorda o netta (sul netto: il netto del mese con assenza
+   non deve stare sotto la quota garantita del netto normale, con l'IRPEF di C20).
+4. Errori inseriti per ogni CCNL: minimo della tranche prima, scatti con la periodicità del Terziario, ratei con la
+   frazione sbagliata, preavviso del Terziario, INPS al 50% nel Turismo, integrazione mancante.
+5. Tre motori, documenti, test.
