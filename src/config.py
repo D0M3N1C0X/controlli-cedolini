@@ -65,7 +65,10 @@ TFR_TASSO_FISSO = 1.5
 TFR_QUOTA_INFLAZIONE = 0.75
 FOI_DICEMBRE = 121.5              # dicembre 2025, base 2015=100
 FOI_RACCORDO = 1.214              # da base 2025 a base 2015
-FOI_MESI = {"2026-08": 103.7, "2026-09": 104.3}     # base 2025=100, dati definitivi ISTAT
+# base 2025=100, dati definitivi ISTAT fino all'ultimo mese chiuso (data/source/istat_foi.csv, tavola ISTAT letta il
+# 25 novembre 2026; ottobre pubblicato il 17 novembre)
+FOI_MESI = {"2026-01": 100.4, "2026-02": 100.9, "2026-03": 101.5, "2026-04": 102.5, "2026-05": 102.8,
+            "2026-06": 102.8, "2026-07": 103.1, "2026-08": 103.7, "2026-09": 104.3, "2026-10": 105.4}
 IMPOSTA_SOSTITUTIVA_TFR = 0.17
 CONTRIBUTO_TFR = 0.005
 # Assenze. Malattia (F16): indennità INPS anticipata dal datore di lavoro, 50% dal 4° al 20° giorno e 66,66% dal 21°

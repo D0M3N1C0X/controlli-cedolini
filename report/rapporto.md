@@ -283,3 +283,17 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 - **Quattro CCNL, impiegati.** Ogni cliente ha il suo contratto; nei dati d'esempio ci sono solo impiegati: operai e personale viaggiante hanno altre regole di malattia e preavviso e non sono controllati.
 - **Un mese alla volta.** Ogni controllo guarda il mese e quello prima: le quote di malattia valgono per i primi periodi, e un evento lungo va ricontato a mano (C22). L'anno della sezione 5 mette in fila dodici mesi, ma ogni mese è ancora controllato solo col precedente.
 
+
+**Le fonti al mese chiuso, ottobre 2026.** Ogni parametro che cambia nel tempo ha una data; un test ferma la pipeline se uno non copre il mese controllato. I primi a scadere, a fine dicembre 2026, sono IRPEF, detrazioni, cuneo e prima fascia INPS (F24, F25, F26, F15): vanno riletti a gennaio 2027.
+
+| Parametro | Fonte | Vale fino a | Letto alla fonte | Il prossimo valore |
+|---|---|---|---|---|
+| Scaglioni IRPEF 2026 (23%, 33%, 43%) | F24 | dicembre 2026 | 2026-11-08 | legge di bilancio 2027, da rileggere a gennaio 2027 |
+| Detrazioni per lavoro dipendente (art. 13 TUIR) | F25 | dicembre 2026 | 2026-11-08 | il testo in vigore scade il 31 dicembre 2026 |
+| Cuneo fiscale: somma e ulteriore detrazione | F26 | dicembre 2026 | 2026-11-08 | dal 2027 cambia (D.lgs. 117/2026) |
+| Prima fascia pensionabile 56.224 €, 4.685 € al mese | F15 | dicembre 2026 | 2026-11-25 | circolare INPS sui minimali e massimali 2027, di solito a fine gennaio |
+| Indice FOI per la rivalutazione del TFR | F20 | ottobre 2026 | 2026-11-25 | il FOI di un mese esce verso la metà del mese dopo |
+| Minimi del CCNL terziario, ultima tranche in tabella | F01 | fino al rinnovo | 2026-10-09 | dopo la tranche di febbraio 2027 in tabella, il prossimo rinnovo |
+| Minimi del CCNL metalmeccanico, ultima tranche in tabella | F30-F40 | fino al rinnovo | 2026-11-09 | dopo la tranche di giugno 2027 in tabella, il prossimo rinnovo |
+| Minimi del CCNL turismo, ultima tranche in tabella | F30-F40 | fino al rinnovo | 2026-11-09 | dopo la tranche di giugno 2027 in tabella, il prossimo rinnovo |
+| Minimi del CCNL logistica, ultima tranche in tabella | F30-F40 | fino al rinnovo | 2026-11-09 | dopo la tranche di gennaio 2027 in tabella, il prossimo rinnovo |

@@ -7,6 +7,7 @@ import pandas as pd
 import anno
 import config as C
 import controlli
+import fonti
 import ponte
 import robustezza
 import statistica
@@ -284,6 +285,7 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict, an_: dict | None = None, p
         "primi periodi, e un evento lungo va ricontato a mano (C22). L'anno della sezione 5 mette in fila dodici "
         "mesi, ma ogni mese è ancora controllato solo col precedente.")
     add("")
+    sezione_fonti(add)
     C.REPORT.mkdir(exist_ok=True)
     (C.REPORT / "rapporto.md").write_text("\n".join(L) + "\n", encoding="utf-8")
     return f
@@ -350,6 +352,23 @@ def sezione_anno(add, a: dict) -> None:
         f"ferie. Per l'anagrafica ({len(anag)} errori su {len(e)}) serve un confronto con i documenti almeno una volta: "
         "all'assunzione, a ogni segnalazione C10, e a campione una volta l'anno.")
     add("")
+
+
+_mese = fonti.nome_mese
+
+
+def sezione_fonti(add) -> None:
+    """In coda a Metodo e limiti: fino a quando vale ogni parametro con una data (fonti.py)."""
+    s = fonti.prima_scadenza()
+    primi = [x.fonte for x in fonti.scadenze() if x.al == s.al]
+    add("")
+    add(f"**Le fonti al mese chiuso, {_mese(fonti.ULTIMO_MESE_CHIUSO)}.** Ogni parametro che cambia nel tempo ha "
+        "una data; un test ferma la pipeline se uno non copre il mese controllato. I primi a scadere, a fine "
+        f"{_mese(s.al)}, sono IRPEF, detrazioni, cuneo e prima fascia INPS ({', '.join(primi)}): vanno riletti a "
+        "gennaio 2027.")
+    add("")
+    add(table(["Parametro", "Fonte", "Vale fino a", "Letto alla fonte", "Il prossimo valore"],
+              [[x.parametro, x.fonte, _mese(x.al), x.letto, x.prossima] for x in fonti.scadenze()], "lllll"))
 
 
 def sezione_ponte(add, p: dict) -> None:

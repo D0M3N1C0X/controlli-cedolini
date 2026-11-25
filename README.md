@@ -160,6 +160,10 @@ The full list is in [docs/decisioni.md](docs/decisioni.md).
   separate taxation of severance are not checked. Income tax is checked in ordinary months and at leaving.
 - **Social security:** the FIS reduction for small employers, bilateral funds other than the FIS and contribution
   reliefs are not modelled.
+- **Sources, at the closed month (October 2026):** every dated parameter says how long it holds, and a test stops the
+  pipeline if one does not cover the month checked. Income tax bands, credits, the tax wedge and the INPS pension
+  band hold until December 2026 and must be reread in January 2027; the ISTAT index for severance revaluation runs to
+  October 2026.
 - **Sources:** the Terziario rules on steps, accruals, notice, sickness, maternity and leave come from the union's
   summary of the 2011 renewal; the employers' note on the 2024 renewal shows those articles did not change then, but
   the 2015 renewal was not reread. Check against the current text before real use.
