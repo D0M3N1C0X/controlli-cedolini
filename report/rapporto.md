@@ -14,6 +14,7 @@
 - **Dal 1° novembre 2026 i minimi del Terziario salgono:** 3.892,67 € al mese per 118 dipendenti. Il superminimo assorbibile ne copre 1.443,69 € in 44 casi; restano 2.448,98 € al mese, 34.286 € l'anno su 14 mensilità.
 - **I controlli trovano ogni alterazione sopra il centesimo:** tutte le 855 delle 1.100 prove casuali che superano il centesimo (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).
 - **Su un anno intero, nove errori di configurazione del software paghe** (sezione 5): i 6 errori di regola sono segnalati dal primo mese e in ogni mese dopo; dei 3 di anagrafica, uno sbagliato dall'assunzione non lo vede nessun controllo, gli altri due li vede C10 una volta sola. L'anno pulito non dà falsi allarmi.
+- **Gli stessi cedolini alimentano gli altri strumenti** (sezione 6): l'estratto per il kit della trasparenza retributiva dà gli stessi divari al codice del kit e a questo, e INPS e TFR tornano con il modello del costo del lavoro.
 
 ## 1. Le segnalazioni, cedolino per cedolino
 
@@ -227,14 +228,54 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 
 **Cosa ne segue.** I controlli aritmetici bastano per le regole: tranche, aliquote, scaglioni, divisori, ferie. Per l'anagrafica (3 errori su 9) serve un confronto con i documenti almeno una volta: all'assunzione, a ogni segnalazione C10, e a campione una volta l'anno.
 
-## 6. Come lo userei in un team payroll
+## 6. Il ponte con la trasparenza retributiva e il costo del lavoro
+
+**Perché.** I cedolini sono la fonte dei dati che chiedono la direttiva (UE) 2023/970 sulla trasparenza retributiva e il budget del personale. Se le voci vanno nel posto sbagliato, il divario retributivo è sbagliato prima di cominciare. Questa sezione collega i cedolini dell'anno (sezione 5) agli altri due strumenti del portfolio: [pay-transparency-readiness-kit](https://github.com/D0M3N1C0X/pay-transparency-readiness-kit) e [workforce-cost-model](https://github.com/D0M3N1C0X/workforce-cost-model).
+
+**Ogni voce del cedolino ha una natura.** Il kit misura la retribuzione su tutte le voci (direttiva) e, per l'Italia, sulle sole voci fisse e continuative (il livello retributivo del recepimento, come lo legge il kit). La tabella dice dove va ogni voce nell'estratto del kit:
+
+| Voce del cedolino | Colonna del kit | Natura | Perché |
+|---|---|---|---|
+| tabellare | base_pay | fissa e continuativa | minimo del livello: retribuzione di base |
+| scatti | base_pay | fissa e continuativa | scatti di anzianità: maturano per regola generale |
+| superminimo | base_pay | fissa e continuativa | superminimo individuale: pagato ogni mese |
+| tredicesima | base_pay | fissa e continuativa | mensilità aggiuntiva dovuta dal CCNL |
+| quattordicesima | base_pay | fissa e continuativa | mensilità aggiuntiva dovuta dal CCNL |
+| straordinari | bonus | variabile | dipende dalle ore del mese: componente variabile (il kit non ha una colonna per lo straordinario, la colonna bonus è variabile) |
+| quota tfr | fuori | esclusa | accantonamento differito, non pagato nell'anno; liquidato alla cessazione |
+| malattia inps | fuori | esclusa | anticipata per conto dell'INPS: non la paga il datore di lavoro |
+| maternita inps | fuori | esclusa | anticipata per conto dell'INPS: non la paga il datore di lavoro |
+| integrazione datore | base_pay | sostitutiva | prende il posto della retribuzione dei giorni di assenza |
+| contributi inps | fuori | esclusa | trattenuta, non retribuzione |
+| irpef | fuori | esclusa | trattenuta, non retribuzione |
+
+**L'estratto.** 177 dipendenti, la retribuzione pagata da gennaio a dicembre 2026 e le ore contrattuali del periodo, nel formato "anno di riferimento" del kit, un datore di lavoro per cliente ([data/ponte/estratto_ptk.csv](../data/ponte/estratto_ptk.csv)). Gli indicatori dell'articolo 9 calcolati qui e quelli del codice del kit, al commit 18be663, sullo stesso file coincidono su tutti i 6 clienti: la CI rifà il conto col kit a ogni modifica.
+
+| Cliente | Dipendenti | Donne | Divario orario medio | Mediano | Divario annuo medio | Variabili: donne / uomini che le ricevono |
+|---|---:|---:|---:|---:|---:|---:|
+| A | 18 | 9 | 10,4% | 3,1% | 14,8% | 78% / 89% |
+| B | 74 | 45 | -3,6% | 4,0% | -8,0% | 76% / 69% |
+| C | 27 | 16 | -6,0% | -7,7% | -3,2% | 81% / 55% |
+| D | 22 | 11 | 1,9% | 1,3% | 8,0% | 100% / 64% |
+| E | 16 | 7 | 8,0% | 11,3% | 17,3% | 100% / 78% |
+| F | 20 | 9 | -2,0% | 4,4% | 1,0% | 67% / 100% |
+
+*Un divario positivo vuol dire donne pagate meno. Annuo e orario differiscono per il part-time: la paga annua lo conta, quella oraria no, ed è per questo che la direttiva chiede tutti e due. Nessun cliente ha 100 dipendenti, la soglia più bassa dell'obbligo di relazione dell'articolo 9; il diritto di informazione dell'articolo 7 vale per tutti. I dati sono inventati: i divari dicono che il ponte funziona, non qualcosa sui clienti.*
+
+**Le categorie sono i livelli del CCNL.** Lo stesso lavoro o un lavoro di pari valore, dentro un cliente, secondo la classificazione del contratto: 40 categorie, 6 con un divario orario di almeno il 5%, 18 sotto, 16 con un solo sesso ([report/ponte_categorie.csv](ponte_categorie.csv)). Nei livelli del CCNL il minimo è uguale per tutti: un divario viene da scatti (anzianità), superminimi, part-time e straordinari, cioè da quello che il kit chiede di giustificare con criteri oggettivi. Un livello sbagliato in anagrafica (K7 della sezione 5) sposta una persona di categoria: per la trasparenza è un errore doppio.
+
+**Il costo del lavoro: due repository, gli stessi conti.** workforce-cost-model calcola il costo italiano dal lato del datore; il suo config.py è copiato al commit bdcfa57 con il checksum fissato. IVS: 23,81% a carico del datore lì, 9,19% del dipendente qui, 33,00% in tutto, l'aliquota del Fondo pensioni lavoratori dipendenti. TFR: dodici quote mensili dei cedolini contro la retribuzione dell'anno / 13,5 del modello, per i 165 dipendenti con un anno intero allo stesso contratto: differenza mediana −1,64 €, la più grande 47,98 €. La formula è la stessa; la differenza è di calendario. La quota mensile proietta la retribuzione del mese su tutte le mensilità, la quota dell'anno guarda quello che è stato pagato: la tredicesima con la tranche di novembre, una quattordicesima che copre meno di dodici mesi per chi è entrato l'anno prima. L'articolo 2120 del codice civile guarda la retribuzione dell'anno: le quote mensili sono un acconto, da allineare a dicembre.
+
+*Due cose che il modello di costo non fa, senza che il costo cambi. Lo 0,50% dell'imponibile che si toglie dal TFR e si versa all'INPS (L. 297/1982, art. 3) sposta 21.915 € l'anno dal fondo TFR ai contributi per questi dipendenti, ma il datore paga lo stesso totale. E le altre voci INPS e INAIL del datore (6,0% nel modello) sono illustrative lì: qui la posizione INPS di ogni cliente (CIGS, FIS) è nei parametri, ed è da lì che il modello dovrebbe prenderle per un cliente vero.*
+
+## 7. Come lo userei in un team payroll
 
 1. **Prima dell'invio, ogni mese:** l'export del software paghe entra nello script o nel foglio; si guardano solo le righe segnalate, a partire dalla priorità alta.
 2. **C07 diventa una domanda al cliente,** non un errore: se lo straordinario c'è, si registra l'evento e il mese dopo non torna.
 3. **Prima di ogni tranche contrattuale:** la tabella di novembre dice al cliente quanto costa l'aumento e chi assorbe, prima del cedolino e non dopo.
 4. **Il passo successivo** è collegarlo all'export reale e misurare quante segnalazioni sono giuste nei primi due mesi, per tarare la soglia di C07.
 
-## 7. Metodo e limiti
+## 8. Metodo e limiti
 
 - **Due motori, una risposta.** Gli stessi controlli sono in Python e in formule nel foglio; il foglio Riconciliazione confronta ogni formula con Python, e la CI ricalcola il foglio con LibreOffice.
 - **Contributi per posizione.** L'aliquota a carico del dipendente viene dalla media del semestre e dal settore del cliente (Parametri): va presa dalla sua posizione INPS, non stimata.

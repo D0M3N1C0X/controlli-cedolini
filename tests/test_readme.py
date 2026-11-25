@@ -33,5 +33,7 @@ def test_readme_aggiornato(out):
     attese += [f"January-December 2026 ({int(a['mesi']['cedolini'].sum()):,} monthly",
                f"payslips and {len(a['extra'])} separate",
                f"the {regola} rule errors", f"Of the {anagrafica} master-data"]
+    import ponte
+    attese.append(f"same figures for all\n  {len(ponte.run()['indicatori'])} clients")
     assert a["segnalazioni"].empty
     assert not [a for a in attese if a not in readme]

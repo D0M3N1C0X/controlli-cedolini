@@ -3,7 +3,8 @@ Tutto in un comando:
 
     python src/run_all.py
 
-dati sintetici -> controlli -> foglio di calcolo con le formule -> prova di robustezza -> anno intero -> rapporto.
+dati sintetici -> controlli -> foglio di calcolo con le formule -> prova di robustezza -> anno intero -> ponte con
+gli altri strumenti -> rapporto.
 Deterministico: stessi dati, stessi risultati.
 """
 import time
@@ -15,6 +16,7 @@ import build_rapporto
 import build_web
 import controlli
 import genera
+import ponte
 import report_html
 import robustezza
 
@@ -33,7 +35,10 @@ def main() -> None:
     an["errori"].to_csv(controlli.C.REPORT / "anno_errori.csv", index=False, float_format="%.2f")
     print(f"anno -> report/anno_errori.csv ({int(an['mesi']['cedolini'].sum())} cedolini, "
           f"{len(an['errori'])} errori di configurazione)")
-    build_rapporto.write(o, rob, robustezza.errore_coerente(), an)
+    po = ponte.scrivi()
+    po["categorie"].to_csv(controlli.C.REPORT / "ponte_categorie.csv", index=False, float_format="%.4f")
+    print(f"ponte -> data/ponte/estratto_ptk.csv ({len(po['estratto'])} dipendenti nel formato del kit trasparenza)")
+    build_rapporto.write(o, rob, robustezza.errore_coerente(), an, po)
     report_html.build()
     print("rapporto -> report/rapporto.md, report/index.html")
     build_catalogo.write()

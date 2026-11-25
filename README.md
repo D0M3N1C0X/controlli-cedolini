@@ -116,6 +116,14 @@ are read as they are, and every flag comes with what to do, ready to download in
   Of the 3 master-data errors, a wrong grade from the hiring date is never flagged; a part-time or a top-up changed
   without a letter is flagged once, by C10, in the month it changes, and never again
   ([report, section 5](report/rapporto.md#5-un-anno-intero-e-gli-errori-di-configurazione)).
+- **The same payslips feed the other two tools:** every payslip item is mapped once to what the EU Pay
+  Transparency Directive counts as pay (fixed and continuing, variable, or excluded), and the year becomes an extract
+  in the format of [pay-transparency-readiness-kit](https://github.com/D0M3N1C0X/pay-transparency-readiness-kit).
+  The kit's own code, at a pinned commit, recomputes the Article 9 gaps on it in CI and gets the same figures for all
+  6 clients. Against [workforce-cost-model](https://github.com/D0M3N1C0X/workforce-cost-model), vendored at a pinned
+  checksum: the employer's 23.81% and the employee's 9.19% make the 33% pension rate, and twelve monthly severance
+  accruals match its annual pay / 13.5 to the cent when pay is constant
+  ([report, section 6](report/rapporto.md#6-il-ponte-con-la-trasparenza-retributiva-e-il-costo-del-lavoro)).
 - **Three engines, one answer:** the sheet is checked against Python on 1,682 values and recalculated with
   LibreOffice in CI; the browser tool is checked against Python on 3,909 values, including half-cent alterations of
   absences, top-ups, severance and income tax, and Italian file formats. The sheet's reconciliation uses [excel-twin](https://github.com/D0M3N1C0X/excel-twin).
@@ -181,6 +189,7 @@ node tests/js/check_controlli.mjs   # the browser tool against Python
 │   ├── controlli.py         i ventidue controlli, la tranche di novembre, la valutazione
 │   ├── robustezza.py        alterazioni casuali e l'errore coerente
 │   ├── anno.py              un anno intero e nove errori di configurazione
+│   ├── ponte.py             verso il kit della trasparenza e il modello del costo del lavoro
 │   ├── statistica.py        regole contro un rilevatore statistico
 │   ├── build_foglio.py      il foglio di calcolo con le formule
 │   ├── build_rapporto.py    il rapporto
@@ -197,6 +206,7 @@ node tests/js/check_controlli.mjs   # the browser tool against Python
 │   ├── fonti.md             fonte e stato di ogni regola, correzioni
 │   ├── decisioni.md         le scelte di metodo e le alternative scartate
 │   └── dizionario-dati.md   ogni colonna dei dati
+├── tools/ptk_indicatori.py  il codice del kit della trasparenza sull'estratto italiano (nella CI)
 └── tests/
 ```
 

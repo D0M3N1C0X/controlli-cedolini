@@ -1,0 +1,41 @@
+cliente,categoria,donne,uomini,divario_orario,stato
+A,terziario 1,0,1,,un solo sesso
+A,terziario 3,1,2,0.0307,sotto il 5%
+A,terziario 4,3,4,-0.0256,sotto il 5%
+A,terziario 5,2,1,0.0212,sotto il 5%
+A,terziario 6,2,1,0.1793,da giustificare
+A,terziario 7,1,0,,un solo sesso
+B,terziario 1,3,1,0.0335,sotto il 5%
+B,terziario 2,6,0,,un solo sesso
+B,terziario 3,2,5,-0.0064,sotto il 5%
+B,terziario 4,17,15,0.0259,sotto il 5%
+B,terziario 5,11,3,0.0161,sotto il 5%
+B,terziario 6,2,1,-0.0758,da giustificare
+B,terziario 7,3,4,0.0228,sotto il 5%
+B,terziario Quadri,1,0,,un solo sesso
+C,terziario 2,1,0,,un solo sesso
+C,terziario 3,6,4,-0.0253,sotto il 5%
+C,terziario 4,3,2,-0.0100,sotto il 5%
+C,terziario 5,1,4,-0.0495,sotto il 5%
+C,terziario 6,1,1,0.0165,sotto il 5%
+C,terziario 7,3,0,,un solo sesso
+C,terziario Quadri,1,0,,un solo sesso
+D,metalmeccanico A1,0,2,,un solo sesso
+D,metalmeccanico B1,3,2,0.0164,sotto il 5%
+D,metalmeccanico B2,2,1,0.0348,sotto il 5%
+D,metalmeccanico C1,0,1,,un solo sesso
+D,metalmeccanico C2,3,3,-0.0429,sotto il 5%
+D,metalmeccanico C3,3,2,0.0271,sotto il 5%
+E,turismo 2,0,3,,un solo sesso
+E,turismo 3,3,1,0.1025,da giustificare
+E,turismo 4,1,2,-0.0500,sotto il 5%
+E,turismo 5,0,2,,un solo sesso
+E,turismo 6s,1,0,,un solo sesso
+E,turismo 7,1,0,,un solo sesso
+E,turismo Qb,1,1,0.0031,sotto il 5%
+F,logistica 2,2,4,-0.0587,da giustificare
+F,logistica 3,4,2,-0.0923,da giustificare
+F,logistica 3S,0,3,,un solo sesso
+F,logistica 4,2,0,,un solo sesso
+F,logistica 4J,1,1,-0.0770,da giustificare
+F,logistica 5,0,1,,un solo sesso
