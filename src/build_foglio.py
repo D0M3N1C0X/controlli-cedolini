@@ -979,7 +979,7 @@ class Foglio:
             color=MUTED, size=12)
         put(ws, "B5", "Come si usa", bold=True, size=11)
         for i, text in enumerate([
-            f"1. Imposta il mese nei Parametri. Incolla i cedolini del mese nel foglio Mese (colonne A-W, più i ratei di tredicesima e quattordicesima in AU-AV, le voci di chi cessa in AZ-BE e assenze, permessi e TFR liquidato in BQ-CF, IRPEF in CY-DE, retribuzione tolta per l'assenza e integrazione in DS-DT, fino a {RIGHE} righe) e quelli del mese prima nel foglio Mese precedente.",
+            f"1. Imposta il mese nei Parametri. Incolla i cedolini del mese nel foglio Mese (colonne A-W, più i ratei di tredicesima e quattordicesima in AU-AV, le voci di chi cessa in AZ-BE e assenze, permessi e TFR liquidato in BQ-CF, IRPEF in CY-DE, retribuzione tolta per l'assenza e integrazione in DS-DT, indennità sostitutiva del preavviso in ED, fino a {RIGHE} righe) e quelli del mese prima nel foglio Mese precedente.",
             "2. Incolla gli importi delle deleghe F24 nel foglio F24 (colonne B ed E).",
             "3. Controlla i parametri gialli nel foglio Parametri: il CCNL di ogni cliente; la media dei dipendenti nel semestre decide CIGS e FIS; la prima fascia pensionabile cambia ogni anno.",
             "4. Leggi il Riepilogo e filtra il foglio Mese sulla colonna Errori maggiore di zero.",
