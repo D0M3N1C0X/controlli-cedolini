@@ -13,7 +13,7 @@ const UI = {
   it: {
     brand: "Controlli cedolini", eyebrow: "Quattro CCNL · prima dell'invio al cliente",
     title: "Controlla i cedolini del mese",
-    lead: "Carica l'export del tuo software paghe: ventidue controlli ricalcolano ogni voce dalle regole del tuo CCNL (Terziario, Metalmeccanico, Turismo o Logistica) e ti dicono cosa correggere, prima che il cliente se ne accorga.",
+    lead: "Carica l'export del tuo software paghe: ventitré controlli ricalcolano ogni voce dalle regole del tuo CCNL (Terziario, Metalmeccanico, Turismo o Logistica) e ti dicono cosa correggere, prima che il cliente se ne accorga.",
     privacy: "I tuoi file restano su questo computer: i controlli girano in questa pagina e niente viene inviato. Puoi verificarlo staccando la rete dopo che la pagina si è aperta.",
     step1: "I tuoi file", step1sub: "File Excel (.xlsx) o CSV, così come escono dal software paghe.",
     dropMese: "Cedolini del mese", dropMeseSub: "Obbligatorio · trascinalo qui o tocca per sceglierlo",
@@ -78,12 +78,13 @@ const UI = {
     f_ritenute_anno_prec: "All'uscita: IRPEF trattenuta nei mesi prima", f_cuneo_anno_prec: "All'uscita: cuneo erogato nei mesi prima",
     f_ti_anno_prec: "All'uscita: trattamento integrativo dei mesi prima",
     f_assenza_trattenuta: "Retribuzione tolta per l'assenza", f_integrazione_datore: "Integrazione del datore (malattia, maternità)",
+    f_indennita_preavviso: "Indennità sostitutiva del preavviso (− se trattenuta)",
     f_ritenute_1001: "Ritenute IRPEF (codice 1001)", f_contributi_dipendente: "Contributi dei dipendenti",
   },
   en: {
     brand: "Payslip checks", eyebrow: "Four Italian CCNLs · before payslips go to the client",
     title: "Check this month's payslips",
-    lead: "Load the export from your payroll software: twenty-two checks recompute every item from your collective agreement's rules (retail, engineering, hospitality or logistics) and tell you what to fix, before the client notices.",
+    lead: "Load the export from your payroll software: twenty-three checks recompute every item from your collective agreement's rules (retail, engineering, hospitality or logistics) and tell you what to fix, before the client notices.",
     privacy: "Your files stay on this computer: the checks run in this page and nothing is sent. You can confirm it by going offline once the page has opened.",
     step1: "Your files", step1sub: "Excel (.xlsx) or CSV files, as they come out of the payroll software.",
     dropMese: "This month's payslips", dropMeseSub: "Required · drop it here or tap to choose it",
@@ -147,6 +148,7 @@ const UI = {
     f_ritenute_anno_prec: "At leaving: tax withheld in earlier months", f_cuneo_anno_prec: "At leaving: tax-wedge paid in earlier months",
     f_ti_anno_prec: "At leaving: allowance paid in earlier months",
     f_assenza_trattenuta: "Pay taken off for the absence", f_integrazione_datore: "Employer's top-up (sickness, maternity)",
+    f_indennita_preavviso: "Pay in lieu of notice (− if withheld)",
     f_ritenute_1001: "Income tax withheld (code 1001)", f_contributi_dipendente: "Employee contributions",
   },
 };
@@ -210,6 +212,7 @@ const CAMPI_CEDOLINI = [
   ["ti_anno_prec", false, ["trattamento integrativo anno", "ti erogato anno", "trattamento integrativo mesi precedenti"]],
   ["assenza_trattenuta", false, ["trattenuta assenza", "assenza", "giorni non lavorati", "trattenuta malattia"]],
   ["integrazione_datore", false, ["integrazione", "integrazione malattia", "integrazione azienda", "integrazione datore"]],
+  ["indennita_preavviso", false, ["indennità preavviso", "indennita preavviso", "indennità sostitutiva del preavviso", "mancato preavviso", "preavviso non lavorato"]],
 ].map(([key, required, aliases]) => ({ key, required, aliases }));
 const CAMPI_F24 = [
   ["cliente", true, ["azienda", "ditta", "client"]],

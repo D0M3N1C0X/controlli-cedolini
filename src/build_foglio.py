@@ -38,7 +38,9 @@ NUOVE = [("BQ", "malattia_dal", "data"), ("BR", "malattia_al", "data"), ("BS", "
          ("DA", "imponibile_fiscale_anno", "euro"), ("DB", "giorni_lavoro_anno", "intero"),
          ("DC", "ritenute_anno_prec", "euro"), ("DD", "cuneo_anno_prec", "euro"), ("DE", "ti_anno_prec", "euro"),
          # v2.2: il mese con un'assenza, retribuzione tolta e integrazione del datore di lavoro (C22)
-         ("DS", "assenza_trattenuta", "euro"), ("DT", "integrazione_datore", "euro")]
+         ("DS", "assenza_trattenuta", "euro"), ("DT", "integrazione_datore", "euro"),
+         # l'indennità sostitutiva del preavviso (C23), con il segno: + pagata dal datore, - trattenuta al dipendente
+         ("ED", "indennita_preavviso", "euro")]
 # Le regole per CCNL nel foglio CCNL: nome della colonna in config.CCNL, intestazione, formato
 REGOLE = [("mensilita", "Mensilità", "0"), ("scatti_max", "Scatti massimi", "0"),
           ("scatti_anni", "Anni per scatto", "0"), ("quattordicesima_senza_scatti", "14ª senza scatti (1 = sì)", "0"),
@@ -445,7 +447,8 @@ class Foglio:
             "C21 Conguaglio",
             "Retribuzione tolta per l'assenza", "Integrazione del datore", "CCNL", "Imponibile di un mese normale",
             "Reddito presunto normale", "Netto normale", "Quota del netto garantita", "Netto garantito",
-            "Netto prima delle altre trattenute", "Integrazione lorda attesa", "C22 Integrazione"]
+            "Netto prima delle altre trattenute", "Integrazione lorda attesa", "C22 Integrazione",
+            "Indennità di preavviso", "Indennità di preavviso attesa", "C23 Indennità di preavviso"]
         header(ws, 4, heads, height=44)
         widths(ws, {**{col(k): 11 for k in range(1, len(heads) + 1)}, "C": 19, "G": 14})
         first = 5
@@ -542,7 +545,7 @@ class Foglio:
                                 f'+COUNTIF(BM{i},"ERRORE")+COUNTIF(BP{i},"ERRORE")+COUNTIF(CM{i},"ERRORE")'
                                 f'+COUNTIF(CO{i},"ERRORE")+COUNTIF(CQ{i},"ERRORE")+COUNTIF(CU{i},"ERRORE")'
                                 f'+COUNTIF(CX{i},"ERRORE")+COUNTIF(DJ{i},"ERRORE")+COUNTIF(DR{i},"ERRORE")'
-                                f'+COUNTIF(EC{i},"ERRORE")'),
+                                f'+COUNTIF(EC{i},"ERRORE")+COUNTIF(EF{i},"ERRORE")'),
                 bold=True)
             # C11: dodicesimi dal 1° gennaio (13ª) e dal 1° luglio (14ª); il mese di assunzione conta se ha almeno
             # "giorni_mese" giorni di servizio
@@ -592,7 +595,13 @@ class Foglio:
             put(ws, f"BO{i}", g(f'IF(OR(AZ{i}="",AND(TRIM(BA{i})<>"dimissioni",TRIM(BA{i})<>"licenziamento")),"",'
                                 f'IFERROR(INDEX({R_["preavviso"]},{chiave},'
                                 f'IF(TRIM(BA{i})="licenziamento",3,0)+IF(BN{i}<5,1,IF(BN{i}<10,2,3))),""))'))
-            put(ws, f"BP{i}", g(f'IF(OR(BO{i}="",BB{i}=""),"OK",IF(BB{i}<BO{i},"ERRORE","OK"))'))
+            # C14 vale solo senza indennità sul cedolino; con l'indennità, il conto è di C23
+            put(ws, f"BP{i}", g(f'IF(OR(BO{i}="",BB{i}="",ED{i}<>""),"OK",IF(BB{i}<BO{i},"ERRORE","OK"))'))
+            # C23: i giorni non dati per la retribuzione dell'anno / 12 / 30, ratei compresi; - nelle dimissioni
+            annua = f'(BF{i}*{rg("mensilita")}-IF({rg("quattordicesima_senza_scatti")}=1,K{i},0))'
+            put(ws, f"EE{i}", g(f'IF(OR(BO{i}="",BB{i}=""),"",IF(TRIM(BA{i})="licenziamento",1,-1)'
+                                f'*ROUND(MAX(0,BO{i}-BB{i})*({annua}/12/30),2))'), fmt=NUM2)
+            put(ws, f"EF{i}", g(f'IF(OR(ED{i}="",EE{i}=""),"OK",IF(ABS(ED{i}-EE{i})>{tol},"ERRORE","OK"))'))
             # C15-C17: indennità INPS anticipate e carenza, sulla retribuzione del mese prima
             fine_mese = f"EOMONTH({mese},0)"
             put(ws, f"CG{i}", g(f'IFERROR(INDEX({R_["ag_ret"]},MATCH(A{i},{R_["ag_m"]},0)),"")'), color=GREEN, fmt=NUM2)
@@ -716,9 +725,14 @@ class Foglio:
                 if t.tipo_cessazione in C.PREAVVISO:
                     self.check("Mese", f"{t.matricola} preavviso minimo", float(R.preavviso_minimo(
                         t.tipo_cessazione, str(t.livello), assunto, ces, kc)), f"Mese!BO{i}")
-                self.check("Mese", f"{t.matricola} coefficiente ISTAT", R.coefficiente_tfr(ces), f"Mese!CV{i}")
-                self.check("Mese", f"{t.matricola} TFR atteso", R.tfr_liquidato(
-                    float(t.fondo_tfr_prec), float(t.tfr_quote_anno), float(t.imponibile_anno), ces), f"Mese!CW{i}")
+                    self.check("Mese", f"{t.matricola} indennità di preavviso attesa", R.indennita_preavviso(
+                        t.tipo_cessazione, str(t.livello), assunto, ces, float(t.preavviso_giorni), mensile, t.scatti,
+                        kc), f"Mese!EE{i}")
+                if str(t.tfr_liquidato).strip():           # C19, come in Python, solo con i dati del TFR
+                    self.check("Mese", f"{t.matricola} coefficiente ISTAT", R.coefficiente_tfr(ces), f"Mese!CV{i}")
+                    self.check("Mese", f"{t.matricola} TFR atteso", R.tfr_liquidato(
+                        float(t.fondo_tfr_prec), float(t.tfr_quote_anno), float(t.imponibile_anno), ces),
+                        f"Mese!CW{i}")
                 if str(t.imponibile_fiscale_anno).strip():
                     cg = R.conguaglio_cessazione(float(t.imponibile_fiscale_anno), int(float(t.giorni_lavoro_anno)),
                                                  float(t.ritenute_anno_prec), float(t.cuneo_anno_prec),
@@ -765,20 +779,21 @@ class Foglio:
                     self.check("Mese", f"{t.matricola} {name} atteso", a.loc[k, name], f"Mese!{letter}{i}")
         esito_rule(ws, f"AK{first}:AS{last}")
         esito_rule(ws, f"AY{first}:AY{last}")
-        for letter in ("BK", "BM", "BP", "CM", "CO", "CQ", "CU", "CX", "DJ", "DR", "EC"):
+        for letter in ("BK", "BM", "BP", "CM", "CO", "CQ", "CU", "CX", "DJ", "DR", "EC", "EF"):
             esito_rule(ws, f"{letter}{first}:{letter}{last}")
         E = lambda letter: f"Mese!${letter}${first}:${letter}${last}"
         self.R.update({"s_cli": E("B"), "s_m": E("A"), "s_irpef": E("Q"), "s_inps": E("O"), "s_err": E("AT"),
                        **{f"s_{c}": E(letter) for c, letter in zip(
                            ["C01", "C02", "C03", "C04", "C05", "C06", "C07", "C09", "C10", "C11", "C12", "C13", "C14",
-                            "C15", "C16", "C17", "C18", "C19", "C20", "C21", "C22"],
+                            "C15", "C16", "C17", "C18", "C19", "C20", "C21", "C22", "C23"],
                            ["AK", "AL", "AM", "AN", "AO", "AP", "AQ", "AR", "AS", "AY", "BK", "BM", "BP",
-                            "CM", "CO", "CQ", "CU", "CX", "DJ", "DR", "EC"], strict=True)}})
+                            "CM", "CO", "CQ", "CU", "CX", "DJ", "DR", "EC", "EF"], strict=True)}})
         # each Python finding must be an ERRORE in the sheet, and every other row OK
         an = self.o["anomalie"]
         colonna = {"C01": "AK", "C02": "AL", "C03": "AM", "C04": "AN", "C05": "AO", "C06": "AP", "C07": "AQ", "C09": "AR",
                    "C10": "AS", "C11": "AY", "C12": "BK", "C13": "BM", "C14": "BP", "C15": "CM", "C16": "CO",
-                   "C17": "CQ", "C18": "CU", "C19": "CX", "C20": "DJ", "C21": "DR", "C22": "EC"}
+                   "C17": "CQ", "C18": "CU", "C19": "CX", "C20": "DJ", "C21": "DR", "C22": "EC",
+                   "C23": "EF"}
         trovate = set(zip(an["controllo"], an["matricola"], strict=True))
         for k, t in enumerate(m.itertuples(index=False)):
             for codice, letter in colonna.items():
@@ -786,7 +801,7 @@ class Foglio:
                     esito = "ERRORE" if (codice, t.matricola) in trovate else "OK"
                     self.check("Mese", f"{t.matricola} {codice}", esito, f"Mese!{letter}{first + k}")
         ws.freeze_panes = "D5"
-        ws.auto_filter.ref = f"A4:EC{last}"
+        ws.auto_filter.ref = f"A4:EF{last}"
 
     # ---- IRPEF in formula: le stesse operazioni, nello stesso ordine, delle funzioni di regole.py ----------------
     def lorda(self, x: str, periodi: int) -> str:
@@ -959,7 +974,7 @@ class Foglio:
     def leggimi(self, ws, names) -> None:
         widths(ws, {"A": 3, "B": 22, "C": 100})
         put(ws, "B2", "Controlli cedolini", bold=True, size=18)
-        put(ws, "B3", "Ventidue controlli sui cedolini del mese, prima dell'invio al cliente: Terziario, Metalmeccanico, "
+        put(ws, "B3", "Ventitré controlli sui cedolini del mese, prima dell'invio al cliente: Terziario, Metalmeccanico, "
             "Turismo e Logistica",
             color=MUTED, size=12)
         put(ws, "B5", "Come si usa", bold=True, size=11)

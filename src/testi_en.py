@@ -95,6 +95,12 @@ CONTROLLI_EN = {
             "Recompute the top-up with the CCNL's rule (retail and services: net not below 75% from day 4 to 20 and "
             "100% after; engineering and logistics: full pay less the INPS benefit) and pay the difference next "
             "month"),
+    "C23": ("Pay in lieu of notice",
+            "At leaving, the allowance for notice days not given different from the pay of that period, 13th and "
+            "14th-month accruals included: paid by the employer on dismissal, withheld from the employee on "
+            "resignation",
+            "Recompute the allowance on the days missing from the CCNL minimum at a year's pay / 12 / 30 a day, and "
+            "pay or recover the difference with the final settlement"),
 }
 
 PRIORITA_EN = {"alta": "high", "media": "medium"}

@@ -131,6 +131,12 @@
    "descrizione": "Nel mese di malattia o maternità, integrazione sotto quella del CCNL: sul netto nel Terziario (il netto non sta sotto la quota garantita del netto normale), sul lordo nel Metalmeccanico e nella Logistica",
    "cosa_fare": "Ricalcolare l'integrazione con la regola del CCNL (Terziario: il netto non sotto il 75% dal 4° al 20° giorno e il 100% dopo; Metalmeccanico e Logistica: la retribuzione intera meno l'indennità INPS) e pagare la differenza nel mese dopo",
    "priorita": "alta"
+  },
+  "C23": {
+   "nome": "Indennità sostitutiva del preavviso",
+   "descrizione": "Alla cessazione, indennità per i giorni di preavviso non dati diversa dalla retribuzione del periodo (ratei di tredicesima e quattordicesima compresi): pagata dal datore nel licenziamento, trattenuta al dipendente nelle dimissioni",
+   "cosa_fare": "Ricalcolare l'indennità sui giorni che mancano al preavviso del CCNL, alla retribuzione dell'anno / 12 / 30 per giorno, ratei compresi, e pagare o recuperare la differenza con le competenze di fine rapporto",
+   "priorita": "alta"
   }
  },
  "en": {
@@ -264,6 +270,12 @@
    "nome": "Employer's top-up",
    "descrizione": "In a month of sickness or maternity, a top-up below the CCNL's: on net pay in retail and services (net not below the guaranteed share of normal net), on gross in engineering and logistics",
    "cosa_fare": "Recompute the top-up with the CCNL's rule (retail and services: net not below 75% from day 4 to 20 and 100% after; engineering and logistics: full pay less the INPS benefit) and pay the difference next month",
+   "priorita": "high"
+  },
+  "C23": {
+   "nome": "Pay in lieu of notice",
+   "descrizione": "At leaving, the allowance for notice days not given different from the pay of that period, 13th and 14th-month accruals included: paid by the employer on dismissal, withheld from the employee on resignation",
+   "cosa_fare": "Recompute the allowance on the days missing from the CCNL minimum at a year's pay / 12 / 30 a day, and pay or recover the difference with the final settlement",
    "priorita": "high"
   }
  }

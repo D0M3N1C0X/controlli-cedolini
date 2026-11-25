@@ -166,6 +166,7 @@ errori elencati in `errori_inseriti.csv`.
 | `tfr_liquidato` | euro | TFR lordo liquidato alla cessazione (F19-F22) |
 | `assenza_trattenuta` | euro | Nel mese di malattia o maternità, la retribuzione dei giorni di assenza tolta dal lordo (D31); vuoto se non c'è |
 | `integrazione_datore` | euro | Integrazione dell'indennità INPS pagata dall'azienda nel mese dell'assenza (C22) |
+| `indennita_preavviso` | euro | Alla cessazione, indennità sostitutiva del preavviso non dato, con il segno: + pagata dal datore nel licenziamento, − trattenuta al dipendente nelle dimissioni; vuota se il preavviso è dato per intero (C23) |
 
 | Evento | Significato |
 |---|---|
@@ -220,3 +221,4 @@ Servono a misurare i controlli: ogni errore deve essere trovato, e nient'altro d
 | `irpef` | C20 | Ritenuta con la tabella del 2025, ulteriore detrazione del cuneo non applicata, somma del cuneo non erogata |
 | `conguaglio` | C21 | Conguaglio alla cessazione con le detrazioni dell'anno intero, o non fatto |
 | `integrazione` | C22 | Integrazione del datore non pagata, o con le quote di un altro CCNL |
+| `indennita_preavviso` | C23 | Indennità sostitutiva del preavviso senza i ratei, o trattenuta nelle dimissioni con i giorni del licenziamento |

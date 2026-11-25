@@ -17,7 +17,7 @@ import pandas as pd
 import codice_fiscale
 import config as C
 import regole as R
-from controlli import ASSENZE, CONGUAGLIO, INTEGRAZIONE, TFR_USCITA
+from controlli import ASSENZE, CONGUAGLIO, INTEGRAZIONE, PREAVVISO_INDENNITA, TFR_USCITA
 
 LIVELLI = C.CCNL["terziario"]["livelli"]
 PESI_LIVELLO = C.CCNL["terziario"]["pesi"]
@@ -104,7 +104,7 @@ def cedolino(d: pd.Series, mese: str, rng: random.Random, residuo_prec: float, s
             "data_cessazione": "", "tipo_cessazione": "", "preavviso_giorni": "", "tredicesima": "",
             "quattordicesima": "", "ferie_liquidate": "",
             # assenze del mese, TFR e conguaglio alla cessazione: vuoti se non ci sono
-            **{c: "" for c in ASSENZE + TFR_USCITA + CONGUAGLIO + INTEGRAZIONE},
+            **{c: "" for c in ASSENZE + TFR_USCITA + CONGUAGLIO + INTEGRAZIONE + PREAVVISO_INDENNITA},
             "permessi_maturati": permessi, "permessi_goduti": permessi_goduti,
             "permessi_residuo": round(permessi_prec + permessi - permessi_goduti, 4)})
 
@@ -438,6 +438,51 @@ def clienti_v22(errori: list) -> tuple[list, pd.DataFrame, pd.DataFrame]:
     return ago, S, a
 
 
+def preavviso_non_dato(S: pd.DataFrame, errori: list) -> None:
+    """L'indennità sostitutiva del preavviso (C23), in fondo per non cambiare i casi già presenti: quattro uscite a
+    fine settembre con il preavviso non dato, in quattro CCNL. Due corrette (un licenziamento senza preavviso nel
+    Terziario, dimissioni con 10 giorni di preavviso nel Turismo, con la quattordicesima senza scatti), due con un
+    errore: l'indennità sulla sola retribuzione mensile, senza i ratei delle mensilità aggiuntive (Metalmeccanico), e
+    la trattenuta delle dimissioni calcolata con i giorni del licenziamento nella Logistica, dove per le dimissioni
+    sono la metà (F38)."""
+    uscita = R.ultimo_del_mese(C.MESE)
+    usati = {e["matricola"] for e in errori}
+    S["indennita_preavviso"] = S["indennita_preavviso"].astype(object)
+
+    def prendi(cliente: str) -> int:
+        return next(i for i in S.index if S.loc[i, "cliente"] == cliente and S.loc[i, "evento"] == ""
+                    and S.loc[i, "matricola"] not in usati and S.loc[i, "part_time"] == 1.0
+                    and S.loc[i, "data_assunzione"] < "2020-01-01")
+
+    def esce(cliente: str, tipo: str, giorni: int, errore: str = "") -> None:
+        i = prendi(cliente)
+        r = cessazione(S.loc[i].to_dict(), tipo, uscita, preavviso=giorni)
+        k, ass = ccnl(r), date.fromisoformat(r["data_assunzione"])
+        mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
+        v = R.indennita_preavviso(tipo, r["livello"], ass, uscita, giorni, mensile, r["scatti"], k)
+        if errore == "senza_ratei":
+            mancano = R.preavviso_minimo(tipo, r["livello"], ass, uscita, k) - giorni
+            v = R.centesimi(mancano * mensile / 30)
+        elif errore == "tabella":
+            v = -abs(R.indennita_preavviso("licenziamento", r["livello"], ass, uscita, giorni, mensile, r["scatti"],
+                                           k))
+        r["indennita_preavviso"] = f"{v:.2f}"
+        S.loc[i] = pd.Series(r)
+        usati.add(r["matricola"])
+        if errore:
+            nota = {"senza_ratei": "indennità sostitutiva del preavviso sulla sola retribuzione mensile, senza i "
+                                   "ratei di tredicesima",
+                    "tabella": "trattenuta per le dimissioni senza preavviso calcolata con i giorni del "
+                               "licenziamento"}[errore]
+            errori.append({"matricola": r["matricola"], "cliente": r["cliente"], "tipo": "indennita_preavviso",
+                           "nota": nota})
+
+    esce("A", "licenziamento", 0)
+    esce("E", "dimissioni", 10)
+    esce("D", "licenziamento", 0, "senza_ratei")
+    esce("F", "dimissioni", 10, "tabella")
+
+
 def main() -> None:
     rng = random.Random(C.SEED)
     # un secondo generatore per i dati aggiunti dopo (permessi, assenze, TFR): così i casi già presenti non cambiano
@@ -732,6 +777,7 @@ def main() -> None:
 
     ago2, S2, a2 = clienti_v22(errori)
     S = pd.concat([S, pd.DataFrame(nuovi), S2], ignore_index=True)
+    preavviso_non_dato(S, errori)
     ago += ago2
     a = pd.concat([a, a2], ignore_index=True)
     ced = pd.concat([pd.DataFrame(ago), S], ignore_index=True)

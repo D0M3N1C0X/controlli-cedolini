@@ -108,7 +108,40 @@ def test_tipo_di_uscita_con_spazi_o_maiuscole():
 
 def test_chi_lascia_prima_di_novembre_non_riceve_la_tranche(out):
     usciti = set(out["mese"].loc[out["mese"]["data_cessazione"] != "", "matricola"])
-    assert len(usciti) == 12            # 6 nei clienti del Terziario, 6 nei clienti D-F (v2.2)
+    assert len(usciti) == 16            # 6 nei clienti del Terziario, 6 nei clienti D-F (v2.2), 4 per C23
     assert usciti.isdisjoint(out["novembre"]["matricola"])
     # la tranche di novembre 2026 è del Terziario: i clienti degli altri CCNL non sono nel foglio
     assert set(out["novembre"]["cliente"]) == set(C.CLIENTI_V1)
+
+
+# ---- C23: l'indennità sostitutiva del preavviso ------------------------------------------------------------------
+
+def test_indennita_di_preavviso_con_i_ratei():
+    """Un licenziamento senza preavviso: 30 giorni del 4° livello oltre 10 anni (45 dal CCNL) = 45 giorni a 1/30 della
+    retribuzione dell'anno / 12. Con 14 mensilità è la mensile x 14/12 / 30 per giorno, non la mensile / 30."""
+    mensile = 2000.0
+    v = R.indennita_preavviso("licenziamento", "4", date(2010, 1, 10), date(2026, 9, 30), 0, mensile)
+    assert v == pytest.approx(round(45 * mensile * 14 / 12 / 30, 2))
+    # con il preavviso in parte dato, solo i giorni che mancano; nelle dimissioni, con il segno meno
+    assert R.indennita_preavviso("licenziamento", "4", date(2010, 1, 10), date(2026, 9, 30), 45, mensile) == 0
+    d = R.indennita_preavviso("dimissioni", "4", date(2010, 1, 10), date(2026, 9, 30), 10, mensile)
+    assert d == pytest.approx(-round(20 * mensile * 14 / 12 / 30, 2))
+
+
+def test_c14_tace_se_c_e_l_indennita_e_c23_la_controlla():
+    base = dict(tipo_cessazione="dimissioni", preavviso_giorni="15")
+    atteso = R.indennita_preavviso("dimissioni", "4", date(2015, 5, 4), date(2026, 9, 30), 15, 1900.0, 100.0)
+    assert atteso == pytest.approx(-round(15 * 1900 * 14 / 12 / 30, 2))
+    giusta = _riga(**base, indennita_preavviso=f"{atteso:.2f}")
+    assert _segnalazioni(giusta) == []
+    sbagliata = _riga(**base, indennita_preavviso=f"{-atteso:.2f}")          # il segno del licenziamento
+    assert [s[0] for s in _segnalazioni(sbagliata)] == ["C23"]
+    assert _segnalazioni(_riga(**base)) == [("C14", 30.0, 15.0)]             # senza indennità, è C14
+
+
+def test_errori_di_preavviso_inseriti_trovati(out):
+    an = out["anomalie"]
+    err = pd.read_csv(C.ERRORI, keep_default_na=False)
+    inseriti = set(err.loc[err["tipo"] == "indennita_preavviso", "matricola"])
+    assert len(inseriti) == 2
+    assert set(an.loc[an["controllo"] == "C23", "matricola"]) == inseriti

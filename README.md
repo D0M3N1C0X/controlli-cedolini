@@ -1,6 +1,6 @@
 <picture>
   <source media="(prefers-color-scheme: dark)" srcset="site-assets/cover-dark.png">
-  <img alt="Catch payroll errors before the client does: 67 of 67 planted errors found with no false alarms, 22 checks across four collective agreements, with their source in the agreement or INPS, three engines in agreement." src="site-assets/cover-light.png">
+  <img alt="Catch payroll errors before the client does: 69 of 69 planted errors found with no false alarms, 23 checks across four collective agreements, with their source in the agreement or INPS, three engines in agreement." src="site-assets/cover-light.png">
 </picture>
 
 <p align="center">
@@ -20,7 +20,7 @@
 
 An Italian payroll provider sends hundreds of payslips a month to its clients, and every mistake the client finds
 first costs money and trust: a minimum still at last year's rate, a seniority step not applied, social security on the
-wrong base, income tax withheld with last year's table, a sick employee's top-up forgotten. These **twenty-two checks
+wrong base, income tax withheld with last year's table, a sick employee's top-up forgotten. These **twenty-three checks
 run before the payslips go out**. Each one **recomputes the item from the rules of the client's collective agreement**
 (four CCNLs: Terziario for retail and services, Metalmeccanico for engineering industry, Turismo for bars and
 restaurants, Logistica for freight and forwarding), INPS and the 2026 income tax law, or compares it with last month
@@ -39,13 +39,13 @@ and with the F24 tax payment, so it does not depend on how the payroll software 
 
 | | |
 |---|---|
-| **67 flags on 182 payslips and 6 F24 payments**, 49 high priority. Each with the expected value, the value found and what to do. | **10 employees below the minimum:** basic pay stuck at the previous tranche of their agreement, or without the logistics equalisation element (EPA). €305.24 a month in all, plus arrears. |
+| **69 flags on 182 payslips and 6 F24 payments**, 51 high priority. Each with the expected value, the value found and what to do. | **10 employees below the minimum:** basic pay stuck at the previous tranche of their agreement, or without the logistics equalisation element (EPA). €305.24 a month in all, plus arrears. |
 | **Five contributions withheld at the wrong rate:** CIGS and the FIS share missing where the client averages more than 15 staff, CIGS taken where it averages fewer, and the extra 1% forgotten on pay above €4,685 a month. | **One F24 with €212.40 less in withholding tax** than the client's payslips add up to. |
-| **Twelve leavers in September**, with errors in the 13th and 14th month, untaken holiday, notice and three severance payments: a coefficient from the wrong month, the 17% substitute tax not deducted, the 0.50% left in. | **Absences, with reduced pay as in a real payslip:** sick pay based on 1/26 instead of × 14/12 / 30, INPS advanced to an industrial white-collar employee who has no right to it, 50% instead of the 80% bars and restaurants get, waiting days paid when not due or not paid when due, a top-up missing or at another agreement's rate, maternity pay without the accruals. |
+| **Sixteen leavers in September**, with errors in the 13th and 14th month, untaken holiday, notice, pay in lieu of notice (accruals left out, or a resignation charged at the dismissal rate) and three severance payments: a coefficient from the wrong month, the 17% substitute tax not deducted, the 0.50% left in. | **Absences, with reduced pay as in a real payslip:** sick pay based on 1/26 instead of × 14/12 / 30, INPS advanced to an industrial white-collar employee who has no right to it, 50% instead of the 80% bars and restaurants get, waiting days paid when not due or not paid when due, a top-up missing or at another agreement's rate, maternity pay without the accruals. |
 | **Other agreements' rules applied by mistake:** steps counted every three years where they are every two, a 15-day month counted where it takes more than 15, an extra holiday day after 10 years not accrued, the 14th month with seniority steps where it excludes them, untaken holiday at 1/26 where it is 1/22, notice of another grade. |
-| **Income tax, real rules:** one payslip still taxed at the 2025 table (35% instead of 33%), one without the €1,000 tax-wedge credit, one low earner without the tax-wedge payment; two leavers' year-end adjustments wrong, with a full year's credits or none at all. | **November 2026, retail and services:** €3,892.67 a month of higher minimums for those who stay; absorbable personal supplements cover €1,443.69, leaving **€2,448.98 a month** to pay. |
+| **Income tax, real rules:** one payslip still taxed at the 2025 table (35% instead of 33%), one without the €1,000 tax-wedge credit, one low earner without the tax-wedge payment; two leavers' year-end adjustments wrong, with a full year's credits or none at all. | **November 2026, retail and services:** €3,861.05 a month of higher minimums for those who stay; absorbable personal supplements cover €1,443.69, leaving **€2,417.36 a month** to pay. |
 
-## The twenty-two checks
+## The twenty-three checks
 
 | Code | Check | How |
 |---|---|---|
@@ -62,7 +62,7 @@ and with the F24 tax payment, so it does not depend on how the payroll software 
 | C11 | 13th and 14th month accruals | Twelfths from January (13th) and July (14th) against the months of service: a month counts with at least 15 days, or more than 15 in engineering and logistics; in hospitality part months add up |
 | C12 | 13th and 14th month paid | Monthly pay × twelfths earned / 12: in December from the accruals, on leaving up to the last day |
 | C13 | Untaken holiday | On leaving, monthly pay / 26 × days left (/ 22 in logistics) |
-| C14 | Notice period | Calendar days at least the agreement's minimum for grade, years of service and resignation or dismissal |
+| C14 | Notice period | Calendar days at least the agreement's minimum for grade, years of service and resignation or dismissal, when the payslip carries no pay in lieu of notice |
 | C15 | INPS sick pay | Last month's pay × monthly payments / 12 / 30, at 50% for days 4-20 and 66.66% for days 21-180; 80% in bars and restaurants; none for white-collar staff in industry |
 | C16 | Waiting days | The first 3 days, by the agreement's rule: in retail full for the year's first two sicknesses, then 66%, 50%, nothing from the fifth; in engineering 66% and 50% from the fourth short one; in hospitality only past 5 days |
 | C17 | INPS maternity pay | 80% of the same daily pay, for each day of leave in the month |
@@ -71,6 +71,7 @@ and with the F24 tax payment, so it does not depend on how the payroll software 
 | C20 | Income tax of the month (IRPEF) | 23% / 33% / 43% brackets scaled to the month, minus a twelfth of the employment credit and of the extra tax-wedge credit on the year's expected income; tax-wedge payment up to €20,000 and supplementary allowance up to €15,000 |
 | C21 | Income tax adjustment at leaving | The year's tax on taxable pay since January, credits and allowance in proportion to the days worked, minus what was already withheld or paid |
 | C22 | Employer's top-up | In a sickness or maternity month: on net pay in retail (net not below 75% of a normal month's net for days 4-20, 100% after) and in hospitality maternity; on gross in engineering and logistics (INPS plus top-up = full pay) |
+| C23 | Pay in lieu of notice | Notice days not given × a year's pay / 12 / 30, 13th and 14th-month accruals included: paid by the employer on dismissal, withheld from the employee on resignation |
 
 ## See it run
 
@@ -92,7 +93,7 @@ are read as they are, and every flag comes with what to do, ready to download in
 
 ## How far you can trust it
 
-- **On the planted errors:** 67 found out of 67, no false alarms, and no flag on the legitimate cases (hires in the
+- **On the planted errors:** 69 found out of 69, no false alarms, and no flag on the legitimate cases (hires in the
   month, declared overtime, a move to part-time, correct leavers in every agreement, a hospitality leaver whose part
   months add up to a twelfth, a sickness on the fifth event with no waiting days, an exempt one with them, an
   engineering sickness paid in full by the employer, maternity leaves, a high earner with the extra 1%). This shows the checks do what they claim, not that
@@ -100,7 +101,7 @@ are read as they are, and every flag comes with what to do, ready to download in
 - **On 1,100 random alterations** of a correct payslip, any item by any amount: above the one-cent tolerance, all are
   found.
 - **Rules against statistics:** an anomaly detector that does not know the agreement, comparing each payslip with the
-  same client's, finds 27 wrong payslips out of 63, with 14 false alarms; the rules find 63 of 63, with none.
+  same client's, finds 29 wrong payslips out of 65, with 15 false alarms; the rules find 65 of 65, with none.
   It only sees errors that move a ratio (contributions, severance, change in net pay, leavers), never minimums, steps,
   records, accruals, income tax, absences or leave hours.
 - **The limit, narrowed by C10:** a *coherent* error passes every arithmetic check. A grade-4 employee entered at
@@ -124,8 +125,8 @@ are read as they are, and every flag comes with what to do, ready to download in
   checksum: the employer's 23.81% and the employee's 9.19% make the 33% pension rate, and twelve monthly severance
   accruals match its annual pay / 13.5 to the cent when pay is constant
   ([report, section 6](report/rapporto.md#6-il-ponte-con-la-trasparenza-retributiva-e-il-costo-del-lavoro)).
-- **Three engines, one answer:** the sheet is checked against Python on 1,682 values and recalculated with
-  LibreOffice in CI; the browser tool is checked against Python on 3,909 values, including half-cent alterations of
+- **Three engines, one answer:** the sheet is checked against Python on 1,741 values and recalculated with
+  LibreOffice in CI; the browser tool is checked against Python on 3,991 values, including half-cent alterations of
   absences, top-ups, severance and income tax, and Italian file formats. The sheet's reconciliation uses [excel-twin](https://github.com/D0M3N1C0X/excel-twin).
 
 ## The judgement calls
@@ -156,8 +157,9 @@ The full list is in [docs/decisioni.md](docs/decisioni.md).
 - **Four agreements, white-collar staff:** blue-collar workers and drivers have other sick-pay bases and notice rules
   and are not in the sample; maternity top-ups are checked only where the text was read (retail, hospitality); long
   sicknesses past the first period (122 days in engineering, 3 months in logistics) need a manual recount. The
-  December year-end adjustment, regional and municipal add-on taxes, family credits, the pay in lieu of notice and the
-  separate taxation of severance are not checked. Income tax is checked in ordinary months and at leaving.
+  December year-end adjustment, regional and municipal add-on taxes, family credits, and the contributions and
+  separate taxation of severance and of pay in lieu of notice are not checked; pay in lieu of notice is checked on
+  ordinary pay, without commissions or bonuses averaged over three years. Income tax is checked in ordinary months and at leaving.
 - **Social security:** the FIS reduction for small employers, bilateral funds other than the FIS and contribution
   reliefs are not modelled.
 - **Sources, at the closed month (October 2026):** every dated parameter says how long it holds, and a test stops the
@@ -190,7 +192,7 @@ node tests/js/check_controlli.mjs   # the browser tool against Python
 ├── src/
 │   ├── config.py            parametri e soglie
 │   ├── regole.py            le regole del contratto, scritte una volta
-│   ├── controlli.py         i ventidue controlli, la tranche di novembre, la valutazione
+│   ├── controlli.py         i ventitré controlli, la tranche di novembre, la valutazione
 │   ├── robustezza.py        alterazioni casuali e l'errore coerente
 │   ├── anno.py              un anno intero e nove errori di configurazione
 │   ├── ponte.py             verso il kit della trasparenza e il modello del costo del lavoro
