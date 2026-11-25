@@ -29,7 +29,9 @@ def test_readme_aggiornato(out):
     import anno
     a = anno.run()
     e = a["errori"]
-    attese += [f"January-December 2026 ({int(a['mesi']['cedolini'].sum()):,} monthly", f"payslips and {len(a['extra'])} separate",
-               f"the {int((e['tipo'] == 'regola').sum())} rule errors", f"Of the {int((e['tipo'] == 'anagrafica').sum())} master-data"]
+    regola, anagrafica = int((e["tipo"] == "regola").sum()), int((e["tipo"] == "anagrafica").sum())
+    attese += [f"January-December 2026 ({int(a['mesi']['cedolini'].sum()):,} monthly",
+               f"payslips and {len(a['extra'])} separate",
+               f"the {regola} rule errors", f"Of the {anagrafica} master-data"]
     assert a["segnalazioni"].empty
     assert not [a for a in attese if a not in readme]
