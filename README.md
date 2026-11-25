@@ -107,6 +107,15 @@ are read as they are, and every flag comes with what to do, ready to download in
   grade 5, with the payslip recomputed from scratch, adds up in every item and takes home €77.98 less a month. If the
   error starts with a change from last month, C10 finds it; it stays invisible only if it was wrong from the hiring
   date, where the client's documents are the check. A test keeps this limit true.
+- **A whole year, and errors that stay coherent:** the employees run through January-December 2026 (2,102 monthly
+  payslips and 332 separate 13th and 14th-month payslips, with every pay rise in the month it takes effect, steps
+  coming due, three promotions and a move to part-time) with no flag at all. Then nine configuration errors of the
+  payroll software, each recomputed downstream so every total still adds up: the 6 rule errors (an agreement's June
+  rise not loaded, a missing redundancy-fund rate, 13 monthly payments instead of 14, last year's tax bands, a step
+  paid a month early, 22 days' holiday instead of 26) are all flagged from their first month and every month after.
+  Of the 3 master-data errors, a wrong grade from the hiring date is never flagged; a part-time or a top-up changed
+  without a letter is flagged once, by C10, in the month it changes, and never again
+  ([report, section 5](report/rapporto.md#5-un-anno-intero-e-gli-errori-di-configurazione)).
 - **Three engines, one answer:** the sheet is checked against Python on 1,682 values and recalculated with
   LibreOffice in CI; the browser tool is checked against Python on 3,909 values, including half-cent alterations of
   absences, top-ups, severance and income tax, and Italian file formats. The sheet's reconciliation uses [excel-twin](https://github.com/D0M3N1C0X/excel-twin).
@@ -171,6 +180,7 @@ node tests/js/check_controlli.mjs   # the browser tool against Python
 │   ├── regole.py            le regole del contratto, scritte una volta
 │   ├── controlli.py         i ventidue controlli, la tranche di novembre, la valutazione
 │   ├── robustezza.py        alterazioni casuali e l'errore coerente
+│   ├── anno.py              un anno intero e nove errori di configurazione
 │   ├── statistica.py        regole contro un rilevatore statistico
 │   ├── build_foglio.py      il foglio di calcolo con le formule
 │   ├── build_rapporto.py    il rapporto

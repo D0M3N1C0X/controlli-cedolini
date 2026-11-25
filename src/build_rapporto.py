@@ -4,6 +4,7 @@ responsabile del team. Ogni numero viene da controlli.run() e da robustezza.py.
 """
 import pandas as pd
 
+import anno
 import config as C
 import controlli
 import robustezza
@@ -93,8 +94,9 @@ def fatti(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     }
 
 
-def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
+def write(o: dict, rob: pd.DataFrame, coerente: dict, an_: dict | None = None) -> dict:
     f = fatti(o, rob, coerente)
+    an_ = anno.run() if an_ is None else an_
     an, n = o["anomalie"], o["riepilogo_novembre"]
     L = []
     add = L.append
@@ -126,6 +128,12 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
         f"restano {euro(f['nov_da_pagare'])} al mese, {euro(f['nov_annuo'], 0)} l'anno su 14 mensilità.")
     add(f"- **I controlli trovano ogni alterazione sopra il centesimo:** tutte le {num(f['prove_sopra'], 0)} delle "
         f"{num(f['prove'], 0)} prove casuali che superano il centesimo (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).")
+    e = an_["errori"]
+    reg = e[e["tipo"] == "regola"]
+    add(f"- **Su un anno intero, nove errori di configurazione del software paghe** (sezione 5): i "
+        f"{len(reg)} errori di regola sono segnalati dal primo mese e in ogni mese dopo; dei "
+        f"{len(e) - len(reg)} di anagrafica, uno sbagliato dall'assunzione non lo vede nessun controllo, gli altri due "
+        "li vede C10 una volta sola. L'anno pulito non dà falsi allarmi.")
     add("")
 
     add("## 1. Le segnalazioni, cedolino per cedolino")
@@ -242,7 +250,9 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
         f"dall'assunzione: lì serve il confronto con i documenti del cliente, lettera di assunzione e mansioni.")
     add("")
 
-    add("## 5. Come lo userei in un team payroll")
+    sezione_anno(add, an_)
+
+    add("## 6. Come lo userei in un team payroll")
     add("")
     add("1. **Prima dell'invio, ogni mese:** l'export del software paghe entra nello script o nel foglio; si guardano "
         "solo le righe segnalate, a partire dalla priorità alta.")
@@ -254,7 +264,7 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
         "due mesi, per tarare la soglia di C07.")
     add("")
 
-    add("## 6. Metodo e limiti")
+    add("## 7. Metodo e limiti")
     add("")
     add("- **Due motori, una risposta.** Gli stessi controlli sono in Python e in formule nel foglio; il foglio "
         "Riconciliazione confronta ogni formula con Python, e la CI ricalcola il foglio con LibreOffice.")
@@ -265,11 +275,75 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     add("- **Quattro CCNL, impiegati.** Ogni cliente ha il suo contratto; nei dati d'esempio ci sono solo impiegati: "
         "operai e personale viaggiante hanno altre regole di malattia e preavviso e non sono controllati.")
     add("- **Un mese alla volta.** Ogni controllo guarda il mese e quello prima: le quote di malattia valgono per i "
-        "primi periodi, e un evento lungo va ricontato a mano (C22).")
+        "primi periodi, e un evento lungo va ricontato a mano (C22). L'anno della sezione 5 mette in fila dodici "
+        "mesi, ma ogni mese è ancora controllato solo col precedente.")
     add("")
     C.REPORT.mkdir(exist_ok=True)
     (C.REPORT / "rapporto.md").write_text("\n".join(L) + "\n", encoding="utf-8")
     return f
+
+
+def sezione_anno(add, a: dict) -> None:
+    """Sezione 5: l'anno intero e gli errori di configurazione (anno.py)."""
+    mesi, e = a["mesi"], a["errori"]
+    ced, segn = int(mesi["cedolini"].sum()), len(a["segnalazioni"])
+    extra = len(a["extra"])
+    add("## 5. Un anno intero e gli errori di configurazione")
+    add("")
+    add(f"**Perché.** Gli errori inseriti e le prove casuali toccano una voce di un cedolino. Un software paghe "
+        "configurato male sbaglia la regola, per tutti i dipendenti del cliente e per tutti i mesi, e ricalcola a valle: "
+        "lordo, contributi, imponibile, IRPEF e netto tornano fra loro. Per vedere cosa succede, i dipendenti "
+        f"dell'anagrafica passano un anno intero, gennaio-dicembre 2026: {num(ced, 0)} cedolini mensili e "
+        f"{extra} cedolini a parte di quattordicesima (luglio) e tredicesima (dicembre), con le tranche dei minimi "
+        "nel mese in cui entrano in vigore (Metalmeccanico e Turismo a giugno, Terziario a novembre), gli scatti che "
+        "maturano, ferie, permessi, straordinari, tre passaggi di livello e una trasformazione in part-time.")
+    add("")
+    add(f"**L'anno pulito: {segn} segnalazioni su {num(ced + extra, 0)} cedolini.** Nessun falso allarme in "
+        "nessun mese, compresi giugno e novembre, quando cambiano i minimi. Ma i cedolini li genera lo stesso codice che scrive le regole: dice che i "
+        "controlli non inventano errori dove le regole sono rispettate, non quanti falsi allarmi darebbe un export "
+        "reale. Gli eventi contano: se i quattro eventi legittimi non fossero registrati sul cedolino, "
+        f"le segnalazioni sarebbero {len(a['senza_evento'])} "
+        f"({', '.join(f'{c} {n}' for c, n in a['senza_evento']['controllo'].value_counts().sort_index().items())}), "
+        "ed è giusto: un cambio di livello o di orario senza un documento è una domanda da fare al cliente.")
+    add("")
+    add("**Nove errori di configurazione.** Ognuno su un cliente o su un dipendente, da un mese a dicembre. "
+        "*Esposti*: i cedolini che l'errore cambia (mensili e mensilità aggiuntive); *segnalati*: quelli su cui almeno un "
+        "controllo scatta. L'effetto è la differenza nell'anno rispetto all'anno pulito, dal lato del dipendente.")
+    add("")
+    add(table(["Errore", "Tipo", "Cliente", "Dal", "Esposti", "Segnalati", "Prima segnalazione", "Controlli",
+               "Netto nell'anno", "Contributi"],
+              [[f"{r.codice} {r.titolo}", r.tipo, r.cliente, r.dal, r.esposti, r.segnalati,
+                r.primo_segnalato or "mai", r.controlli or "nessuno", euro(r.netto_anno), euro(r.contributi_anno)]
+               for r in e.itertuples(index=False)], "lllrrrllrr"))
+    add("")
+    regola, anag = e[e["tipo"] == "regola"], e[e["tipo"] == "anagrafica"]
+    subito = int((regola["primo_segnalato"] == regola["primo_esposto"]).sum())
+    k = e.set_index("codice")
+    add(f"**Un errore nella regola si vede subito, e ogni mese.** {subito} dei {len(regola)} errori di regola sono "
+        "segnalati nel primo mese in cui cambiano un cedolino, e poi in ogni mese dopo, perché i controlli ricalcolano "
+        "la regola da capo e non si fidano del software. Quanti cedolini espongono dipende dall'errore, non dai "
+        f"controlli: gli scaglioni IRPEF del 2025 toccano solo chi supera i 28.000 € l'anno ({k.loc['K4', 'esposti']} "
+        f"cedolini su {k.loc['K4', 'dipendenti'] * 12}), lo scatto anticipato solo il mese prima della maturazione "
+        f"({k.loc['K5', 'esposti']} cedolini). Le ferie a 22 giorni non cambiano il netto, ma a dicembre il cliente B ha "
+        f"{num(-k.loc['K6', 'ferie_dicembre'], 0)} giorni di ferie in meno nei residui dei suoi {k.loc['K6', 'dipendenti']} "
+        "dipendenti: quattro a testa, meno per chi è entrato nell'anno. Quello che sfugge sono le mensilità aggiuntive costruite su una base "
+        f"sbagliata: C12 rifà il conto sul tabellare del cedolino, e quel tabellare l'ha già segnalato C01. Con il CCNL "
+        f"a 13 mensilità (K3) la quattordicesima di luglio non viene pagata affatto ({euro(-k.loc['K3', 'mensilita_aggiuntive'])} "
+        "nel cliente A): nessun controllo guarda un cedolino che non c'è, ma C11 vede i ratei di quattordicesima a zero "
+        "da gennaio.")
+    add("")
+    add(f"**Un errore nell'anagrafica si vede una volta, o mai.** Il livello sbagliato dall'assunzione (K7) espone "
+        f"{k.loc['K7', 'esposti']} cedolini e non ne segnala nessuno: {euro(k.loc['K7', 'netto_anno'])} netti in più "
+        "nell'anno e nessun controllo lo vede, perché ogni voce torna con il livello inserito. Il part-time inserito a "
+        f"giugno senza lettera (K8) e il superminimo assorbito ma non assorbibile (K9) li trova C10, ma una volta sola, "
+        "nel mese in cui l'anagrafica cambia: dal mese dopo il dato sbagliato è la nuova base e tutto torna. Se quella "
+        "segnalazione si chiude senza guardare la lettera di assunzione, l'errore resta per sempre: "
+        f"{euro(-k.loc['K8', 'netto_anno'])} netti in meno in sette mesi per K8. Per questo C10 è ad alta priorità.")
+    add("")
+    add("**Cosa ne segue.** I controlli aritmetici bastano per le regole: tranche, aliquote, scaglioni, divisori, "
+        f"ferie. Per l'anagrafica ({len(anag)} errori su {len(e)}) serve un confronto con i documenti almeno una volta: "
+        "all'assunzione, a ogni segnalazione C10, e a campione una volta l'anno.")
+    add("")
 
 
 def main() -> None:

@@ -13,6 +13,7 @@
 - **L'F24 del cliente C ha 212,40 € di ritenute in meno** della somma dei cedolini: va integrato prima della scadenza del versamento.
 - **Dal 1° novembre 2026 i minimi del Terziario salgono:** 3.892,67 € al mese per 118 dipendenti. Il superminimo assorbibile ne copre 1.443,69 € in 44 casi; restano 2.448,98 € al mese, 34.286 € l'anno su 14 mensilità.
 - **I controlli trovano ogni alterazione sopra il centesimo:** tutte le 855 delle 1.100 prove casuali che superano il centesimo (sezione 4). Un errore coerente lo vedono solo se nasce da un cambio rispetto al mese prima (C10).
+- **Su un anno intero, nove errori di configurazione del software paghe** (sezione 5): i 6 errori di regola sono segnalati dal primo mese e in ogni mese dopo; dei 3 di anagrafica, uno sbagliato dall'assunzione non lo vede nessun controllo, gli altri due li vede C10 una volta sola. L'anno pulito non dà falsi allarmi.
 
 ## 1. Le segnalazioni, cedolino per cedolino
 
@@ -200,18 +201,44 @@ Il rinnovo del CCNL Terziario del 22 marzo 2024 alza i minimi a novembre 2026 e 
 
 **Il limite, e come C10 lo restringe.** Un errore coerente passa i controlli aritmetici: il dipendente A003 è assunto al 4° livello; inserito al 5° e ricalcolato da capo, il cedolino torna in ogni voce e prende 77,98 € netti in meno al mese. Se l'errore nasce da un cambio rispetto al mese prima, senza un evento che lo spieghi, lo trova C10: i due errori di anagrafica inseriti (un livello, un superminimo azzerato) sono segnalati. Resta invisibile solo se è sbagliato fin dall'assunzione: lì serve il confronto con i documenti del cliente, lettera di assunzione e mansioni.
 
-## 5. Come lo userei in un team payroll
+## 5. Un anno intero e gli errori di configurazione
+
+**Perché.** Gli errori inseriti e le prove casuali toccano una voce di un cedolino. Un software paghe configurato male sbaglia la regola, per tutti i dipendenti del cliente e per tutti i mesi, e ricalcola a valle: lordo, contributi, imponibile, IRPEF e netto tornano fra loro. Per vedere cosa succede, i dipendenti dell'anagrafica passano un anno intero, gennaio-dicembre 2026: 2.102 cedolini mensili e 332 cedolini a parte di quattordicesima (luglio) e tredicesima (dicembre), con le tranche dei minimi nel mese in cui entrano in vigore (Metalmeccanico e Turismo a giugno, Terziario a novembre), gli scatti che maturano, ferie, permessi, straordinari, tre passaggi di livello e una trasformazione in part-time.
+
+**L'anno pulito: 0 segnalazioni su 2.434 cedolini.** Nessun falso allarme in nessun mese, compresi giugno e novembre, quando cambiano i minimi. Ma i cedolini li genera lo stesso codice che scrive le regole: dice che i controlli non inventano errori dove le regole sono rispettate, non quanti falsi allarmi darebbe un export reale. Gli eventi contano: se i quattro eventi legittimi non fossero registrati sul cedolino, le segnalazioni sarebbero 5 (C07 1, C10 4), ed è giusto: un cambio di livello o di orario senza un documento è una domanda da fare al cliente.
+
+**Nove errori di configurazione.** Ognuno su un cliente o su un dipendente, da un mese a dicembre. *Esposti*: i cedolini che l'errore cambia (mensili e mensilità aggiuntive); *segnalati*: quelli su cui almeno un controllo scatta. L'effetto è la differenza nell'anno rispetto all'anno pulito, dal lato del dipendente.
+
+| Errore | Tipo | Cliente | Dal | Esposti | Segnalati | Prima segnalazione | Controlli | Netto nell'anno | Contributi |
+|---|---|---|---:|---:|---:|---|---|---:|---:|
+| K1 Tranche di giugno non caricata | regola | E | 2026-06 | 142 | 111 | 2026-06 | C01 | −3.841,47 € | −431,53 € |
+| K2 CIGS non applicata | regola | F | 2026-01 | 240 | 240 | 2026-01 | C03 | 911,98 € | −1.453,97 € |
+| K3 CCNL a 13 mensilità invece di 14 | regola | A | 2026-01 | 233 | 215 | 2026-01 | C04, C11, C20 | −29.227,51 € | 0,00 € |
+| K4 Scaglioni IRPEF del 2025 | regola | B | 2026-01 | 79 | 79 | 2026-01 | C20 | −228,33 € | 0,00 € |
+| K5 Scatto pagato un mese prima | regola | C | 2026-01 | 13 | 11 | 2026-02 | C02 | 170,32 € | 21,85 € |
+| K6 Ferie a 22 giorni invece di 26 | regola | B | 2026-01 | 881 | 881 | 2026-01 | C05 | 0,00 € | 0,00 € |
+| K7 Livello sbagliato dall'assunzione | anagrafica | B | 2025-12 | 14 | 0 | mai | nessuno | 1.877,98 € | 237,50 € |
+| K8 Part-time inserito a giugno senza lettera | anagrafica | C | 2026-06 | 9 | 1 | 2026-06 | C10 | −3.234,18 € | −348,23 € |
+| K9 Superminimo assorbito ma non assorbibile | anagrafica | A | 2026-11 | 3 | 1 | 2026-11 | C10 | −68,82 € | −5,86 € |
+
+**Un errore nella regola si vede subito, e ogni mese.** 6 dei 6 errori di regola sono segnalati nel primo mese in cui cambiano un cedolino, e poi in ogni mese dopo, perché i controlli ricalcolano la regola da capo e non si fidano del software. Quanti cedolini espongono dipende dall'errore, non dai controlli: gli scaglioni IRPEF del 2025 toccano solo chi supera i 28.000 € l'anno (79 cedolini su 888), lo scatto anticipato solo il mese prima della maturazione (13 cedolini). Le ferie a 22 giorni non cambiano il netto, ma a dicembre il cliente B ha 286 giorni di ferie in meno nei residui dei suoi 74 dipendenti: quattro a testa, meno per chi è entrato nell'anno. Quello che sfugge sono le mensilità aggiuntive costruite su una base sbagliata: C12 rifà il conto sul tabellare del cedolino, e quel tabellare l'ha già segnalato C01. Con il CCNL a 13 mensilità (K3) la quattordicesima di luglio non viene pagata affatto (31.468,12 € nel cliente A): nessun controllo guarda un cedolino che non c'è, ma C11 vede i ratei di quattordicesima a zero da gennaio.
+
+**Un errore nell'anagrafica si vede una volta, o mai.** Il livello sbagliato dall'assunzione (K7) espone 14 cedolini e non ne segnala nessuno: 1.877,98 € netti in più nell'anno e nessun controllo lo vede, perché ogni voce torna con il livello inserito. Il part-time inserito a giugno senza lettera (K8) e il superminimo assorbito ma non assorbibile (K9) li trova C10, ma una volta sola, nel mese in cui l'anagrafica cambia: dal mese dopo il dato sbagliato è la nuova base e tutto torna. Se quella segnalazione si chiude senza guardare la lettera di assunzione, l'errore resta per sempre: 3.234,18 € netti in meno in sette mesi per K8. Per questo C10 è ad alta priorità.
+
+**Cosa ne segue.** I controlli aritmetici bastano per le regole: tranche, aliquote, scaglioni, divisori, ferie. Per l'anagrafica (3 errori su 9) serve un confronto con i documenti almeno una volta: all'assunzione, a ogni segnalazione C10, e a campione una volta l'anno.
+
+## 6. Come lo userei in un team payroll
 
 1. **Prima dell'invio, ogni mese:** l'export del software paghe entra nello script o nel foglio; si guardano solo le righe segnalate, a partire dalla priorità alta.
 2. **C07 diventa una domanda al cliente,** non un errore: se lo straordinario c'è, si registra l'evento e il mese dopo non torna.
 3. **Prima di ogni tranche contrattuale:** la tabella di novembre dice al cliente quanto costa l'aumento e chi assorbe, prima del cedolino e non dopo.
 4. **Il passo successivo** è collegarlo all'export reale e misurare quante segnalazioni sono giuste nei primi due mesi, per tarare la soglia di C07.
 
-## 6. Metodo e limiti
+## 7. Metodo e limiti
 
 - **Due motori, una risposta.** Gli stessi controlli sono in Python e in formule nel foglio; il foglio Riconciliazione confronta ogni formula con Python, e la CI ricalcola il foglio con LibreOffice.
 - **Contributi per posizione.** L'aliquota a carico del dipendente viene dalla media del semestre e dal settore del cliente (Parametri): va presa dalla sua posizione INPS, non stimata.
 - **Scatti al livello attuale.** Il CCNL non rivaluta gli scatti già maturati con il passaggio di livello: chi ha cambiato livello va controllato a mano.
 - **Quattro CCNL, impiegati.** Ogni cliente ha il suo contratto; nei dati d'esempio ci sono solo impiegati: operai e personale viaggiante hanno altre regole di malattia e preavviso e non sono controllati.
-- **Un mese alla volta.** Ogni controllo guarda il mese e quello prima: le quote di malattia valgono per i primi periodi, e un evento lungo va ricontato a mano (C22).
+- **Un mese alla volta.** Ogni controllo guarda il mese e quello prima: le quote di malattia valgono per i primi periodi, e un evento lungo va ricontato a mano (C22). L'anno della sezione 5 mette in fila dodici mesi, ma ogni mese è ancora controllato solo col precedente.
 
