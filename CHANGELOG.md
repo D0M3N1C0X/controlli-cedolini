@@ -16,6 +16,12 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
   dall'assunzione non lo vede nessun controllo, part-time e superminimo cambiati senza lettera li vede C10 una volta
   sola. Risultati in `report/anno_errori.csv` e `report/anno_mesi.csv`.
 
+- **Il ponte con gli altri strumenti** (`src/ponte.py`, sezione 6 del rapporto): ogni voce del cedolino ha la sua
+  natura per la direttiva sulla trasparenza retributiva (fissa e continuativa, variabile, esclusa); l'anno diventa un
+  estratto nel formato del kit della trasparenza (`data/ponte/estratto_ptk.csv`), su cui il codice del kit, al commit
+  fissato, ricalcola nella CI gli stessi divari dell'articolo 9 (`tools/ptk_indicatori.py`). Divari per categoria
+  con i livelli del CCNL. INPS e TFR confrontati con il config.py di workforce-cost-model copiato a checksum fissato.
+
 ### Cambiato
 
 - **I controlli valgono per un mese qualsiasi:** `controlli.esegui` e `attesi` prendono il mese del cedolino, e il

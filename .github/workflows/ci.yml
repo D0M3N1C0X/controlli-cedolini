@@ -81,3 +81,38 @@ jobs:
         with:
           name: workbook-recalculated
           path: build/foglio_controllo_cedolini.xlsx
+
+  bridge:
+    # The pay-transparency kit, at the commit pinned in src/ponte.py, recomputes the Article 9 items on the
+    # Italian extract: its figures must be the ones committed in data/ponte/indicatori_ptk.json.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: The pinned commit of the kit
+        id: pin
+        run: echo "commit=$(sed -n 's/^PTK_COMMIT = \"\(.*\)\"/\1/p' src/ponte.py)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          repository: D0M3N1C0X/pay-transparency-readiness-kit
+          path: ptk
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install
+        run: |
+          git -C ptk checkout ${{ steps.pin.outputs.commit }}
+          pip install -r requirements.txt
+
+      - name: The kit's own code on the extract
+        run: python -I tools/ptk_indicatori.py ptk
+
+      - name: Same figures as committed
+        run: |
+          git diff --exit-code -- data/ponte/indicatori_ptk.json \
+            || (echo "::error::The kit computes different figures on the extract" && exit 1)

@@ -7,6 +7,7 @@ import pandas as pd
 import anno
 import config as C
 import controlli
+import ponte
 import robustezza
 import statistica
 
@@ -94,9 +95,10 @@ def fatti(o: dict, rob: pd.DataFrame, coerente: dict) -> dict:
     }
 
 
-def write(o: dict, rob: pd.DataFrame, coerente: dict, an_: dict | None = None) -> dict:
+def write(o: dict, rob: pd.DataFrame, coerente: dict, an_: dict | None = None, po: dict | None = None) -> dict:
     f = fatti(o, rob, coerente)
     an_ = anno.run() if an_ is None else an_
+    po = ponte.run() if po is None else po
     an, n = o["anomalie"], o["riepilogo_novembre"]
     L = []
     add = L.append
@@ -134,6 +136,9 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict, an_: dict | None = None) -
         f"{len(reg)} errori di regola sono segnalati dal primo mese e in ogni mese dopo; dei "
         f"{len(e) - len(reg)} di anagrafica, uno sbagliato dall'assunzione non lo vede nessun controllo, gli altri due "
         "li vede C10 una volta sola. L'anno pulito non dà falsi allarmi.")
+    add("- **Gli stessi cedolini alimentano gli altri strumenti** (sezione 6): l'estratto per il kit della trasparenza "
+        "retributiva dà gli stessi divari al codice del kit e a questo, e INPS e TFR tornano con il modello del costo "
+        "del lavoro.")
     add("")
 
     add("## 1. Le segnalazioni, cedolino per cedolino")
@@ -251,8 +256,9 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict, an_: dict | None = None) -
     add("")
 
     sezione_anno(add, an_)
+    sezione_ponte(add, po)
 
-    add("## 6. Come lo userei in un team payroll")
+    add("## 7. Come lo userei in un team payroll")
     add("")
     add("1. **Prima dell'invio, ogni mese:** l'export del software paghe entra nello script o nel foglio; si guardano "
         "solo le righe segnalate, a partire dalla priorità alta.")
@@ -264,7 +270,7 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict, an_: dict | None = None) -
         "due mesi, per tarare la soglia di C07.")
     add("")
 
-    add("## 7. Metodo e limiti")
+    add("## 8. Metodo e limiti")
     add("")
     add("- **Due motori, una risposta.** Gli stessi controlli sono in Python e in formule nel foglio; il foglio "
         "Riconciliazione confronta ogni formula con Python, e la CI ricalcola il foglio con LibreOffice.")
@@ -343,6 +349,80 @@ def sezione_anno(add, a: dict) -> None:
     add("**Cosa ne segue.** I controlli aritmetici bastano per le regole: tranche, aliquote, scaglioni, divisori, "
         f"ferie. Per l'anagrafica ({len(anag)} errori su {len(e)}) serve un confronto con i documenti almeno una volta: "
         "all'assunzione, a ogni segnalazione C10, e a campione una volta l'anno.")
+    add("")
+
+
+def sezione_ponte(add, p: dict) -> None:
+    """Sezione 6: dai cedolini dell'anno alla trasparenza retributiva e al costo del lavoro (ponte.py)."""
+    e, ind, cat, t, ivs = p["estratto"], p["indicatori"], p["categorie"], p["tfr"], p["ivs"]
+    ptk = p["ptk"]
+    add("## 6. Il ponte con la trasparenza retributiva e il costo del lavoro")
+    add("")
+    add("**Perché.** I cedolini sono la fonte dei dati che chiedono la direttiva (UE) 2023/970 sulla trasparenza "
+        "retributiva e il budget del personale. Se le voci vanno nel posto sbagliato, il divario retributivo è "
+        "sbagliato prima di cominciare. Questa sezione collega i cedolini dell'anno (sezione 5) agli altri due "
+        "strumenti del portfolio: [pay-transparency-readiness-kit]"
+        f"({ponte.PTK_REPO}) e [workforce-cost-model]({ponte.WCM_REPO}).")
+    add("")
+    d = p["dizionario"]
+    add("**Ogni voce del cedolino ha una natura.** Il kit misura la retribuzione su tutte le voci (direttiva) e, per "
+        "l'Italia, sulle sole voci fisse e continuative (il livello retributivo del recepimento, come lo legge il kit). "
+        "La tabella dice dove va ogni voce nell'estratto del kit:")
+    add("")
+    add(table(["Voce del cedolino", "Colonna del kit", "Natura", "Perché"],
+              [[r.voce.replace("_", " "), r.colonna_ptk or "fuori", r.natura, r.motivo] for r in d.itertuples(index=False)],
+              "llll"))
+    add("")
+    uguali = ptk is not None and all(
+        abs((ptk["clienti"][r.country][k] or 0) - (0 if pd.isna(getattr(r, k)) else getattr(r, k))) < 1e-9
+        for r in ind.itertuples(index=False) for k in ptk["clienti"][r.country] if k not in ("workers", "women", "men"))
+    add(f"**L'estratto.** {len(e)} dipendenti, la retribuzione pagata da gennaio a dicembre 2026 e le ore contrattuali "
+        "del periodo, nel formato \"anno di riferimento\" del kit, un datore di lavoro per cliente "
+        "([data/ponte/estratto_ptk.csv](../data/ponte/estratto_ptk.csv)). Gli indicatori dell'articolo 9 calcolati qui "
+        + (f"e quelli del codice del kit, al commit {ptk['kit_commit']}, sullo stesso file coincidono su tutti i "
+           f"{len(ind)} clienti" if uguali else "e quelli del kit NON coincidono")
+        + ": la CI rifà il conto col kit a ogni modifica.")
+    add("")
+    add(table(["Cliente", "Dipendenti", "Donne", "Divario orario medio", "Mediano", "Divario annuo medio",
+               "Variabili: donne / uomini che le ricevono"],
+              [[r.country, r.workers, r.women, pct(r.a_mean_gap_hourly, 1), pct(r.c_median_gap_hourly, 1),
+                pct(r.a_mean_gap_annual, 1), f"{pct(r.e_share_women_receiving)} / {pct(r.e_share_men_receiving)}"]
+               for r in ind.itertuples(index=False)], "lrrrrrr"))
+    add("")
+    conta = cat["stato"].value_counts()
+    add("*Un divario positivo vuol dire donne pagate meno. Annuo e orario differiscono per il part-time: la paga "
+        "annua lo conta, quella oraria no, ed è per questo che la direttiva chiede tutti e due. Nessun cliente "
+        "ha 100 dipendenti, la soglia più bassa dell'obbligo di relazione dell'articolo 9; il diritto di "
+        "informazione dell'articolo 7 vale per tutti. I dati sono inventati: i divari dicono che il ponte funziona, "
+        "non qualcosa sui clienti.*")
+    add("")
+    add(f"**Le categorie sono i livelli del CCNL.** Lo stesso lavoro o un lavoro di pari valore, dentro un cliente, "
+        f"secondo la classificazione del contratto: {len(cat)} categorie, {conta.get('da giustificare', 0)} con un "
+        f"divario orario di almeno il 5%, {conta.get('sotto il 5%', 0)} sotto, {conta.get('un solo sesso', 0)} con un "
+        "solo sesso ([report/ponte_categorie.csv](ponte_categorie.csv)). Nei livelli del CCNL il minimo è uguale per "
+        "tutti: un divario viene da scatti (anzianità), superminimi, part-time e straordinari, cioè da quello che il "
+        "kit chiede di giustificare con criteri oggettivi. Un livello sbagliato in anagrafica (K7 della sezione 5) "
+        "sposta una persona di categoria: per la trasparenza è un errore doppio.")
+    add("")
+    w = p["wcm"]
+    add(f"**Il costo del lavoro: due repository, gli stessi conti.** workforce-cost-model calcola il costo italiano dal "
+        f"lato del datore; il suo config.py è copiato al commit {ponte.WCM_COMMIT} con il checksum fissato. "
+        f"IVS: {pct(ivs['datore'], 2)} a carico del datore lì, {pct(ivs['dipendente'], 2)} del dipendente qui, "
+        f"{pct(ivs['somma'], 2)} in tutto, l'aliquota del Fondo pensioni lavoratori dipendenti. "
+        f"TFR: dodici quote mensili dei cedolini contro la retribuzione dell'anno / {num(w['TFR_DIVISOR'], 1)} del "
+        f"modello, per i {len(t)} dipendenti con un anno intero allo stesso contratto: differenza mediana "
+        f"{euro(t['differenza'].median())}, la più grande {euro(t['differenza'].abs().max())}. La formula è la "
+        "stessa; la differenza è di calendario. La quota mensile proietta la retribuzione del mese su tutte le "
+        "mensilità, la quota dell'anno guarda quello che è stato pagato: la tredicesima con la tranche di novembre, una "
+        "quattordicesima che copre meno di dodici mesi per chi è entrato l'anno prima. L'articolo 2120 del codice "
+        "civile guarda la retribuzione dell'anno: le quote mensili sono un acconto, da allineare a dicembre.")
+    add("")
+    add(f"*Due cose che il modello di costo non fa, senza che il costo cambi. Lo 0,50% dell'imponibile che si toglie "
+        f"dal TFR e si versa all'INPS (L. 297/1982, art. 3) sposta {euro(t['contributo_050'].sum(), 0)} l'anno dal "
+        "fondo TFR ai contributi per questi dipendenti, ma il datore paga lo stesso totale. E le altre voci INPS e "
+        f"INAIL del datore ({pct(w['IT_OTHER'], 1)} nel modello) sono illustrative lì: qui la posizione INPS di "
+        "ogni cliente (CIGS, FIS) è nei parametri, ed è da lì che il modello dovrebbe prenderle per un cliente "
+        "vero.*")
     add("")
 
 

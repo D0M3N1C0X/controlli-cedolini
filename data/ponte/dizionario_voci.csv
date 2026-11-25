@@ -1,0 +1,13 @@
+voce,colonna_ptk,natura,motivo
+tabellare,base_pay,fissa e continuativa,minimo del livello: retribuzione di base
+scatti,base_pay,fissa e continuativa,scatti di anzianità: maturano per regola generale
+superminimo,base_pay,fissa e continuativa,superminimo individuale: pagato ogni mese
+tredicesima,base_pay,fissa e continuativa,mensilità aggiuntiva dovuta dal CCNL
+quattordicesima,base_pay,fissa e continuativa,mensilità aggiuntiva dovuta dal CCNL
+straordinari,bonus,variabile,"dipende dalle ore del mese: componente variabile (il kit non ha una colonna per lo straordinario, la colonna bonus è variabile)"
+quota_tfr,,esclusa,"accantonamento differito, non pagato nell'anno; liquidato alla cessazione"
+malattia_inps,,esclusa,anticipata per conto dell'INPS: non la paga il datore di lavoro
+maternita_inps,,esclusa,anticipata per conto dell'INPS: non la paga il datore di lavoro
+integrazione_datore,base_pay,sostitutiva,prende il posto della retribuzione dei giorni di assenza
+contributi_inps,,esclusa,"trattenuta, non retribuzione"
+irpef,,esclusa,"trattenuta, non retribuzione"
