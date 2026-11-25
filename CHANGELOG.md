@@ -22,8 +22,15 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
   fissato, ricalcola nella CI gli stessi divari dell'articolo 9 (`tools/ptk_indicatori.py`). Divari per categoria
   con i livelli del CCNL. INPS e TFR confrontati con il config.py di workforce-cost-model copiato a checksum fissato.
 
+- **Le fonti al mese chiuso, ottobre 2026** (`src/fonti.py`, sezione 8 del rapporto): fino a quando vale ogni
+  parametro con una data, con la fonte e il giorno della lettura; un test ferma la pipeline se un parametro non copre
+  il mese controllato o un mese dell'anno.
+
 ### Cambiato
 
+- **Indici FOI di tutto il 2026, da gennaio a ottobre,** dalla tavola ISTAT letta il 25 novembre 2026 e copiata in
+  `data/source/istat_foi.csv` (prima solo agosto e settembre): C19 controlla il TFR liquidato in ogni mese chiuso
+  dell'anno. Prima fascia pensionabile 2026 riletta sulla circolare INPS n. 6/2026.
 - **I controlli valgono per un mese qualsiasi:** `controlli.esegui` e `attesi` prendono il mese del cedolino, e il
   minimo atteso è quello della tranche in vigore nel mese (`regole.colonna_in_vigore`), non più la colonna fissa di
   settembre 2026. Per agosto e settembre 2026 il risultato non cambia.
