@@ -106,13 +106,15 @@ def carica() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
             pd.read_csv(C.F24))
 
 
-def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
-    """Il valore atteso di ogni voce controllata, calcolato dalle regole e non dal cedolino."""
+def attesi(m: pd.DataFrame, prec: pd.DataFrame, mese: str | None = None) -> pd.DataFrame:
+    """Il valore atteso di ogni voce controllata, calcolato dalle regole e non dal cedolino, per il mese del
+    cedolino: la tranche dei minimi, gli scatti, le ferie e i ratei di quel mese."""
+    mese = mese or C.MESE
     a = m[["matricola", "cliente", "livello", "part_time"]].copy()
     k = [R.ccnl_cliente(c) for c in m["cliente"]]
-    a["tabellare"] = [R.centesimi(R.tabella(c).loc[lv, R.regola(c)["minimo"]] * p)
+    a["tabellare"] = [R.centesimi(R.tabella(c).loc[lv, R.colonna_in_vigore(c, mese)] * p)
                       for lv, p, c in zip(m["livello"], m["part_time"], k, strict=True)]
-    a["scatti_n"] = [R.scatti_maturati(date.fromisoformat(d), C.MESE, c)
+    a["scatti_n"] = [R.scatti_maturati(date.fromisoformat(d), mese, c)
                      for d, c in zip(m["data_assunzione"], k, strict=True)]
     a["scatti"] = [R.centesimi(R.tabella(c).loc[lv, "scatto"] * n * p)
                    for lv, n, p, c in zip(m["livello"], a["scatti_n"], m["part_time"], k, strict=True)]
@@ -122,7 +124,7 @@ def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
     a["quota_tfr"] = [R.quota_tfr(o, sc, c) for o, sc, c in zip(ordinaria, m["scatti"], k, strict=True)]
     residuo_prec = m["matricola"].map(prec.set_index("matricola")["ferie_residuo"]).fillna(0.0)
     assunti = [date.fromisoformat(d) for d in m["data_assunzione"]]
-    fine = R.ultimo_del_mese(C.MESE)
+    fine = R.ultimo_del_mese(mese)
     a["ferie_maturate"] = [R.ferie_mese(c, R.anni_di_servizio(d, fine)) for d, c in zip(assunti, k, strict=True)]
     a["ferie_residuo"] = (residuo_prec + a["ferie_maturate"] - m["ferie_godute"]).round(4)
     extra = sum(s_ * _num(m, c) for c, s_ in VOCI_LORDO)
@@ -132,13 +134,13 @@ def attesi(m: pd.DataFrame, prec: pd.DataFrame) -> pd.DataFrame:
     a["netto_prec"] = m["matricola"].map(prec.set_index("matricola")["netto"])
     a["variazione"] = m["netto"] / a["netto_prec"] - 1
     uscite = (m["data_cessazione"] if "data_cessazione" in m else pd.Series([""] * len(m), index=m.index))
-    ratei = [R.ratei_al(d, C.MESE, None if _vuoto(u) else date.fromisoformat(str(u)), c)
+    ratei = [R.ratei_al(d, mese, None if _vuoto(u) else date.fromisoformat(str(u)), c)
              for d, u, c in zip(assunti, uscite, k, strict=True)]
     a["ratei_13"] = [r[0] for r in ratei]
     a["ratei_14"] = [r[1] for r in ratei]
     if "permessi_residuo" in m:
         res_prec = m["matricola"].map(prec.set_index("matricola")["permessi_residuo"]).fillna(0.0)
-        a["permessi_maturati"] = [R.permessi_mese(d, C.MESE, C.CLIENTI[cl]["dipendenti"], p, c)
+        a["permessi_maturati"] = [R.permessi_mese(d, mese, C.CLIENTI[cl]["dipendenti"], p, c)
                                   for d, cl, p, c in zip(assunti, m["cliente"], m["part_time"], k, strict=True)]
         a["permessi_residuo"] = (res_prec + a["permessi_maturati"] - m["permessi_goduti"]).round(4)
     return a
@@ -157,8 +159,10 @@ def _fmt(v) -> str:
     return f"{v:g}" if isinstance(v, float) else str(v)
 
 
-def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.DataFrame, pd.DataFrame]:
-    a = attesi(m, prec)
+def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame,
+           mese: str | None = None) -> tuple[pd.DataFrame, pd.DataFrame]:
+    mese = mese or C.MESE
+    a = attesi(m, prec, mese)
     prev_by = {r["matricola"]: r for r in prec.to_dict("records")}
     out = []
 
@@ -188,9 +192,9 @@ def esegui(m: pd.DataFrame, prec: pd.DataFrame, f24: pd.DataFrame) -> tuple[pd.D
             e13, e14 = int(a.loc[i, "ratei_13"]), int(a.loc[i, "ratei_14"])
             if (r13, r14) != (e13, e14):
                 segnala(i, "C11", f"13ª {e13}; 14ª {e14}", f"13ª {r13}; 14ª {r14}")
-        _cessazione(m.loc[i], segnala, i)
+        _cessazione(m.loc[i], segnala, i, mese)
         _fisco(m.loc[i], segnala, i)
-        _assenze(m.loc[i], prev_by.get(m.loc[i, "matricola"]), segnala, i)
+        _assenze(m.loc[i], prev_by.get(m.loc[i, "matricola"]), segnala, i, mese)
         if "permessi_residuo" in m and abs(m.loc[i, "permessi_residuo"]
                                            - a.loc[i, "permessi_residuo"]) > C.TOLLERANZA_ORE:
             segnala(i, "C18", float(a.loc[i, "permessi_residuo"]), float(m.loc[i, "permessi_residuo"]))
@@ -222,8 +226,9 @@ def _vuoto(v) -> bool:
     return v is None or (isinstance(v, float) and v != v) or str(v).strip() == ""
 
 
-def _cessazione(r: pd.Series, segnala, i: int) -> None:
+def _cessazione(r: pd.Series, segnala, i: int, mese: str | None = None) -> None:
     """C12-C14: le voci pagate a dicembre o alla cessazione, quando il cedolino le riporta."""
+    mese = mese or C.MESE
     k = R.ccnl_cliente(r.get("cliente"))
     assunzione = date.fromisoformat(str(r["data_assunzione"]))
     mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
@@ -233,7 +238,7 @@ def _cessazione(r: pd.Series, segnala, i: int) -> None:
                                        R.base_quattordicesima(mensile, r["scatti"], k))):
         if _vuoto(r.get(voce)):
             continue
-        n = R.dodicesimi_alla_cessazione(assunzione, ces, inizio(ces), k) if ces else ratei(assunzione, C.MESE, k)
+        n = R.dodicesimi_alla_cessazione(assunzione, ces, inizio(ces), k) if ces else ratei(assunzione, mese, k)
         if voce == "quattordicesima" and not R.ha_quattordicesima(k):
             n = 0
         atteso, trovato = R.mensilita_aggiuntiva(base, n), float(r[voce])
@@ -281,12 +286,13 @@ def _si(v) -> bool:
     return str(v).strip().lower() in ("true", "vero", "1", "si", "sì", "yes", "x")
 
 
-def _assenze(r: pd.Series, prec, segnala, i: int) -> None:
+def _assenze(r: pd.Series, prec, segnala, i: int, mese: str | None = None) -> None:
     """C15-C17: le indennità anticipate per conto dell'INPS e la carenza, quando il cedolino riporta l'evento. La
     base è la retribuzione del mese prima: senza il suo cedolino, o per un evento iniziato prima, non si controlla.
     C22: l'integrazione del datore di lavoro, con le regole del CCNL del cliente."""
+    mese = mese or C.MESE
     k = R.ccnl_cliente(r.get("cliente"))
-    inizio = R.primo_del_mese(C.MESE)
+    inizio = R.primo_del_mese(mese)
     base = None if prec is None else R.centesimi(prec["tabellare"] + prec["scatti"] + prec["superminimo"])
     scatti_prec = 0.0 if prec is None else float(prec["scatti"])
     mensile = R.centesimi(r["tabellare"] + r["scatti"] + r["superminimo"])
@@ -294,10 +300,10 @@ def _assenze(r: pd.Series, prec, segnala, i: int) -> None:
     if not _vuoto(r.get("malattia_dal")):
         dal, al = date.fromisoformat(str(r["malattia_dal"])), date.fromisoformat(str(r["malattia_al"]))
         if base is not None and dal >= inizio and not _vuoto(r.get("malattia_inps")):
-            atteso = R.indennita_malattia(base, dal, al, C.MESE, scatti_prec, k)
+            atteso = R.indennita_malattia(base, dal, al, mese, scatti_prec, k)
             if abs(float(r["malattia_inps"]) - atteso) > C.TOLLERANZA:
                 segnala(i, "C15", atteso, float(r["malattia_inps"]))
-        carenza, _, _ = R.giorni_malattia(dal, al, C.MESE, k)
+        carenza, _, _ = R.giorni_malattia(dal, al, mese, k)
         if carenza and not _vuoto(r.get("malattia_evento_n")):
             quota = R.carenza_percentuale(int(float(r["malattia_evento_n"])), _si(r.get("malattia_esente")), k,
                                           (al - dal).days + 1)
@@ -311,14 +317,14 @@ def _assenze(r: pd.Series, prec, segnala, i: int) -> None:
         dal, al = date.fromisoformat(str(r["maternita_dal"])), date.fromisoformat(str(r["maternita_al"]))
         if dal >= inizio:
             maternita = True
-            atteso = R.indennita_maternita(base, dal, al, C.MESE, scatti_prec, k)
+            atteso = R.indennita_maternita(base, dal, al, mese, scatti_prec, k)
             if abs(float(r["maternita_inps"]) - atteso) > C.TOLLERANZA:
                 segnala(i, "C17", atteso, float(r["maternita_inps"]))
     # C22: solo se il cedolino porta la retribuzione tolta per l'assenza, cioè è un cedolino del mese con l'assenza
     if (malattia is None and not maternita) or _vuoto(r.get("assenza_trattenuta")):
         return
     integrazione = 0.0 if _vuoto(r.get("integrazione_datore")) else float(r["integrazione_datore"])
-    q = R.quota_netto_garantita(C.MESE, k, malattia, quota) if malattia else R.quota_netto_garantita(C.MESE, k)
+    q = R.quota_netto_garantita(mese, k, malattia, quota) if malattia else R.quota_netto_garantita(mese, k)
     if q is not None:
         garantito = R.netto_garantito(mensile, r["cliente"], q)
         effettivo = R.centesimi(float(r["netto"]) + float(r["altre_trattenute"]))
@@ -326,7 +332,7 @@ def _assenze(r: pd.Series, prec, segnala, i: int) -> None:
             segnala(i, "C22", garantito, effettivo)
     elif malattia:
         inps = 0.0 if _vuoto(r.get("malattia_inps")) else float(r["malattia_inps"])
-        attesa = R.integrazione_lorda(mensile, inps, *malattia, C.MESE, k)
+        attesa = R.integrazione_lorda(mensile, inps, *malattia, mese, k)
         if attesa is not None and integrazione < attesa - C.TOLLERANZA:
             segnala(i, "C22", attesa, integrazione)
 

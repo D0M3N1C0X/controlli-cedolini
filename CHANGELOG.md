@@ -5,6 +5,23 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
 
 ## [Non rilasciato]
 
+### Aggiunto
+
+- **Un anno intero, gennaio-dicembre 2026** (`src/anno.py`, sezione 5 del rapporto): i dipendenti dell'anagrafica
+  dal mese di assunzione a dicembre, 2.102 cedolini mensili e 332 di quattordicesima e tredicesima, con le tranche dei
+  minimi nel mese in cui entrano in vigore, scatti, ferie, permessi, straordinari e quattro eventi legittimi. Nessuna
+  segnalazione; senza l'evento registrato, i quattro eventi li segnala C10.
+- **Nove errori di configurazione del software paghe**, ricalcolati a cascata come farebbe il software: i sei di
+  regola sono segnalati dal primo mese e in ogni mese dopo; dei tre di anagrafica, il livello sbagliato
+  dall'assunzione non lo vede nessun controllo, part-time e superminimo cambiati senza lettera li vede C10 una volta
+  sola. Risultati in `report/anno_errori.csv` e `report/anno_mesi.csv`.
+
+### Cambiato
+
+- **I controlli valgono per un mese qualsiasi:** `controlli.esegui` e `attesi` prendono il mese del cedolino, e il
+  minimo atteso è quello della tranche in vigore nel mese (`regole.colonna_in_vigore`), non più la colonna fissa di
+  settembre 2026. Per agosto e settembre 2026 il risultato non cambia.
+
 ## [2.2.0] - 2026-11-09
 
 ### Aggiunto

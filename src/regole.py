@@ -4,6 +4,7 @@ riscritte come formule nel foglio di controllo (build_foglio.py), e il foglio Ri
 verifica che diano lo stesso risultato.
 """
 import calendar
+import re
 from datetime import date, timedelta
 from decimal import ROUND_HALF_UP, Decimal
 
@@ -160,6 +161,15 @@ def centesimi(x: float) -> float:
     """Arrotonda al centesimo come ROUND di Excel: 15 cifre significative, poi metà per eccesso."""
     v = Decimal(f"{float(x):.15g}").quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)
     return float(v)
+
+
+def colonna_in_vigore(ccnl: str, mese: str) -> str:
+    """La colonna della tabella in vigore nel mese: delle tranche con lo stesso nome della colonna di settembre 2026
+    (minimo_AAAA_MM, totale_AAAA_MM), l'ultima già cominciata. Prima della prima tranche in tabella, la prima."""
+    prefisso = regola(ccnl)["minimo"].rsplit("_", 2)[0]
+    tranche = sorted(c for c in tabella(ccnl).columns if re.fullmatch(rf"{prefisso}_\d{{4}}_\d{{2}}", c))
+    iniziate = [c for c in tranche if c[-7:].replace("_", "-") <= mese]
+    return iniziate[-1] if iniziate else tranche[0]
 
 
 def tabellare(livello: str, part_time: float, colonna: str | None = None, ccnl: str = T) -> float:

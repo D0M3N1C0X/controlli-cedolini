@@ -1,0 +1,10 @@
+codice,titolo,tipo,cliente,dal,descrizione,dipendenti,esposti,segnalati,primo_esposto,primo_segnalato,mesi_segnalati,controlli,falsi_allarmi,netto_anno,contributi_anno,irpef_anno,tfr_anno,mensilita_aggiuntive,ferie_dicembre
+K1,Tranche di giugno non caricata,regola,E,2026-06,Il software resta sui minimi del Turismo di giugno 2025 dopo il 1° giugno 2026.,16,142,111,2026-06,2026-06,7,C01,0,-3841.47,-431.53,-1317.50,-381.90,-1189.52,0.00
+K2,CIGS non applicata,regola,F,2026-01,"Media del semestre caricata sotto 15 dipendenti: manca lo 0,30% di CIGS.",20,240,240,2026-01,2026-01,12,C03,0,911.98,-1453.97,529.19,0.00,0.00,0.00
+K3,CCNL a 13 mensilità invece di 14,regola,A,2026-01,"Nessun rateo di quattordicesima, TFR su 13 mensilità, reddito presunto su 13.",18,233,215,2026-01,2026-01,12,"C04, C11, C20",0,-29227.51,0.00,22.15,-2402.52,-31468.12,0.00
+K4,Scaglioni IRPEF del 2025,regola,B,2026-01,Il secondo scaglione resta al 35% invece del 33% del 2026.,74,79,79,2026-01,2026-01,12,C20,0,-228.33,0.00,228.33,0.00,0.00,0.00
+K5,Scatto pagato un mese prima,regola,C,2026-01,"Lo scatto entra nel mese in cui si compie il triennio, non dal mese dopo.",27,13,11,2026-02,2026-02,6,C02,0,170.32,21.85,68.82,19.28,40.39,0.00
+K6,Ferie a 22 giorni invece di 26,regola,B,2026-01,Il cliente del Terziario configurato con le ferie annue della Logistica.,74,881,881,2026-01,2026-01,12,C05,0,0.00,0.00,0.00,0.00,0.00,-286.06
+K7,Livello sbagliato dall'assunzione,anagrafica,B,2025-12,"Assunto al 4° livello, inserito al 3° fin dal primo cedolino.",1,14,0,2026-01,,0,,0,1877.98,237.50,688.42,209.86,408.37,0.00
+K8,Part-time inserito a giugno senza lettera,anagrafica,C,2026-06,"Un tempo pieno portato al 75% in anagrafica da giugno, senza un evento che lo spieghi.",1,9,1,2026-06,2026-06,1,C10,0,-3234.18,-348.23,-628.54,-308.08,-1022.98,0.00
+K9,Superminimo assorbito ma non assorbibile,anagrafica,A,2026-11,"Alla tranche di novembre il superminimo cala dell'aumento, ma la lettera non lo consente.",1,3,1,2026-11,2026-11,1,C10,0,-68.82,-5.86,-19.32,-5.46,-31.62,0.00

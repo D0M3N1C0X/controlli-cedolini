@@ -83,7 +83,7 @@ def cedolino(d: pd.Series, mese: str, rng: random.Random, residuo_prec: float, s
     assunzione = date.fromisoformat(d["data_assunzione"])
     k = ccnl(d)
     n = R.scatti_maturati(assunzione, mese, k)
-    tab = R.tabellare(d["livello"], pt, ccnl=k)
+    tab = R.tabellare(d["livello"], pt, R.colonna_in_vigore(k, mese), k)
     sc = R.scatti_importo(d["livello"], n, pt, k)
     ordinaria = R.centesimi(tab + sc + d["superminimo"])
     lordo = R.centesimi(ordinaria + straordinari)

@@ -12,5 +12,9 @@ date sono un'intenzione, non una promessa.
 | 5 | **Altri contratti**, dopo i quattro della v2.2 (Terziario, Metalmeccanico, Turismo, Logistica): una riga di `config.CCNL` e una tabella per contratto | Il motore per contratto c'è (D28): ogni CCNL in più è lavoro di fonti, non di codice | La fonte primaria di ciascun contratto, e il testo vigente del Terziario dall'archivio CNEL | 2027 |
 | 6 | **F24 completo**: quota INPS a carico dell'azienda e addizionali IRPEF | C08 oggi riconcilia solo ritenute 1001 e contributi dei dipendenti | Aliquote azienda per posizione; codici tributo 3802 e 3848 | 2027 |
 
+Un anno intero di cedolini e nove errori di configurazione (sezione 5 del rapporto) dicono che l'anagrafica è
+il punto cieco dei controlli aritmetici: un confronto con i documenti del cliente, all'assunzione e a ogni
+segnalazione C10, resta un passo manuale.
+
 Le scelte che hanno portato fin qui sono in [decisioni.md](decisioni.md); cosa è già stato fatto, nel
 [CHANGELOG](../CHANGELOG.md).
