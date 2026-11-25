@@ -26,6 +26,7 @@ Una scheda per controllo: cosa controlla, da quale regola, dove sta nel foglio, 
 | [C20 · IRPEF del mese](#c20--irpef-del-mese) | alta | Ritenuta, somma del cuneo fiscale o trattamento integrativo diversi da quelli delle regole 2026: scaglioni ragguagliati al mese, detrazioni per un dodicesimo sul reddito presunto dell'anno |
 | [C21 · Conguaglio IRPEF alla cessazione](#c21--conguaglio-irpef-alla-cessazione) | alta | Imposta dell'anno, detrazioni e trattamento integrativo rapportati ai giorni di lavoro, meno quanto già trattenuto o erogato: il cedolino di uscita porta una differenza diversa |
 | [C22 · Integrazione del datore di lavoro](#c22--integrazione-del-datore-di-lavoro) | alta | Nel mese di malattia o maternità, integrazione sotto quella del CCNL: sul netto nel Terziario (il netto non sta sotto la quota garantita del netto normale), sul lordo nel Metalmeccanico e nella Logistica |
+| [C23 · Indennità sostitutiva del preavviso](#c23--indennità-sostitutiva-del-preavviso) | alta | Alla cessazione, indennità per i giorni di preavviso non dati diversa dalla retribuzione del periodo (ratei di tredicesima e quattordicesima compresi): pagata dal datore nel licenziamento, trattenuta al dipendente nelle dimissioni |
 
 ## C01 · Minimo tabellare
 
@@ -479,7 +480,7 @@ BN  Anni di servizio
 BO  Preavviso minimo
     =IF($A5="","",IF(OR(AZ5="",AND(TRIM(BA5)<>"dimissioni",TRIM(BA5)<>"licenziamento")),"",IFERROR(INDEX(CCNL!$G$5:$L$40,MATCH($DU5&"|"&D5&"",CCNL!$A$5:$A$40,0),IF(TRIM(BA5)="licenziamento",3,0)+IF(BN5<5,1,IF(BN5<10,2,3))),"")))
 BP  C14 Preavviso
-    =IF($A5="","",IF(OR(BO5="",BB5=""),"OK",IF(BB5<BO5,"ERRORE","OK")))
+    =IF($A5="","",IF(OR(BO5="",BB5="",ED5<>""),"OK",IF(BB5<BO5,"ERRORE","OK")))
 ```
 
 **Un esempio dal mese di settembre 2026.** Dipendente B076, cliente B: preavviso minimo 20 giorni, sul cedolino 10 giorni.
@@ -494,7 +495,7 @@ BP  C14 Preavviso
 
 **Limiti.**
 
-- Controlla i giorni di preavviso, non l'importo dell'indennità sostitutiva (D18).
+- Controlla i giorni di preavviso quando il cedolino non porta l'indennità sostitutiva; se la porta, l'importo lo controlla C23 (D39).
 - Non applica le anzianità convenzionali che il CCNL riconosce ad alcune categorie, né le regole degli operatori di vendita.
 - Si applica solo a dimissioni e licenziamento: per giusta causa o altri tipi di cessazione il preavviso non è dovuto e il controllo tace.
 
@@ -808,3 +809,40 @@ EC  C22 Integrazione
 - Sul netto il controllo segnala solo un'integrazione in meno: chi paga di più non è un errore.
 - Le quote valgono per i primi periodi: dopo 122-214 giorni (Metalmeccanico) o 3-5 mesi (Logistica) cambiano, e gli eventi lunghi vanno controllati a mano.
 - La retribuzione tolta per l'assenza è in giorni di calendario (D31): un software a giorni lavorativi dà un netto diverso, che il controllo sul netto assorbe e quello sul lordo no.
+
+## C23 · Indennità sostitutiva del preavviso
+
+**Priorità alta.** Alla cessazione, indennità per i giorni di preavviso non dati diversa dalla retribuzione del periodo (ratei di tredicesima e quattordicesima compresi): pagata dal datore nel licenziamento, trattenuta al dipendente nelle dimissioni.
+
+**La regola.** Chi recede senza dare il preavviso del CCNL deve all'altra parte un'indennità pari alla retribuzione del periodo non dato (art. 2118 c.c.), con i compensi continuativi, ratei di tredicesima e quattordicesima compresi (art. 2121 c.c.): retribuzione dell'anno / 12 / 30 per giorno di calendario mancante (nel Turismo la quattordicesima senza scatti). Nel licenziamento la paga il datore di lavoro; nelle dimissioni il datore la trattiene su quanto deve al dipendente, e sul cedolino ha il segno meno.
+
+**Fonti.** [F42](fonti.md), [F13](fonti.md), [F34](fonti.md), [F36](fonti.md), [F38](fonti.md).
+
+**Nel foglio** (foglio Mese, riga 5; le altre righe sono uguali):
+
+```
+BF  Retribuzione mensile
+    =IF($A5="","",ROUND(I5+K5+L5,2))
+BO  Preavviso minimo
+    =IF($A5="","",IF(OR(AZ5="",AND(TRIM(BA5)<>"dimissioni",TRIM(BA5)<>"licenziamento")),"",IFERROR(INDEX(CCNL!$G$5:$L$40,MATCH($DU5&"|"&D5&"",CCNL!$A$5:$A$40,0),IF(TRIM(BA5)="licenziamento",3,0)+IF(BN5<5,1,IF(BN5<10,2,3))),"")))
+EE  Indennità di preavviso attesa
+    =IF($A5="","",IF(OR(BO5="",BB5=""),"",IF(TRIM(BA5)="licenziamento",1,-1)*ROUND(MAX(0,BO5-BB5)*((BF5*INDEX(CCNL!$C$44:$C$47,MATCH($DU5,CCNL!$A$44:$A$47,0))-IF(INDEX(CCNL!$F$44:$F$47,MATCH($DU5,CCNL!$A$44:$A$47,0))=1,K5,0))/12/30),2)))
+EF  C23 Indennità di preavviso
+    =IF($A5="","",IF(OR(ED5="",EE5=""),"OK",IF(ABS(ED5-EE5)>Parametri!$C$17,"ERRORE","OK")))
+```
+
+**Un esempio dal mese di settembre 2026.** Dipendente D306, cliente D: atteso 5.454,84 €, sul cedolino 5.035,24 €, differenza −419,60 €.
+
+**Cause tipiche.**
+
+- Indennità sulla sola retribuzione mensile, senza i ratei delle mensilità aggiuntive.
+- Giorni del licenziamento usati per le dimissioni, dove il CCNL li dimezza (Logistica).
+- Giorni di preavviso lavorati non tolti, o contati due volte.
+
+**Cosa fare.** Ricalcolare l'indennità sui giorni che mancano al preavviso del CCNL, alla retribuzione dell'anno / 12 / 30 per giorno, ratei compresi, e pagare o recuperare la differenza con le competenze di fine rapporto.
+
+**Limiti.**
+
+- La retribuzione è quella ordinaria del mese di uscita: provvigioni, premi e medie degli ultimi tre anni (art. 2121 c.c., c. 2) non sono nei dati e non sono calcolati.
+- Non controlla contributi e tassazione separata dell'indennità: è riportata come voce a parte, come il TFR.
+- Il datore può rinunciare alla trattenuta, o le parti accordarsi: un'indennità diversa con un accordo scritto non è un errore, ed è da verificare sui documenti.

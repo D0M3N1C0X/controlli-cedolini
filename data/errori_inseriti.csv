@@ -65,4 +65,6 @@ F341,F,minimo,minimo senza l'elemento perequativo (EPA) del rinnovo
 F357,F,integrazione,"integrazione al 75% dal 4° al 20° giorno, come nel Terziario: qui è il 100%"
 F358,F,preavviso,"dimissioni con 15 giorni di preavviso, quelli dei livelli più bassi"
 F356,F,ferie_liquidate,ferie non godute pagate a 1/26: con la settimana di 5 giorni la quota è 1/22
+D306,D,indennita_preavviso,"indennità sostitutiva del preavviso sulla sola retribuzione mensile, senza i ratei di tredicesima"
+F342,F,indennita_preavviso,trattenuta per le dimissioni senza preavviso calcolata con i giorni del licenziamento
 ,C,f24,"F24 con 212,40 € di ritenute in meno dei cedolini"

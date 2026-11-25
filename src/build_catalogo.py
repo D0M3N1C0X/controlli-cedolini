@@ -29,6 +29,7 @@ FOGLIO_COLONNE = {
     "C19": ("Mese", ["CV", "CW"], "CX"),
     "C20": ("Mese", ["DF", "DG", "DH", "DI"], "DJ"), "C21": ("Mese", ["DK", "DL", "DM", "DN", "DO", "DP", "DQ"], "DR"),
     "C22": ("Mese", ["DV", "DX", "DY", "DZ", "EA", "EB"], "EC"),
+    "C23": ("Mese", ["BF", "BO", "EE"], "EF"),
 }
 FONTI = {
     "C01": ["F01", "F02", "F30", "F33", "F38"], "C02": ["F03", "S04", "F30", "F33", "F38"],
@@ -40,6 +41,7 @@ FONTI = {
     "C20": ["F24", "F25", "F26", "F27", "F28", "S08", "S09", "S10", "S11"],
     "C21": ["F24", "F25", "F26", "F27", "F29", "S10", "S11"],
     "C22": ["F16", "F18", "F35", "F39", "F41", "S12"],
+    "C23": ["F42", "F13", "F34", "F36", "F38"],
 }
 
 SCHEDE = {
@@ -187,7 +189,8 @@ SCHEDE = {
         "cause": ["Tabella delle dimissioni usata per un licenziamento.",
                   "Termini di un altro livello o di un altro CCNL.",
                   "Anni di servizio contati male, sulla soglia dei 5 o dei 10 anni."],
-        "limiti": ["Controlla i giorni di preavviso, non l'importo dell'indennità sostitutiva (D18).",
+        "limiti": ["Controlla i giorni di preavviso quando il cedolino non porta l'indennità sostitutiva; se la porta, "
+                   "l'importo lo controlla C23 (D39).",
                    "Non applica le anzianità convenzionali che il CCNL riconosce ad alcune categorie, né le regole "
                    "degli operatori di vendita.",
                    "Si applica solo a dimissioni e licenziamento: per giusta causa o altri tipi di cessazione il "
@@ -275,6 +278,23 @@ SCHEDE = {
                    "vale per i mesi senza tredicesima o quattordicesima.",
                    "Addizionali regionale e comunale fuori dal controllo: si trattengono a rate sull'anno prima."],
     },
+    "C23": {
+        "regola": "Chi recede senza dare il preavviso del CCNL deve all'altra parte un'indennità pari alla retribuzione "
+                  "del periodo non dato (art. 2118 c.c.), con i compensi continuativi, ratei di tredicesima e "
+                  "quattordicesima compresi (art. 2121 c.c.): retribuzione dell'anno / 12 / 30 per giorno di "
+                  "calendario mancante (nel Turismo la quattordicesima senza scatti). Nel licenziamento la paga il "
+                  "datore di lavoro; nelle dimissioni il datore la trattiene su quanto deve al dipendente, e sul "
+                  "cedolino ha il segno meno.",
+        "cause": ["Indennità sulla sola retribuzione mensile, senza i ratei delle mensilità aggiuntive.",
+                  "Giorni del licenziamento usati per le dimissioni, dove il CCNL li dimezza (Logistica).",
+                  "Giorni di preavviso lavorati non tolti, o contati due volte."],
+        "limiti": ["La retribuzione è quella ordinaria del mese di uscita: provvigioni, premi e medie degli ultimi tre "
+                   "anni (art. 2121 c.c., c. 2) non sono nei dati e non sono calcolati.",
+                   "Non controlla contributi e tassazione separata dell'indennità: è riportata come voce a parte, "
+                   "come il TFR.",
+                   "Il datore può rinunciare alla trattenuta, o le parti accordarsi: un'indennità diversa con un "
+                   "accordo scritto non è un errore, ed è da verificare sui documenti."],
+    },
     "C22": {
         "regola": "Nel mese di malattia la retribuzione dei giorni di assenza lascia il posto all'indennità INPS, alla "
                   "carenza e all'integrazione del datore di lavoro, che segue il CCNL. Terziario: il netto del mese, "
@@ -343,7 +363,7 @@ def _esempio(codice: str, an: pd.DataFrame) -> str:
     if codice == "C09":
         return f"{chi}: il codice «{r['trovato']}» ha un carattere di controllo non valido."
     if codice == "C14":
-        return (f"{chi}: preavviso minimo {float(r['atteso']):.0f} giorni, sul cedolino {float(r['trovato']):.0f} "
+        return (f"{chi}: preavviso minimo {float(r['atteso']):g} giorni, sul cedolino {float(r['trovato']):.0f} "
                 f"giorni.")
     if codice in ("C10", "C11"):
         return f"{chi}: atteso «{r['atteso']}», sul cedolino «{r['trovato']}»."

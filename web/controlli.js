@@ -1,4 +1,4 @@
-// I ventidue controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
+// I ventitré controlli nel browser: gemello riga per riga di src/controlli.py e src/regole.py.
 // tests/js/check_controlli.mjs li fa girare sui dati di casi preparati in Python
 // (tests/fixtures/js_vectors.json) e la CI fallisce alla prima differenza.
 
@@ -12,6 +12,7 @@ export const CONTROLLI = {
   C17: ["Indennità di maternità INPS", "alta"], C18: ["Permessi ROL ed ex festività", "media"],
   C19: ["TFR liquidato", "alta"], C20: ["IRPEF del mese", "alta"], C21: ["Conguaglio IRPEF alla cessazione", "alta"],
   C22: ["Integrazione del datore di lavoro", "alta"],
+  C23: ["Indennità sostitutiva del preavviso", "alta"],
 };
 
 const ANAGRAFICA = ["livello", "part_time", "superminimo", "data_assunzione"];
@@ -328,6 +329,14 @@ export function preavvisoMinimo(tipo, livello, assunzione, cessazione, cfg) {
   return cfg.preavviso[tipo][livello][anni < 5 ? 0 : anni < 10 ? 1 : 2];
 }
 
+// Indennità sostitutiva per i giorni di preavviso non dati (C23, F42, D39): retribuzione dell'anno / 12 / 30 per
+// giorno mancante, + nel licenziamento, - nelle dimissioni (come indennita_preavviso in regole.py)
+export function indennitaPreavviso(tipo, livello, assunzione, cessazione, giorni, mensile, scatti, cfg) {
+  const mancano = Math.max(0, preavvisoMinimo(tipo, livello, assunzione, cessazione, cfg) - giorni);
+  const importo = centesimi(mancano * (retribuzioneAnnua(mensile, scatti, cfg) / 12 / 30));
+  return tipo === "licenziamento" ? importo : -importo;
+}
+
 // ---- Controlli --------------------------------------------------------------------------------
 // righe: oggetti con i campi di data/cedolini.csv, già convertiti in numeri e date ISO.
 export function esegui(mese, prec, f24, ccnl, cfg) {
@@ -358,7 +367,14 @@ export function esegui(mese, prec, f24, ccnl, cfg) {
     const tipo = String(r.tipo_cessazione ?? "").trim().toLowerCase();
     if (Object.hasOwn(cfg.preavviso, tipo) && !vuoto(r.preavviso_giorni)) {
       const minimo = preavvisoMinimo(tipo, String(r.livello), r.data_assunzione, ces, cfg);
-      if (Math.trunc(Number(r.preavviso_giorni)) < minimo) segnala(r, "C14", minimo, Number(r.preavviso_giorni));
+      // C14: preavviso corto e nessuna indennità; C23: l'indennità c'è, e deve essere quella giusta
+      if (vuoto(r.indennita_preavviso)) {
+        if (Math.trunc(Number(r.preavviso_giorni)) < minimo) segnala(r, "C14", minimo, Number(r.preavviso_giorni));
+      } else {
+        const atteso = indennitaPreavviso(tipo, String(r.livello), r.data_assunzione, ces, Number(r.preavviso_giorni),
+          mensile, r.scatti, cfg);
+        if (Math.abs(Number(r.indennita_preavviso) - atteso) > cfg.tolleranza) segnala(r, "C23", atteso, Number(r.indennita_preavviso));
+      }
     }
     if (["fondo_tfr_prec", "tfr_quote_anno", "imponibile_anno", "tfr_liquidato"].every((k) => !vuoto(r[k]))) {
       const atteso = tfrLiquidato(Number(r.fondo_tfr_prec), Number(r.tfr_quote_anno), Number(r.imponibile_anno), ces, cfg);
@@ -544,7 +560,7 @@ const FACOLTATIVI = ["ratei_13", "ratei_14", "preavviso_giorni", "tredicesima", 
   "malattia_evento_n", "malattia_inps", "malattia_carenza", "maternita_inps", "permessi_maturati", "permessi_goduti",
   "permessi_residuo", "fondo_tfr_prec", "tfr_quote_anno", "imponibile_anno", "tfr_liquidato",
   "bonus_cuneo", "trattamento_integrativo", "imponibile_fiscale_anno", "giorni_lavoro_anno", "ritenute_anno_prec",
-  "cuneo_anno_prec", "ti_anno_prec", "assenza_trattenuta", "integrazione_datore"];
+  "cuneo_anno_prec", "ti_anno_prec", "assenza_trattenuta", "integrazione_datore", "indennita_preavviso"];
 const DATE_FACOLTATIVE = ["malattia_dal", "malattia_al", "maternita_dal", "maternita_al"];
 
 export function numero(s, decimaleVirgola) {

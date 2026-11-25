@@ -1,6 +1,6 @@
 # Architettura: una regola, tre motori
 
-Gli stessi ventidue controlli esistono tre volte, per tre modi di lavorare: uno script Python, un foglio di calcolo con
+Gli stessi ventitré controlli esistono tre volte, per tre modi di lavorare: uno script Python, un foglio di calcolo con
 formule vive e una pagina web che gira solo nel browser. Il rischio di avere tre copie è che divergano. Questa
 pagina spiega come restano uguali, e come si cambia qualcosa senza romperle.
 

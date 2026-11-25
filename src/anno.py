@@ -1,7 +1,7 @@
 """
 Un anno intero di cedolini, gennaio-dicembre 2026, e gli errori di configurazione che restano coerenti.
 
-I 67 errori inseriti e le 1.100 alterazioni casuali di robustezza.py toccano una voce di un cedolino di un mese. Un
+I 69 errori inseriti e le 1.100 alterazioni casuali di robustezza.py toccano una voce di un cedolino di un mese. Un
 software paghe configurato male sbaglia in un altro modo: sbaglia la regola, per tutti i dipendenti del cliente e
 per tutti i mesi, e ricalcola a valle in modo coerente, così che lordo, contributi, imponibile, IRPEF e netto
 tornano fra loro. Qui le due cose si misurano su un anno.

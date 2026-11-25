@@ -52,6 +52,8 @@ COSA_FARE = {
     "C22": "Ricalcolare l'integrazione con la regola del CCNL (Terziario: il netto non sotto il 75% dal 4° al 20° "
            "giorno e il 100% dopo; Metalmeccanico e Logistica: la retribuzione intera meno l'indennità INPS) e pagare "
            "la differenza nel mese dopo",
+    "C23": "Ricalcolare l'indennità sui giorni che mancano al preavviso del CCNL, alla retribuzione dell'anno / 12 / "
+           "30 per giorno, ratei compresi, e pagare o recuperare la differenza con le competenze di fine rapporto",
 }
 
 
@@ -112,7 +114,7 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict, an_: dict | None = None, p
     add("**Strumenti:** Uno script Python, lo stesso controllo in un [foglio di calcolo](../deliverables/foglio_controllo_cedolini.xlsx) "
         "e uno [strumento nel browser](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/) dove i file restano sul computer")
     add("")
-    add("> Ventidue controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano "
+    add("> Ventitré controlli da passare prima di mandare i cedolini al cliente. I controlli ricalcolano "
         "ogni voce dalle regole del contratto e dell'INPS, o la confrontano con il mese prima e con l'F24: "
         "non serve sapere come l'ha calcolata il software paghe. "
         "Non è consulenza del lavoro.")
@@ -155,7 +157,8 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict, an_: dict | None = None, p
         elif t.controllo == "C18":
             atteso, trovato, diff = f"{num(t.atteso, 2)} ore", f"{num(t.trovato, 2)} ore", f"{num(t.differenza, 2)} ore"
         elif t.controllo == "C14":
-            atteso, trovato, diff = f"{num(t.atteso, 0)} gg", f"{num(t.trovato, 0)} gg", f"{num(t.differenza, 0)} gg"
+            d = 0 if float(t.atteso).is_integer() else 1          # mezza giornata nelle dimissioni della Logistica
+            atteso, trovato, diff = f"{num(t.atteso, d)} gg", f"{num(t.trovato, 0)} gg", f"{num(t.differenza, d)} gg"
         elif t.controllo == "C05":
             atteso, trovato, diff = f"{num(t.atteso, 2)} gg", f"{num(t.trovato, 2)} gg", f"{num(t.differenza, 2)} gg"
         else:
@@ -236,8 +239,9 @@ def write(o: dict, rob: pd.DataFrame, coerente: dict, an_: dict | None = None, p
             "ratei": "ratei", "tredicesima": "mensilità aggiuntive", "ferie_liquidate": "ferie non godute",
             "preavviso": "preavviso", "tfr_liquidato": "TFR liquidato", "malattia": "malattia", "carenza": "carenza",
             "maternita": "maternità", "permessi": "permessi", "irpef": "IRPEF del mese", "conguaglio": "conguaglio",
-            "integrazione": "integrazione del datore"}
-    uscita = {"tredicesima", "ferie_liquidate", "preavviso", "tfr_liquidato", "conguaglio"}
+            "integrazione": "integrazione del datore",
+            "indennita_preavviso": "indennità di preavviso"}
+    uscita = {"tredicesima", "ferie_liquidate", "preavviso", "tfr_liquidato", "conguaglio", "indennita_preavviso"}
     visti = ", ".join(nomi[t] for t in pt.loc[(pt["trovati_statistico"] > 0) & ~pt["tipo"].isin(uscita), "tipo"])
     add(f"*Il rilevatore confronta ogni cedolino con quelli dello stesso cliente, perché posizioni INPS diverse non "
         f"sono anomalie. Vede solo gli errori che spostano un rapporto ({visti}); minimi, scatti, ferie, codice "

@@ -7,6 +7,13 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
 
 ### Aggiunto
 
+- **C23 Indennità sostitutiva del preavviso:** alla cessazione, i giorni che mancano al preavviso del CCNL per la
+  retribuzione dell'anno / 12 / 30, ratei di tredicesima e quattordicesima compresi (F42, D39); pagata dal datore nel
+  licenziamento, trattenuta al dipendente nelle dimissioni, con il segno meno. Nuova colonna `indennita_preavviso`;
+  C14 ora segnala il preavviso corto solo quando l'indennità manca. Quattro uscite nuove, due con un errore: trovati 69
+  errori su 69, nessun falso allarme. Nel foglio le colonne ED-EF (1.741 valori riconciliati, erano 1.682); lo
+  strumento nel browser verificato su 3.991 valori (erano 3.909).
+
 - **Un anno intero, gennaio-dicembre 2026** (`src/anno.py`, sezione 5 del rapporto): i dipendenti dell'anagrafica
   dal mese di assunzione a dicembre, 2.102 cedolini mensili e 332 di quattordicesima e tredicesima, con le tranche dei
   minimi nel mese in cui entrano in vigore, scatti, ferie, permessi, straordinari e quattro eventi legittimi. Nessuna

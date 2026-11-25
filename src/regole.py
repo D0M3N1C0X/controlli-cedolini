@@ -146,6 +146,17 @@ def preavviso_minimo(tipo: str, livello: str, assunzione: date, cessazione: date
     return regola(ccnl)["preavviso"][tipo][livello][fascia]
 
 
+def indennita_preavviso(tipo: str, livello: str, assunzione: date, cessazione: date, giorni: float,
+                        mensile: float, scatti: float = 0.0, ccnl: str = T) -> float:
+    """Indennità sostitutiva per i giorni di preavviso non dati (C23): la retribuzione che sarebbe spettata nel
+    periodo (art. 2118 c.c.), con i ratei delle mensilità aggiuntive (art. 2121 c.c.: ogni compenso continuativo),
+    a 1/30 del mese per giorno di calendario come il preavviso (D29). Positiva se la paga il datore di lavoro
+    (licenziamento), negativa se la trattiene al dipendente che si dimette senza darlo (F42)."""
+    mancano = max(0.0, preavviso_minimo(tipo, livello, assunzione, cessazione, ccnl) - giorni)
+    importo = centesimi(mancano * (retribuzione_annua(mensile, scatti, ccnl) / 12 / 30))
+    return importo if tipo == "licenziamento" else -importo
+
+
 def mensilita_aggiuntiva(retribuzione_mensile: float, dodicesimi_maturati: int) -> float:
     """Tredicesima o quattordicesima per i dodicesimi maturati (F11)."""
     return centesimi(retribuzione_mensile * dodicesimi_maturati / 12)

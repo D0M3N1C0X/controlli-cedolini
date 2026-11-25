@@ -66,16 +66,22 @@ CONTROLLI = {
             "Nel mese di malattia o maternità, integrazione sotto quella del CCNL: sul netto nel Terziario (il netto "
             "non sta sotto la quota garantita del netto normale), sul lordo nel Metalmeccanico e nella Logistica",
             "alta"),
+    "C23": ("Indennità sostitutiva del preavviso",
+            "Alla cessazione, indennità per i giorni di preavviso non dati diversa dalla retribuzione del periodo "
+            "(ratei di tredicesima e quattordicesima compresi): pagata dal datore nel licenziamento, trattenuta al "
+            "dipendente nelle dimissioni", "alta"),
 }
 TIPO_CONTROLLO = {"minimo": "C01", "scatto": "C02", "inps": "C03", "tfr": "C04", "ferie": "C05", "netto": "C06",
                   "variazione": "C07", "f24": "C08", "codice_fiscale": "C09",
                   "anagrafica": "C10", "ratei": "C11", "tredicesima": "C12", "ferie_liquidate": "C13",
                   "preavviso": "C14", "malattia": "C15", "carenza": "C16", "maternita": "C17", "permessi": "C18",
                   "tfr_liquidato": "C19", "irpef": "C20",
-                  "conguaglio": "C21", "integrazione": "C22"}
+                  "conguaglio": "C21", "integrazione": "C22", "indennita_preavviso": "C23"}
 
 CESSAZIONE = ["data_cessazione", "tipo_cessazione", "preavviso_giorni", "tredicesima", "quattordicesima",
               "ferie_liquidate"]
+# L'indennità sostitutiva del preavviso (C23): con il segno, + pagata dal datore, - trattenuta al dipendente
+PREAVVISO_INDENNITA = ["indennita_preavviso"]
 # Voci facoltative: vuote se nel mese non c'è l'evento (F16-F23)
 ASSENZE = ["malattia_dal", "malattia_al", "malattia_evento_n", "malattia_esente", "malattia_inps", "malattia_carenza",
            "maternita_dal", "maternita_al", "maternita_inps"]
@@ -99,7 +105,7 @@ def _num(m: pd.DataFrame, c: str) -> pd.Series:
 
 
 def carica() -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
-    testo = CESSAZIONE + ASSENZE + TFR_USCITA + CONGUAGLIO + INTEGRAZIONE
+    testo = CESSAZIONE + ASSENZE + TFR_USCITA + CONGUAGLIO + INTEGRAZIONE + PREAVVISO_INDENNITA
     ced = pd.read_csv(C.CEDOLINI, dtype={"livello": str, "evento": str, **{c: str for c in testo}},
                       keep_default_na=False)
     return (ced[ced["mese"] == C.MESE].reset_index(drop=True), ced[ced["mese"] == C.MESE_PRECEDENTE],
@@ -254,8 +260,16 @@ def _cessazione(r: pd.Series, segnala, i: int, mese: str | None = None) -> None:
     tipo = str(r.get("tipo_cessazione", "")).strip().lower()
     if tipo in C.PREAVVISO and not _vuoto(r.get("preavviso_giorni")):
         minimo = R.preavviso_minimo(tipo, str(r["livello"]), assunzione, ces, k)
-        if int(float(r["preavviso_giorni"])) < minimo:
-            segnala(i, "C14", float(minimo), float(r["preavviso_giorni"]))
+        indennita = r.get("indennita_preavviso")
+        # C14: preavviso corto e nessuna indennità sul cedolino; C23: l'indennità c'è, e deve essere quella giusta
+        if _vuoto(indennita):
+            if int(float(r["preavviso_giorni"])) < minimo:
+                segnala(i, "C14", float(minimo), float(r["preavviso_giorni"]))
+        else:
+            atteso = R.indennita_preavviso(tipo, str(r["livello"]), assunzione, ces, float(r["preavviso_giorni"]),
+                                           mensile, r["scatti"], k)
+            if abs(float(indennita) - atteso) > C.TOLLERANZA:
+                segnala(i, "C23", atteso, float(indennita))
     if all(not _vuoto(r.get(c)) for c in TFR_USCITA):
         atteso = R.tfr_liquidato(float(r["fondo_tfr_prec"]), float(r["tfr_quote_anno"]),
                                  float(r["imponibile_anno"]), ces)
