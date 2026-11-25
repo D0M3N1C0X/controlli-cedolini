@@ -86,7 +86,7 @@ are read as they are, and every flag comes with what to do, ready to download in
 | Deliverable | For | What is in it |
 |---|---|---|
 | [Browser tool](https://d0m3n1c0x.github.io/controlli-cedolini/strumento/?lang=en) | the payroll team | The checks on the month's export, Excel or CSV, in the page; results to download in Excel or print; Italian and English. |
-| [`foglio_controllo_cedolini.xlsx`](deliverables/foglio_controllo_cedolini.xlsx) | whoever runs payroll without code | Paste this month's and last month's payslips (up to 250 rows, formulas ready) and the F24: OK or ERRORE row by row, a summary per client, the November tranche, editable settings. Opens in Excel, LibreOffice and Google Sheets. |
+| [`foglio_controllo_cedolini.xlsx`](deliverables/foglio_controllo_cedolini.xlsx) | whoever runs payroll without code | Paste this month's and last month's payslips (up to 250 rows, formulas ready) and the F24: OK or ERRORE row by row, a summary per client, the November tranche, editable settings; and three sheets that carry the analysis in live formulas: the whole year with the nine configuration errors, the bridge to the pay-transparency kit and the cost model (pay gaps per client from the extract), and how long each dated source holds. Opens in Excel, LibreOffice and Google Sheets. |
 | [Report](https://d0m3n1c0x.github.io/controlli-cedolini/) | the team lead | The flags with what to do, the F24, the November tranche and how far the checks can be trusted (in Italian). |
 | [Catalogue of checks](docs/catalogo-controlli.md) · [runbook](docs/guida-operativa.md) | the payroll team | One card per check (rule, source, sheet formula, a real example, causes, limits) and the monthly procedure: who does what, triage, release criteria (in Italian). |
 | [Sources](docs/fonti.md) · [decisions](docs/decisioni.md) · [data dictionary](docs/dizionario-dati.md) | reviewers | The source and status of every rule, every choice of method with the alternative it replaced, every column (in Italian). |
@@ -125,7 +125,7 @@ are read as they are, and every flag comes with what to do, ready to download in
   checksum: the employer's 23.81% and the employee's 9.19% make the 33% pension rate, and twelve monthly severance
   accruals match its annual pay / 13.5 to the cent when pay is constant
   ([report, section 6](report/rapporto.md#6-il-ponte-con-la-trasparenza-retributiva-e-il-costo-del-lavoro)).
-- **Three engines, one answer:** the sheet is checked against Python on 1,741 values and recalculated with
+- **Three engines, one answer:** the sheet is checked against Python on 1,789 values and recalculated with
   LibreOffice in CI; the browser tool is checked against Python on 3,991 values, including half-cent alterations of
   absences, top-ups, severance and income tax, and Italian file formats. The sheet's reconciliation uses [excel-twin](https://github.com/D0M3N1C0X/excel-twin).
 

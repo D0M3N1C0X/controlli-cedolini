@@ -7,6 +7,11 @@ Le cose che vengono dopo sono in [docs/roadmap.md](docs/roadmap.md).
 
 ### Aggiunto
 
+- **Tre fogli nuovi nel foglio di calcolo:** Anno (le segnalazioni dei dodici mesi e i nove errori di
+  configurazione, con quota segnalata e mesi di ritardo in formula), Ponte (IVS di datore e dipendente, TFR a
+  retribuzione costante, l'estratto per il kit della trasparenza e i divari medi per cliente con AVERAGEIFS) e
+  Scadenze (fino a quando vale ogni parametro, contro il mese dei Parametri). 1.789 valori riconciliati con Python.
+
 - **C23 Indennità sostitutiva del preavviso:** alla cessazione, i giorni che mancano al preavviso del CCNL per la
   retribuzione dell'anno / 12 / 30, ratei di tredicesima e quattordicesima compresi (F42, D39); pagata dal datore nel
   licenziamento, trattenuta al dipendente nelle dimissioni, con il segno meno. Nuova colonna `indennita_preavviso`;
