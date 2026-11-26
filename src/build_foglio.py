@@ -139,8 +139,9 @@ def esito_rule(ws, ref) -> None:
 
 
 class Foglio:
-    def __init__(self, o: dict):
+    def __init__(self, o: dict, an: dict | None = None, po: dict | None = None):
         self.o = o
+        self.an, self.po = an, po
         self.wb = Workbook()
         self.R = {}
         self.checks = []
@@ -149,8 +150,8 @@ class Foglio:
         self.checks.append((area, item, plain(value), ref))
 
     def build(self, path: Path) -> None:
-        names = ["Leggimi", "Riepilogo", "Mese", "Mese precedente", "F24", "Novembre 2026", "CCNL", "Parametri",
-                 "Codice fiscale", "Riconciliazione"]
+        names = ["Leggimi", "Riepilogo", "Mese", "Mese precedente", "F24", "Novembre 2026", "Anno", "Ponte",
+                 "Scadenze", "CCNL", "Parametri", "Codice fiscale", "Riconciliazione"]
         self.wb.active.title = names[0]
         for n in names[1:]:
             self.wb.create_sheet(n)
@@ -161,6 +162,9 @@ class Foglio:
         self.settembre(self.wb["Mese"])
         self.f24(self.wb["F24"])
         self.novembre(self.wb["Novembre 2026"])
+        self.anno(self.wb["Anno"])
+        self.ponte(self.wb["Ponte"])
+        self.scadenze(self.wb["Scadenze"])
         self.riepilogo(self.wb["Riepilogo"])
         self.riconciliazione(self.wb["Riconciliazione"])
         self.leggimi(self.wb["Leggimi"], names)
@@ -803,6 +807,175 @@ class Foglio:
         ws.freeze_panes = "D5"
         ws.auto_filter.ref = f"A4:EF{last}"
 
+    # ---- Un anno intero e gli errori di configurazione (anno.py) ----------------------------------------------------
+    def anno(self, ws) -> None:
+        mesi, e = self.an["mesi"], self.an["errori"]
+        title(ws, "Un anno intero, gennaio-dicembre 2026, e nove errori di configurazione",
+              "Dati di src/anno.py (sezione 5 del rapporto). In blu i risultati della simulazione, in nero le formule.")
+        widths(ws, {"A": 12, "B": 44, "C": 12, "D": 9, "E": 11, "F": 11, "G": 11, "H": 13, "I": 13, "J": 13,
+                    "K": 13, "L": 15, "M": 14})
+        put(ws, "A4", "L'anno pulito: segnalazioni per mese", bold=True, size=11)
+        header(ws, 5, ["Mese", "", "Cedolini", "", "Segnalazioni", "Ogni 100 cedolini"])
+        r0 = 6
+        for k, t in enumerate(mesi.itertuples(index=False), start=r0):
+            put(ws, f"A{k}", date.fromisoformat(t.mese + "-01"), color=BLUE, fmt="MM/YYYY")
+            put(ws, f"C{k}", int(t.cedolini), color=BLUE)
+            put(ws, f"E{k}", int(t.segnalazioni), color=BLUE)
+            put(ws, f"F{k}", f"=ROUND(E{k}/C{k}*100,2)", fmt=NUM2)
+        tot = r0 + len(mesi)
+        put(ws, f"A{tot}", "Anno", bold=True)
+        put(ws, f"C{tot}", f"=SUM(C{r0}:C{tot - 1})", bold=True)
+        put(ws, f"E{tot}", f"=SUM(E{r0}:E{tot - 1})", bold=True)
+        put(ws, f"F{tot}", f"=ROUND(E{tot}/C{tot}*100,2)", bold=True, fmt=NUM2)
+        self.check("Anno", "cedolini dell'anno", int(mesi["cedolini"].sum()), f"Anno!C{tot}")
+        self.check("Anno", "segnalazioni nell'anno pulito", int(mesi["segnalazioni"].sum()), f"Anno!E{tot}")
+        h = tot + 3
+        put(ws, f"A{h - 1}", "Nove errori di configurazione, ricalcolati a cascata come farebbe il software", bold=True,
+            size=11)
+        header(ws, h, ["Codice", "Errore", "Tipo", "Cliente", "Esposti", "Segnalati", "Quota segnalata",
+                       "Primo mese esposto", "Primo mese segnalato", "Mesi di ritardo", "Visto", "Netto nell'anno",
+                       "Contributi nell'anno"], height=40)
+        first = h + 1
+        for k, t in enumerate(e.itertuples(index=False), start=first):
+            put(ws, f"A{k}", t.codice, color=BLUE)
+            put(ws, f"B{k}", t.titolo, color=BLUE)
+            put(ws, f"C{k}", t.tipo, color=BLUE)
+            put(ws, f"D{k}", t.cliente, color=BLUE)
+            put(ws, f"E{k}", int(t.esposti), color=BLUE)
+            put(ws, f"F{k}", int(t.segnalati), color=BLUE)
+            put(ws, f"G{k}", f'=IF(E{k}=0,"",F{k}/E{k})', fmt="0%")
+            put(ws, f"H{k}", date.fromisoformat(t.primo_esposto + "-01"), color=BLUE, fmt="MM/YYYY")
+            if t.primo_segnalato:
+                put(ws, f"I{k}", date.fromisoformat(t.primo_segnalato + "-01"), color=BLUE, fmt="MM/YYYY")
+            put(ws, f"J{k}", f'=IF(I{k}="","",(YEAR(I{k})*12+MONTH(I{k}))-(YEAR(H{k})*12+MONTH(H{k})))')
+            put(ws, f"K{k}", f'=IF(I{k}="","mai",IF(J{k}=0,"dal primo mese","dopo "&J{k}&" mesi"))')
+            put(ws, f"L{k}", float(t.netto_anno), color=BLUE, fmt=NUM2)
+            put(ws, f"M{k}", float(t.contributi_anno), color=BLUE, fmt=NUM2)
+            quota = t.segnalati / t.esposti if t.esposti else None
+            self.check("Anno", f"{t.codice} quota segnalata", quota, f"Anno!G{k}")
+            visto = ("mai" if not t.primo_segnalato else "dal primo mese" if t.primo_segnalato == t.primo_esposto
+                     else None)
+            if visto:
+                self.check("Anno", f"{t.codice} visto", visto, f"Anno!K{k}")
+        last = first + len(e) - 1
+        s = last + 2
+        regola = e[e["tipo"] == "regola"]
+        put(ws, f"B{s}", "Errori di regola visti dal primo mese", bold=True)
+        put(ws, f"E{s}", f'=COUNTIFS(C{first}:C{last},"regola",K{first}:K{last},"dal primo mese")', bold=True)
+        put(ws, f"F{s}", f'=COUNTIF(C{first}:C{last},"regola")', bold=True)
+        put(ws, f"B{s + 1}", "Errori di anagrafica mai visti", bold=True)
+        put(ws, f"E{s + 1}", f'=COUNTIFS(C{first}:C{last},"anagrafica",K{first}:K{last},"mai")', bold=True)
+        put(ws, f"F{s + 1}", f'=COUNTIF(C{first}:C{last},"anagrafica")', bold=True)
+        self.check("Anno", "errori di regola visti dal primo mese",
+                   int((regola["primo_segnalato"] == regola["primo_esposto"]).sum()), f"Anno!E{s}")
+        self.check("Anno", "errori di anagrafica mai visti",
+                   int(((e["tipo"] == "anagrafica") & (e["primo_segnalato"] == "")).sum()), f"Anno!E{s + 1}")
+        put(ws, f"B{s + 3}", "Un errore nella regola si vede dal primo mese e ogni mese: i controlli la ricalcolano. "
+            "Un errore nell'anagrafica fin dall'assunzione non si vede mai; cambiato a metà anno, C10 lo vede una "
+            "volta sola. Esposti: i cedolini che l'errore cambia rispetto all'anno pulito, mensilità aggiuntive "
+            "comprese.", italic=True, color=MUTED, wrap=True)
+        ws.merge_cells(f"B{s + 3}:M{s + 4}")
+        ws.freeze_panes = "A6"
+
+    # ---- Il ponte: trasparenza retributiva e costo del lavoro (ponte.py) -----------------------------------------
+    def ponte(self, ws) -> None:
+        import ponte as P
+        po = self.po
+        e = po["estratto"]
+        title(ws, "Il ponte: dai cedolini dell'anno alla trasparenza retributiva e al costo del lavoro",
+              "Dati di src/ponte.py (sezione 6 del rapporto). L'estratto è quello che legge il kit della trasparenza.")
+        widths(ws, {"A": 12, "B": 26, "C": 12, "D": 14, "E": 14, "F": 14, "G": 3, "H": 12, "I": 10, "J": 12,
+                    "K": 14, "L": 14, "M": 14})
+        put(ws, "A4", "Costo del lavoro: IVS di datore e dipendente", bold=True, size=11)
+        put(ws, "A5", "Datore (workforce-cost-model)")
+        put(ws, "D5", po["wcm"]["IT_IVS"], color=BLUE, fmt="0.00%")
+        put(ws, "A6", "Dipendente (Parametri)")
+        put(ws, "D6", f"={self.R['aliquota']}", color=GREEN, fmt="0.00%")
+        put(ws, "A7", "Fondo pensioni lavoratori dipendenti", bold=True)
+        put(ws, "D7", "=D5+D6", bold=True, fmt="0.00%")
+        put(ws, "E7", '=IF(ABS(D7-0.33)<1E-9,"OK","ERRORE")')
+        esito_rule(ws, "E7")
+        self.check("Ponte", "IVS datore + dipendente", po["ivs"]["somma"], "Ponte!D7")
+        put(ws, "A9", "TFR: dodici quote mensili contro la quota annua del modello di costo, a retribuzione costante",
+            bold=True, size=11)
+        header(ws, 10, ["CCNL", "", "Mensilità", "Mensile", "12 quote mensili", "Retribuzione annua / 13,5",
+                        "", "Differenza"])
+        for k, (kc, mensile) in enumerate((("terziario", 1781.68), ("metalmeccanico", 2100.0), ("turismo", 1650.5),
+                                           ("logistica", 1900.0)), start=11):
+            m = R.regola(kc)["mensilita"]
+            put(ws, f"A{k}", kc, color=BLUE)
+            put(ws, f"C{k}", m, color=BLUE)
+            put(ws, f"D{k}", mensile, color=BLUE, fmt=NUM2)
+            put(ws, f"E{k}", f"=12*ROUND(D{k}*C{k}/{po['wcm']['TFR_DIVISOR']}/12,2)", fmt=NUM2)
+            put(ws, f"F{k}", f"=D{k}*C{k}/{po['wcm']['TFR_DIVISOR']}", fmt=NUM2)
+            put(ws, f"H{k}", f"=ROUND(E{k}-F{k},2)", fmt=NUM2)
+            self.check("Ponte", f"TFR {kc}, 12 quote mensili", 12 * R.quota_tfr(mensile, 0.0, kc), f"Ponte!E{k}")
+        # l'estratto per il kit e gli indicatori dell'articolo 9 per cliente
+        put(ws, "A17", "Trasparenza retributiva: divari medi per cliente sull'estratto (articolo 9, elementi a)",
+            bold=True, size=11)
+        header(ws, 18, ["Cliente", "", "Dipendenti", "Paga oraria donne", "Paga oraria uomini", "Divario orario", "",
+                        "Annua donne", "", "Annua uomini", "Divario annuo"])
+        ind = po["indicatori"].set_index("country")
+        clienti = list(ind.index)
+        top = 18 + len(clienti) + 4
+        n = len(e)
+        X = lambda c: f"Ponte!${c}${top + 1}:${c}${top + n}"
+        for k, c in enumerate(clienti, start=19):
+            put(ws, f"A{k}", c, color=BLUE)
+            put(ws, f"C{k}", f'=COUNTIF({X("B")},A{k})')
+            put(ws, f"D{k}", f'=AVERAGEIFS({X("H")},{X("B")},A{k},{X("C")},"F")', fmt="0.0000")
+            put(ws, f"E{k}", f'=AVERAGEIFS({X("H")},{X("B")},A{k},{X("C")},"M")', fmt="0.0000")
+            put(ws, f"F{k}", f"=(E{k}-D{k})/E{k}", fmt="0.0%")
+            put(ws, f"H{k}", f'=AVERAGEIFS({X("G")},{X("B")},A{k},{X("C")},"F")', fmt=NUM2)
+            put(ws, f"J{k}", f'=AVERAGEIFS({X("G")},{X("B")},A{k},{X("C")},"M")', fmt=NUM2)
+            put(ws, f"K{k}", f"=(J{k}-H{k})/J{k}", fmt="0.0%")
+            self.check("Ponte", f"cliente {c} divario orario medio", float(ind.loc[c, "a_mean_gap_hourly"]),
+                       f"Ponte!F{k}")
+            self.check("Ponte", f"cliente {c} divario annuo medio", float(ind.loc[c, "a_mean_gap_annual"]),
+                       f"Ponte!K{k}")
+        put(ws, f"A{top - 1}", f"L'estratto: {n} dipendenti, retribuzione pagata nel 2026 e ore del periodo "
+            f"(data/ponte/estratto_ptk.csv). Il codice del kit, al commit {P.PTK_COMMIT}, dà gli stessi divari.",
+            italic=True, color=MUTED)
+        header(ws, top, ["Matricola", "Cliente", "Sesso", "Categoria", "Ore settimanali medie", "Retribuzione di base",
+                         "Retribuzione totale", "Paga oraria"])
+        for k, t in enumerate(e.itertuples(index=False), start=top + 1):
+            put(ws, f"A{k}", t.worker_id, color=BLUE)
+            put(ws, f"B{k}", t.country, color=BLUE)
+            put(ws, f"C{k}", t.gender, color=BLUE)
+            put(ws, f"D{k}", t.role, color=BLUE)
+            put(ws, f"E{k}", float(t.weekly_hours), color=BLUE, fmt=NUM4)
+            put(ws, f"F{k}", float(t.base_pay), color=BLUE, fmt=NUM2)
+            put(ws, f"G{k}", float(t.payroll_total), color=BLUE, fmt=NUM2)
+            put(ws, f"H{k}", f"=G{k}/(E{k}*{P.SETTIMANE})", fmt="0.0000")       # come il kit: ore x 52
+        ws.freeze_panes = "A4"
+
+    # ---- Le fonti al mese chiuso (fonti.py) ------------------------------------------------------------------------
+    def scadenze(self, ws) -> None:
+        import fonti
+        title(ws, f"Le fonti al mese chiuso, {fonti.nome_mese(fonti.ULTIMO_MESE_CHIUSO)}",
+              "Fino a quando vale ogni parametro con una data. Con il mese dei Parametri oltre la scadenza, il "
+              "parametro va riletto prima di usare il foglio.")
+        widths(ws, {"A": 56, "B": 9, "C": 14, "D": 14, "E": 14, "F": 12, "G": 60})
+        header(ws, 4, ["Parametro", "Fonte", "Dal", "Vale fino a", "Letto alla fonte", "Stato", "Il prossimo valore"])
+        mese = date.fromisoformat(C.MESE + "-01")
+        for k, x in enumerate(fonti.scadenze(), start=5):
+            put(ws, f"A{k}", x.parametro, color=BLUE)
+            put(ws, f"B{k}", x.fonte, color=BLUE)
+            put(ws, f"C{k}", date.fromisoformat(x.dal + "-01"), color=BLUE, fmt="MM/YYYY")
+            if x.al != fonti.RINNOVO:
+                put(ws, f"D{k}", date.fromisoformat(x.al + "-01"), color=BLUE, fmt="MM/YYYY")
+            else:
+                put(ws, f"D{k}", "fino al rinnovo", color=BLUE)
+            put(ws, f"E{k}", date.fromisoformat(x.letto), color=BLUE, fmt="DD/MM/YYYY")
+            put(ws, f"F{k}", f'=IF(NOT(ISNUMBER(D{k})),"OK",IF(OR({self.R["mese"]}<C{k},{self.R["mese"]}>D{k}),'
+                             f'"ERRORE","OK"))')
+            put(ws, f"G{k}", x.prossima, color=BLUE)
+            stato = "OK" if x.al == fonti.RINNOVO or x.dal <= C.MESE <= x.al else "ERRORE"
+            self.check("Scadenze", f"{x.fonte} {x.parametro[:30]}", stato, f"Scadenze!F{k}")
+        last = 4 + len(fonti.scadenze())
+        esito_rule(ws, f"F5:F{last}")
+        assert mese.year == 2026
+
     # ---- IRPEF in formula: le stesse operazioni, nello stesso ordine, delle funzioni di regole.py ----------------
     def lorda(self, x: str, periodi: int) -> str:
         R_ = self.R
@@ -997,6 +1170,11 @@ class Foglio:
             "Mese precedente": "Netto, residui di ferie e permessi, retribuzione e anagrafica del mese prima (C05, C07, C10, C15-C18).",
             "F24": "Deleghe contro somma dei cedolini, per cliente.",
             "Novembre 2026": "Aumento dei minimi dal 1° novembre per dipendente, con l'assorbimento del superminimo.",
+            "Anno": "Un anno intero, gennaio-dicembre 2026: segnalazioni per mese e i nove errori di configurazione, con "
+                    "quanti cedolini cambiano e quando i controlli li vedono.",
+            "Ponte": "IVS e TFR contro il modello del costo del lavoro; l'estratto per il kit della trasparenza "
+                     "retributiva e i divari medi per cliente.",
+            "Scadenze": "Fino a quando vale ogni parametro con una data, contro il mese dei Parametri.",
             "CCNL": "Minimi, scatti, preavviso e regole dei quattro CCNL, e le tabelle come sono nei file.",
             "Parametri": "Aliquote INPS e posizioni dei clienti, divisori, ferie e permessi, malattia e maternità, indici ISTAT per il TFR, soglie.",
             "Codice fiscale": "Valori per il carattere di controllo.",
@@ -1023,9 +1201,11 @@ class Foglio:
         cell.hyperlink = REPO
 
 
-def build(o: dict | None = None, path: Path = OUTPUT) -> Foglio:
+def build(o: dict | None = None, path: Path = OUTPUT, an: dict | None = None, po: dict | None = None) -> Foglio:
+    import anno
+    import ponte
     o = controlli.run() if o is None else o
-    f = Foglio(o)
+    f = Foglio(o, anno.run() if an is None else an, ponte.run() if po is None else po)
     f.build(path)
     return f
 
